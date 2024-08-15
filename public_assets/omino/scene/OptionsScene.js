@@ -8,6 +8,8 @@ import {pageData} from "/assets/omino/Options.js";
 import {allPalettes, nullPalette} from "/assets/omino/Palettes.js";
 
 const changelog = [
+`c0.1.7b 8/14/24
+  - Fixed pieces past (9,y) or (x,9) decoding incorrectly when loading board from url`,
 `v0.1.7 8/13/24 (again hehe)
   - Fixed drawing mode so it doesn't create duplicate ominoes
   - Added palettes for mono- to hexominoes (1 to 6)
