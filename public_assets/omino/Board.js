@@ -49,6 +49,7 @@ const tileRadius = 0.2;
 const borderOmino = new LockedOmino([]);
 const defaultOptions = {
   lockedTiles:[],
+  ominoes:[],
   torusMode:false,
 };
 class Board{
@@ -65,7 +66,7 @@ class Board{
     Object.assign(filledInOptions, options);
 
     this.torusMode=filledInOptions.torusMode;
-    this.ominoes = [new LockedOmino(filledInOptions.lockedTiles)];
+    this.ominoes = [new LockedOmino(filledInOptions.lockedTiles), ...filledInOptions.ominoes];
 
     this.path = [];
     this.recalcPath();

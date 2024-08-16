@@ -21,13 +21,11 @@ class MainScene extends Scene{
   constructor(){
     super();
     this.boardScene = this.addScene(new BoardScene(pageData.dims[0],pageData.dims[1],{
-      torusMode:pageData.torus
+      torusMode:pageData.torus,
+      ominoes:pageData.boardData.ominoes,
     }));
     this.paletteScene = this.addScene(new PaletteScene(pageData.palette));
     this.optionsScene = this.addScene(new OptionsScene());
-
-    for(const omino of pageData.boardData.ominoes)
-      this.boardScene.board.add(omino);
 
     const buttonWrapper = func=>{
       return s=>{

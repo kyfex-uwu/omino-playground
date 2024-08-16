@@ -9,6 +9,8 @@ import {pageData} from "/assets/omino/Options.js";
 import {allPalettes, nullPalette} from "/assets/omino/Palettes.js";
 
 const changelog = [
+`vXXX
+  - Path calculation should be slightly faster when loading a board from url`
 `v0.1.8b 8/16/24
   - Fixed text not rendering correctly in the options panel
   - Fixed screenshot incorrectly showing board as not in torus mode when it is
