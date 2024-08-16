@@ -34,12 +34,21 @@ class BoardScene extends DimsScene{
             .scale(this.board.renderData.scale)
             .add(this.getAbsolutePos()));
 
+        if(omino.pos.x>x) this.parent.mouseData.offs.x+=this.board.renderData.scale*this.board.width;
+        if(omino.pos.y>y) this.parent.mouseData.offs.y+=this.board.renderData.scale*this.board.height;
+
         omino.pos = new Vector(0,0);
       }
     }else{
       let newPos = new Vector(p5.mouseX,p5.mouseY).sub(this.parent.mouseData.offs)
         .sub(this.pos).scale(1/this.board.renderData.scale)
         .round();
+      if(this.board.torusMode){
+        while(newPos.x<0) newPos.x+=this.board.width;
+        while(newPos.y<0) newPos.y+=this.board.height;
+        newPos.x%=this.board.width;
+        newPos.y%=this.board.height;
+      }
 
       let valid=true;
       for(let y=0;y<this.parent.mouseData.omino.tiles.length;y++){

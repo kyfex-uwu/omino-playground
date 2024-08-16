@@ -82,9 +82,12 @@ class Board{
   }
   
   get(pos){
-    if(pos.x<0||pos.y<0||pos.x>=this.width||pos.y>=this.height) return borderOmino;
-    for(const omino of this.ominoes)
-      if(omino.get(pos)) return omino;
+    if(!this.torusMode) if(pos.x<0||pos.y<0||pos.x>=this.width||pos.y>=this.height) return borderOmino;
+    for(const omino of this.ominoes){
+      if(this.torusMode){
+        if(omino.getOnTorus(pos, new Vector(this.width, this.height))) return omino;
+      }else if(omino.get(pos)) return omino;
+    }
     return false;
   }
   recalcPath(){
@@ -164,12 +167,30 @@ class Board{
     if(over&&!(over instanceof LockedOmino))
       p5.cursor(p5.MOVE);
     
-    for(const omino of this.ominoes)
-      omino.render(this.renderData.scale, new Vector(0,0), env);
+    env.push();
+    env.beginClip();
+    env.rect(0,0,this.renderData.scale*this.width, this.renderData.scale*this.height, this.renderData.scale*(tileRadius+tileSpacing));
+    env.endClip();
+    for(const omino of this.ominoes){
+      if(this.torusMode){
+        for(let y=0;y<omino.pos.y+omino.height();y+=this.height){
+          for(let x=0;x<omino.pos.x+omino.width();x+=this.width){
+            let newOmino = omino.clone();
+            newOmino.pos = newOmino.pos.clone();
+            newOmino.pos.x-=x;
+            newOmino.pos.y-=y;
+            newOmino.render(this.renderData.scale, new Vector(0,0), env);
+          }
+        }
+      }else omino.render(this.renderData.scale, new Vector(0,0), env);
+    }
+    env.pop();
   }
 
   clone(){
-    let toReturn = new Board(this.width, this.height);
+    let toReturn = new Board(this.width, this.height, {
+      torusMode:this.torusMode,
+    });
     toReturn.ominoes=[...this.ominoes];
     toReturn.recalcPath();
     return toReturn;

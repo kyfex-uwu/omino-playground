@@ -9,6 +9,10 @@ import {pageData} from "/assets/omino/Options.js";
 import {allPalettes, nullPalette} from "/assets/omino/Palettes.js";
 
 const changelog = [
+`v0.1.8b 8/16/24
+  - Fixed text not rendering correctly in the options panel
+  - Fixed screenshot incorrectly showing board as not in torus mode when it is
+  - Made it possible to put ominoes on the border in torus mode`,
 `v0.1.8 8/15/24
   - Added torus mode
   - Removed lag when calculating optimal path (it's calculated in another thread now)
@@ -361,15 +365,16 @@ class OptionsScene extends ScrollableScene{
 
     p5.push();
     let sc = this.dims.x/100;
-    p5.translate(0,-this.offs);
-    p5.scale(sc);
 
     p5.fill(255);
-    p5.textSize(6);
+    p5.textSize(6*sc);
     p5.textAlign(p5.LEFT, p5.TOP);
-    p5.text("Dimensions: ", 2, this.boardDims.getAbsolutePos().y/sc);
-    p5.text("Palette: ", 2, this.palette.getAbsolutePos().y/sc);
-    p5.text("Torus mode", 2, this.torusBox.getAbsolutePos().y/sc);
+    p5.text("Dimensions: ", 2, this.boardDims.getAbsolutePos().y);
+    p5.text("Palette: ", 2, this.palette.getAbsolutePos().y);
+    p5.text("Torus mode", 2, this.torusBox.getAbsolutePos().y);
+
+    p5.translate(0,-this.offs);
+    p5.scale(sc);
 
     p5.textSize(4.5);
     p5.textAlign(p5.LEFT, p5.TOP);

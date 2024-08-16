@@ -25,6 +25,22 @@ class Omino{
     if(this.tiles[newPos.y]) return !!this.tiles[newPos.y][newPos.x];
     return false;
   }
+  getOnTorus(pos, boardDims){
+    let newPos = pos.clone();
+    while(newPos.x>=this.pos.x) newPos.x-=boardDims.x;
+    while(newPos.x<this.pos.x) newPos.x+=boardDims.x;
+    while(newPos.y>=this.pos.y) newPos.y-=boardDims.y;
+    while(newPos.y<this.pos.y) newPos.y+=boardDims.y;
+
+    let w=this.width();
+    let h=this.height();
+    for(let y=0;y<h;y+=boardDims.y){
+      for(let x=0;x<w;x+=boardDims.x){
+        if(this.get(newPos.add(new Vector(x,y)))) return true;
+      }
+    }
+    return false;
+  }
   height(){ return Math.max(...this.vectors.map(t=>t.y))+1; }
   width(){ return Math.max(...this.vectors.map(t=>t.x))+1; }
   
