@@ -34,6 +34,12 @@ const pageData={
     transform:d=>d.split("$").map(v=>parseInt(v)),
     validate:v=>v instanceof Object && !isNaN(v[0]) && !isNaN(v[1]) && v[0]>0 && v[1]>0
   },
+  torus:{
+    val:"false",
+    transform:d=>d=="true",
+    validate:v=>true
+  },
+  
   boardData:{
     /*
       AAAAAA$
@@ -82,7 +88,6 @@ const pageData={
 
         return omino;
       }).filter(o=>!!o);
-      console.log(toReturn.ominoes.map(o=>o.pos))
 
       return toReturn;
     },

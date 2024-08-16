@@ -4,9 +4,9 @@ import {DimsScene} from "/assets/omino/scene/Scene.js";
 import {LockedOmino} from "/assets/omino/Omino.js";
 
 class BoardScene extends DimsScene{
-  constructor(w,h){
+  constructor(w,h, options={}){
     super();
-    this.board = new Board(w,h);
+    this.board = new Board(w,h, options);
   }
   render(){
     this.board.render(this.getAbsolutePos());

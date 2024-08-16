@@ -1,13 +1,20 @@
-import {ScrollableScene, OneTimeButtonScene, Scene, DimsScene} from "/assets/omino/scene/Scene.js";
+import {ScrollableScene, OneTimeButtonScene, Scene, DimsScene, focus} from "/assets/omino/scene/Scene.js";
 import BoardScene from "/assets/omino/scene/BoardScene.js";
 import PaletteScene from "/assets/omino/scene/PaletteScene.js";
 import TextInputScene from "/assets/omino/scene/TextInputScene.js";
+import TickboxScene from "/assets/omino/scene/TickboxScene.js";
 import Vector from "/assets/omino/Vector.js";
 import Data from "/assets/omino-playground.js";
 import {pageData} from "/assets/omino/Options.js";
 import {allPalettes, nullPalette} from "/assets/omino/Palettes.js";
 
 const changelog = [
+`v0.1.8 8/15/24
+  - Added torus mode
+  - Removed lag when calculating optimal path (it's calculated in another thread now)
+  - Added color change to the board options when they are different from what's on the board `+
+  `to show the use of the "Overwrite" button
+  - Let the user press enter on the options to apply changes`,
 `v0.1.7b 8/14/24
   - Fixed pieces past (9,y) or (x,9) decoding incorrectly when loading board from url`,
 `v0.1.7 8/13/24 (again hehe)
@@ -98,17 +105,21 @@ class Counter extends DimsScene{
     this.max=max;
     this.inc=inc;
 
-    this.val=val;
+    this.value=val;
+    this.oldValue=val;
   }
   render(){
-    p5.fill(255);
+    if(this.value==this.oldValue) p5.fill(255);
+    else p5.fill(247, 232, 156);
+
     p5.rect(0,0,this.dims.x-this.dims.y*2,this.dims.y);
+    p5.fill(255);
     p5.rect(this.dims.x-this.dims.y*1.9, this.dims.y*0.1, this.dims.y*0.8, this.dims.y*0.8);
     p5.rect(this.dims.x-this.dims.y*0.9, this.dims.y*0.1, this.dims.y*0.8, this.dims.y*0.8);
     p5.fill(0);
     p5.textSize(this.dims.y*0.9);
     p5.textAlign(p5.LEFT, p5.TOP);
-    p5.text(this.val, this.dims.y*0.1,this.dims.y*0.05);
+    p5.text(this.value, this.dims.y*0.1,this.dims.y*0.05);
 
     p5.push();
     p5.stroke(0);
@@ -125,12 +136,80 @@ class Counter extends DimsScene{
   }
 
   mouseUp(x, y){
-    if(!this.isIn()) return;
+    if(!this.isIn()) return super.mouseUp(x,y);
 
-    if(x>this.dims.x-this.dims.y) this.val-=this.inc;
-    else if(x>this.dims.x-this.dims.y*2) this.val+=this.inc;
+    if(x>this.dims.x-this.dims.y) this.value-=this.inc;
+    else if(x>this.dims.x-this.dims.y*2) this.value+=this.inc;
 
-    this.val=Math.min(Math.max(this.val, this.min), this.max);
+    this.value=Math.min(Math.max(this.value, this.min), this.max);
+
+    focus(this);
+
+    return true;
+  }
+
+  keyPressed(key){
+    if(this.focused&&key=="Enter"){
+      Data.scene.optionsScene.overwriteButton.click(0,0);
+      return true;
+    }
+    return super.keyPressed(key);
+  }
+}
+class CustomTextInputScene extends TextInputScene{
+  constructor(validator, value){
+    super(validator);
+
+    this.value=value;
+    this.oldValue=this.value;
+  }
+
+  render(){
+    if(this.value==this.oldValue) p5.fill(255);
+    else p5.fill(247, 232, 156);
+
+    p5.rect(0,0,this.dims.x,this.dims.y);
+    p5.fill(0);
+    p5.textSize(this.dims.y*0.8);
+    p5.textAlign(p5.LEFT, p5.TOP);
+    p5.text(this.value, 2, 2);
+    if(this.focused&&p5.frameCount*0.015%1>0.5) p5.rect(p5.textWidth(this.value)+2, 2, 2, this.dims.y-4);
+  }
+
+  keyPressed(key){
+    if(this.focused&&key=="Enter"){
+      Data.scene.optionsScene.overwriteButton.click(0,0);
+      return true;
+    }
+    return super.keyPressed(key);
+  }
+
+  setCorrectVal(newVal){
+    this.value=newVal;
+    this.oldValue=newVal;
+  }
+}
+class CustomTickboxScene extends TickboxScene{
+  constructor(value){
+    super();
+
+    this.value=value;
+    this.oldValue=this.value;
+  }
+
+  render(){
+    if(this.value==this.oldValue) p5.fill(255);
+    else p5.fill(247, 232, 156);
+
+    p5.rect(0,0,this.dims.x,this.dims.y);
+    if(this.value){
+      p5.stroke(0);
+      p5.scale((this.dims.x+this.dims.y)*0.05);
+      p5.strokeWeight(2);
+      p5.line(2,2,8,8);
+      p5.line(2,8,8,2);
+      p5.noStroke();
+    }
   }
 }
 
@@ -138,8 +217,9 @@ class OptionsScene extends ScrollableScene{
   constructor(){
     super();
 
-    this.boardDims = this.addScene(new TextInputScene(new Vector(2,2), new Vector(50,10), /[\dx,]/));
+    this.boardDims = this.addScene(new CustomTextInputScene(/[\dx,]/, pageData.dims.join(",")));
     this.palette = this.addScene(new Counter(allPalettes.indexOf(pageData.palette)+1, 0));
+    this.torusBox = this.addScene(new CustomTickboxScene(pageData.torus));
 
     this.overwriteButton = this.addScene(new OneTimeButtonScene(s=>{
       p5.fill(s.isIn()?255:200);
@@ -153,14 +233,20 @@ class OptionsScene extends ScrollableScene{
       if(isNaN(dims[0])||isNaN(dims[1])) return;
 
       Data.scene.boardScene.remove();
-      Data.scene.boardScene = Data.scene.addScene(new BoardScene(dims[0], dims[1]));
+      Data.scene.boardScene = Data.scene.addScene(new BoardScene(dims[0], dims[1], {
+        torusMode:this.torusBox.value,
+      }));
       Data.scene.paletteScene.remove();
 
-      if(allPalettes[this.palette.val-1]){
-        Data.scene.paletteScene = Data.scene.addScene(new PaletteScene(allPalettes[this.palette.val-1]));
+      if(allPalettes[this.palette.value-1]){
+        Data.scene.paletteScene = Data.scene.addScene(new PaletteScene(allPalettes[this.palette.value-1]));
       }else{
         Data.scene.paletteScene = Data.scene.addScene(new PaletteScene(nullPalette));
       }
+
+      this.boardDims.oldValue=this.boardDims.value;
+      this.palette.oldValue = this.palette.value;
+      this.torusBox.oldValue = this.torusBox.value;
 
       p5.windowResized();
     }));
@@ -227,17 +313,22 @@ class OptionsScene extends ScrollableScene{
 
     let currY=0;
     let scale = this.dims.x/100;
+    const padding=scale*3;
     p5.textSize(scale*6);
-    this.boardDims.dims = new Vector(this.dims.x*0.99 - p5.textWidth("Dimensions: "), scale*6*1.2);
-    this.boardDims.pos = new Vector(p5.textWidth("Dimensions: "), 2*scale);
+    this.boardDims.dims = new Vector(this.dims.x*0.99 - p5.textWidth("Dimensions: ")-padding, scale*6*1.2);
+    this.boardDims.pos = new Vector(p5.textWidth("Dimensions: ")+padding, 2*scale);
     currY+=this.boardDims.dims.y+scale*3+2*scale;
 
-    this.palette.dims = new Vector(this.dims.x*0.99 - p5.textWidth("Palette: "), scale*6*1.2);
-    this.palette.pos = new Vector(p5.textWidth("Palette: "), 2*scale+currY);
+    this.palette.dims = new Vector(this.dims.x*0.99 - p5.textWidth("Palette: ")-padding, scale*6*1.2);
+    this.palette.pos = new Vector(p5.textWidth("Palette: ")+padding, 2*scale+currY);
     currY+=this.palette.dims.y+scale*3+2*scale;
 
+    this.torusBox.dims = new Vector(p5.textSize()*1.3, p5.textSize()*1.3);
+    this.torusBox.pos = new Vector(p5.textWidth("Torus mode ")+padding, 2*scale+currY);
+    currY+=2*scale+this.torusBox.dims.y;
+
     this.overwriteButton.dims = new Vector(p5.textWidth("Overwrite")*1.5, p5.textSize()*1.3);
-    this.overwriteButton.pos = new Vector(2*scale, currY+2*scale-this.offs);
+    this.overwriteButton.pos = new Vector(2*scale, currY+2*scale);
     currY+=2*scale+this.overwriteButton.dims.y;
 
     let sbSize = Math.min(this.dims.x/3, scale*30);
@@ -278,10 +369,11 @@ class OptionsScene extends ScrollableScene{
     p5.textAlign(p5.LEFT, p5.TOP);
     p5.text("Dimensions: ", 2, this.boardDims.getAbsolutePos().y/sc);
     p5.text("Palette: ", 2, this.palette.getAbsolutePos().y/sc);
+    p5.text("Torus mode", 2, this.torusBox.getAbsolutePos().y/sc);
 
     p5.textSize(4.5);
     p5.textAlign(p5.LEFT, p5.TOP);
-    p5.text("Changelog\n\n"+changelog.join("\n\n"), 3,50, 100-3*2);
+    p5.text("Changelog\n\n"+changelog.join("\n\n"), 3,80, 100-3*2);
 
     p5.pop();
 

@@ -15,7 +15,10 @@ class Scene{
     return scene;
   }
   render(){
-    for(const scene of this.subScenes){
+    Scene.renderChildren(this);
+  }
+  static renderChildren(self){
+    for(const scene of self.subScenes){
       p5.push();
       p5.translate(scene.pos.x,scene.pos.y);
       scene.render();

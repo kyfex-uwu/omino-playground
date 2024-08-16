@@ -3,72 +3,69 @@ import {LockedOmino} from "/assets/omino/Omino.js";
 import {allPalettes} from "/assets/omino/Palettes.js";
 import {pageData} from "/assets/omino/Options.js";
 import Data from "/assets/omino-playground.js";
+import * as FakeWebWorker from "/assets/omino/BoardLengthCalculator.js";
 
-function findLongestShortest(currPoint, pool, maybePaths){
-  let prevPoint;
-  while(true){
-    for(const point of pool) point.dist=undefined;
-    let furthestDist=0;
-    currPoint.dist=0;
+let lengthWorker;
+try{
+  lengthWorker = new Worker("/assets/omino/BoardLengthCalculator.js", { type: "module" });
+}catch(e){
+  const fakePostMessage = data=>lengthWorker.onmessage({data});
+  FakeWebWorker.fake(fakePostMessage);
 
-    while(true){
-      let distsMapped=true;
-      for(const point of pool){
-        if(point.dist!==undefined) continue;
-        distsMapped=false;
-
-        let dists=[
-          pool.find(somePoint=>somePoint.pos.equals(point.pos.left())),
-          pool.find(somePoint=>somePoint.pos.equals(point.pos.right())),
-          pool.find(somePoint=>somePoint.pos.equals(point.pos.up())),
-          pool.find(somePoint=>somePoint.pos.equals(point.pos.down()))
-        ].filter(d=>d!==undefined&&d.dist!==undefined);
-        if(dists.length!=0){
-          point.dist=dists.reduce((a,c)=>Math.min(a,c.dist),Infinity)+1;
-          furthestDist=Math.max(point.dist,furthestDist);
-        }
-      }
-      if(distsMapped) break;
-    }
-
-    let furthestPoint = pool.find(p=>p.dist==furthestDist);
-    if(furthestPoint==prevPoint){
-      prevPoint=currPoint;
-      currPoint=furthestPoint;
-      break;
-    }
-
-    prevPoint=currPoint;
-    currPoint=furthestPoint;
-  }
-
-  let maybePath=[currPoint];
-  while(true){
-    let last=maybePath[maybePath.length-1];
-    if(last.dist==0) break;
-
-    if(last.conns.left&&last.conns.left.dist==last.dist-1) maybePath.push(last.conns.left);
-    else if(last.conns.right&&last.conns.right.dist==last.dist-1) maybePath.push(last.conns.right);
-    else if(last.conns.up&&last.conns.up.dist==last.dist-1) maybePath.push(last.conns.up);
-    else if(last.conns.down&&last.conns.down.dist==last.dist-1) maybePath.push(last.conns.down);
-  }
-  maybePaths.push(maybePath);
-  return maybePath;
+  lengthWorker = {
+    postMessage:data=>setTimeout(_=>FakeWebWorker.onMessage({data}),0),
+  };
 }
+
+let awaitingReplies=[];
+lengthWorker.onmessage = e => {
+  let message = e.data;
+
+  let maybeReplyCallback = awaitingReplies.find(c=>c.id==message.id);
+  if(maybeReplyCallback){
+    maybeReplyCallback.onReply(message.data);
+    awaitingReplies.splice(awaitingReplies.indexOf(maybeReplyCallback), 1);
+    return;
+  }
+
+  switch(message.type){
+  default:
+    console.log(message.type+" message received from worker, no handler");
+    break;
+  }
+};
+let id=0;
+function sendAndWait(type, data, onReply){
+  awaitingReplies.push({id, onReply});
+  lengthWorker.postMessage({type, data, id});
+  id++;
+
+  return id-1;
+}
+let calcId=-1;
 
 const tileSpacing=0.07;
 const tileRadius = 0.2;
 const borderOmino = new LockedOmino([]);
+const defaultOptions = {
+  lockedTiles:[],
+  torusMode:false,
+};
 class Board{
-  constructor(width, height, lockedTiles=[]){
+  constructor(width, height, options={}){
     this.width=width;
     this.height=height;
 
     this.renderData = {
       scale:20
     };
-    
-    this.ominoes = [new LockedOmino(lockedTiles)];
+
+    let filledInOptions={};
+    Object.assign(filledInOptions, defaultOptions);
+    Object.assign(filledInOptions, options);
+
+    this.torusMode=filledInOptions.torusMode;
+    this.ominoes = [new LockedOmino(filledInOptions.lockedTiles)];
 
     this.path = [];
     this.recalcPath();
@@ -91,99 +88,25 @@ class Board{
     return false;
   }
   recalcPath(){
-    let poolData=[];
-    let currPool=0;
+    this.path=[];
+
+    let thisAsBoolArr=[];
     for(let y=0;y<this.height;y++){
-      poolData[y]=[];
+      thisAsBoolArr[y]=[];
       for(let x=0;x<this.width;x++){
-        if(this.get(new Vector(x,y))){
-          poolData[y][x]=undefined;
-          continue;
-        }
-
-        let possiblePools = [];
-        if(y>0&&poolData[y-1][x]!==undefined) possiblePools.push(poolData[y-1][x]);
-        if(x>0&&poolData[y][x-1]!==undefined) possiblePools.push(poolData[y][x-1]);
-        if(possiblePools.length==0) poolData[y][x]=currPool++;
-        else if(possiblePools.length==1||
-            (possiblePools.length==2&&possiblePools[0]==possiblePools[1]))
-          poolData[y][x]=possiblePools[0];
-        else if(possiblePools.length==2){
-          let b=false;
-          for(let y2=0;y2<this.height;y2++){
-            for(let x2=0;x2<this.width;x2++){
-              b=x==x2&&y==y2;
-              if(b) break;
-
-              if(poolData[y2][x2]==possiblePools[1]) poolData[y2][x2]=possiblePools[0];
-            }
-            if(b) break;
-          }
-
-          poolData[y][x]=possiblePools[0];
-        }
+        thisAsBoolArr[y][x]=this.get(new Vector(x,y));
       }
     }
-
-    let pools=[];
-    for(let y=0;y<this.height;y++){
-      for(let x=0;x<this.width;x++){
-        if(poolData[y][x]===undefined) continue;
-        if(pools[poolData[y][x]]==undefined) pools[poolData[y][x]]=[];
-
-        pools[poolData[y][x]].push(new Vector(x,y));
-      }
-    }
-
-    let maybePaths=[];
-    for(let pool of pools.filter(p=>p!==undefined)){
-      pool=pool.map(pos=>{return{
-        pos,
-        conns:{},
-      };});
-      for(const data of pool){
-        data.conns.left=pool.find(d=>data.pos.left().equals(d.pos));
-        data.conns.right=pool.find(d=>data.pos.right().equals(d.pos));
-        data.conns.up=pool.find(d=>data.pos.up().equals(d.pos));
-        data.conns.down=pool.find(d=>data.pos.down().equals(d.pos));
-      }
-
-      let maybePath = findLongestShortest(pool[0], pool, maybePaths);
-
-      for(let y=0;y<this.height;y++){
-        for(let x=0;x<this.width;x++){
-          let pos = new Vector(x,y);
-          if(!pool.some(p=>p.pos.equals(pos))||
-            maybePath.some(p=>p.pos.equals(pos))) continue;
-
-          let map=[
-            [[-1,-1],[0,-1],[1,-1]],
-            [[-1,0],[1,0]],
-            [[-1,1],[0,1],[1,1]],
-          ].map(r=>r.map(p=>{
-            let offs=new Vector(p[0],p[1]);
-            return !!pool.find(p=>p.pos.equals(pos.add(offs)));
-          })).flat().reduce((a,c)=>a*2+(c?0:1),0);
-
-          if(map==0b0010_1111||
-              map==0b1001_0111||
-              map==0b1110_1001||
-              map==0b1111_0100||
-
-              (map|0b1010_0101)==0b1111_1101||
-              (map|0b1010_0101)==0b1011_1111||
-              (map|0b1010_0101)==0b1110_1111||
-              (map|0b1010_0101)==0b1111_0111){
-            //valid start
-            findLongestShortest(pool.find(p=>p.pos.equals(pos)), pool, maybePaths);
-          }
-        }
-      }
-    }
-
-    if(maybePaths.length==0) this.path=[];
-    else
-      this.path=maybePaths.sort((p1,p2)=>p2.length-p1.length)[0].map(p=>p.pos);
+    
+    let thisId;
+    calcId=sendAndWait("length", {
+      board:thisAsBoolArr, 
+      torusMode:this.torusMode,
+    }, reply=>{
+      if(calcId!=thisId) return;
+      this.path=reply;
+    });
+    thisId=calcId;
   }
   
   render(pos, env=p5){
@@ -205,6 +128,24 @@ class Board{
     env.translate(0.5,0.5);
     env.strokeWeight(0.1);
     for(let i=1;i<this.path.length;i++){
+      if(this.torusMode&&
+        (Math.abs(this.path[i-1].x-this.path[i].x)>1||Math.abs(this.path[i-1].y-this.path[i].y)>1)){
+        let portalDist = 0.5-tileSpacing;
+
+        if(this.path[i-1].y!=this.path[i].y){
+          env.line(this.path[i-1].x,this.path[i-1].y, this.path[i].x,
+            this.path[i-1].y+(this.path[i].y>this.path[i-1].y?-1:1)*portalDist);
+          env.line(this.path[i].x,this.path[i].y, this.path[i-1].x,
+            this.path[i].y+(this.path[i-1].y>this.path[i].y?-1:1)*portalDist);
+        }else{
+          env.line(this.path[i-1].x,this.path[i-1].y,
+            this.path[i-1].x+(this.path[i].x>this.path[i-1].x?-1:1)*portalDist, this.path[i].y);
+          env.line(this.path[i].x,this.path[i].y,
+            this.path[i].x+(this.path[i-1].x>this.path[i].x?-1:1)*portalDist, this.path[i].y);
+        }
+        continue;
+      }
+
       env.line(this.path[i-1].x,this.path[i-1].y, this.path[i].x,this.path[i].y);
     }
     env.pop();
@@ -239,6 +180,7 @@ class Board{
       fullscreen:false,
       palette:allPalettes.indexOf(Data.scene.paletteScene.palette)+1,
       dims:this.width+"$"+this.height,
+      torus:this.torusMode,
       boardData:this.ominoes.map(omino=>{
         if(omino instanceof LockedOmino) return undefined;//todo
 

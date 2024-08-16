@@ -20,14 +20,14 @@ const keys = {
 class MainScene extends Scene{
   constructor(){
     super();
-    this.boardScene = this.addScene(new BoardScene(pageData.dims[0],pageData.dims[1]));
+    this.boardScene = this.addScene(new BoardScene(pageData.dims[0],pageData.dims[1],{
+      torusMode:pageData.torus
+    }));
     this.paletteScene = this.addScene(new PaletteScene(pageData.palette));
-    this.leftBarScene = this.addScene(new OptionsScene());
+    this.optionsScene = this.addScene(new OptionsScene());
 
     for(const omino of pageData.boardData.ominoes)
       this.boardScene.board.add(omino);
-
-    this.leftBarScene.boardDims.value = pageData.dims.join(",");
 
     const buttonWrapper = func=>{
       return s=>{
@@ -212,7 +212,7 @@ class MainScene extends Scene{
     this.boardScene.moveToCenter();
 
     this.paletteScene.setXAndWidth(p5.width*3/4,p5.width/4);
-    this.leftBarScene.dims.x=p5.width/4;
+    this.optionsScene.dims.x=p5.width/4;
 
     let size = Math.min(p5.width/2/this.buttonGrid[0].length,p5.height/3/this.buttonGrid.length);
     for(let y=0;y<this.buttonGrid.length;y++){

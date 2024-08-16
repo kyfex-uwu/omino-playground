@@ -1,10 +1,8 @@
 import {DimsScene, focus} from "/assets/omino/scene/Scene.js";
 
 class TextInputScene extends DimsScene{
-	constructor(pos, dims, validator=/./){
+	constructor(validator=/./){
 		super();
-		this.pos=pos;
-		this.dims=dims;
 		this.validator=validator;
 		this.value="";
 	}
