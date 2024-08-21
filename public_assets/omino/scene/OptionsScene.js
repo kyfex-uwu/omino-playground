@@ -11,7 +11,8 @@ import {allPalettes, nullPalette} from "/assets/omino/Palettes.js";
 const changelog = [
 `v0.1.8d 8/21/24
   - Fixed bug with ad covering canvas
-  - Added hover text to buttons`,
+  - Added hover text to buttons
+  - Fixed the options on the left freaking out on resize`,
 `v0.1.8c 8/19/24
   - Path calculation should be slightly faster when loading a board from url`,
 `v0.1.8b 8/16/24
@@ -324,24 +325,26 @@ class OptionsScene extends ScrollableScene{
     this.dims.y=p5.height;
     this.dims.x=p5.width/4;
 
+    this.offs*=n.x/old.x;
+
     let currY=0;
     let scale = this.dims.x/100;
     const padding=scale*3;
     p5.textSize(scale*6);
     this.boardDims.dims = new Vector(this.dims.x*0.99 - p5.textWidth("Dimensions: ")-padding, scale*6*1.2);
-    this.boardDims.pos = new Vector(p5.textWidth("Dimensions: ")+padding, 2*scale);
+    this.boardDims.pos = new Vector(p5.textWidth("Dimensions: ")+padding, 2*scale-this.offs);
     currY+=this.boardDims.dims.y+scale*3+2*scale;
 
     this.palette.dims = new Vector(this.dims.x*0.99 - p5.textWidth("Palette: ")-padding, scale*6*1.2);
-    this.palette.pos = new Vector(p5.textWidth("Palette: ")+padding, 2*scale+currY);
+    this.palette.pos = new Vector(p5.textWidth("Palette: ")+padding, 2*scale+currY-this.offs);
     currY+=this.palette.dims.y+scale*3+2*scale;
 
     this.torusBox.dims = new Vector(p5.textSize()*1.3, p5.textSize()*1.3);
-    this.torusBox.pos = new Vector(p5.textWidth("Torus mode ")+padding, 2*scale+currY);
+    this.torusBox.pos = new Vector(p5.textWidth("Torus mode ")+padding, 2*scale+currY-this.offs);
     currY+=2*scale+this.torusBox.dims.y;
 
     this.overwriteButton.dims = new Vector(p5.textWidth("Overwrite")*1.5, p5.textSize()*1.3);
-    this.overwriteButton.pos = new Vector(2*scale, currY+2*scale);
+    this.overwriteButton.pos = new Vector(2*scale, 2*scale+currY-this.offs);
     currY+=2*scale+this.overwriteButton.dims.y;
 
     let sbSize = Math.min(this.dims.x/3, scale*30);

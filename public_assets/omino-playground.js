@@ -17,7 +17,7 @@ new p5(p5=>{
 
   p5.setup = function() {
     p5.noStroke();
-    data.canvElt = p5.createCanvas(0,0).elt;
+    data.canvElt = p5.createCanvas(100,100).elt;
     try{document.getElementById("app").appendChild(data.canvElt);}catch(e){}
     data.canvElt.addEventListener("contextmenu", e=>e.preventDefault());
     data.canvElt.addEventListener("scroll", e=>e.preventDefault());
