@@ -9,6 +9,9 @@ import {pageData} from "/assets/omino/Options.js";
 import {allPalettes, nullPalette} from "/assets/omino/Palettes.js";
 
 const changelog = [
+`v0.1.8d 8/21/24
+  - Fixed bug with ad covering canvas
+  - Added hover text to buttons`,
 `v0.1.8c 8/19/24
   - Path calculation should be slightly faster when loading a board from url`,
 `v0.1.8b 8/16/24
@@ -272,6 +275,8 @@ class OptionsScene extends ScrollableScene{
       p5.bezierVertex(-10,5,-20,10,-30,23);
       p5.bezierVertex(-20,0,-10,-5,10+arrOffs,-5);
       p5.endShape();
+
+      if(s.isIn()) this.parent.setHoverText("Share Image");
     },s=>{
       Data.scene = new ShareImageScene(Data.scene);
     }));
@@ -303,6 +308,8 @@ class OptionsScene extends ScrollableScene{
 
       p5.pop();
       p5.noStroke();
+
+      if(s.isIn()) this.parent.setHoverText("Share Link");
     },s=>{
       navigator.clipboard.write([
           new ClipboardItem({

@@ -21,6 +21,7 @@ new p5(p5=>{
     try{document.getElementById("app").appendChild(data.canvElt);}catch(e){}
     data.canvElt.addEventListener("contextmenu", e=>e.preventDefault());
     data.canvElt.addEventListener("scroll", e=>e.preventDefault());
+    data.canvElt.style["z-index"]=999;
 
     data.scene = new MainScene();
     data.isFullscreened=pageData.fullscreen;

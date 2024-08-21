@@ -7,8 +7,12 @@ class Vector{
   add(other){ return new Vector(this.x+other.x,this.y+other.y); }
   sub(other){ return new Vector(this.x-other.x,this.y-other.y); }
   scale(amt){ return new Vector(this.x*amt,this.y*amt); }
+
   round(){ return new Vector(Math.round(this.x),Math.round(this.y)); }
   clone(){ return new Vector(this.x,this.y); }
+  distTo(other){
+    return Math.sqrt((this.x-other.x)**2+(this.y-other.y)**2);
+  }
 
   left(){ return new Vector(this.x-1,this.y); }
   right(){ return new Vector(this.x+1,this.y); }

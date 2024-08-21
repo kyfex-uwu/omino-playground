@@ -60,6 +60,8 @@ class PaletteScene extends ScrollableScene{
       p5.textSize((s.dims.x+s.dims.y)*0.4);
       p5.text("+", s.dims.x/2,s.dims.y/2);
       p5.pop();
+
+      if(s.isIn()) this.parent.setHoverText("Add Omino");
     },_=>{
       this.parent.enterDrawingMode();
     }));

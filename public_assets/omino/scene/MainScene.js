@@ -20,6 +20,14 @@ const keys = {
 class MainScene extends Scene{
   constructor(){
     super();
+
+    this.hoverTextData = {
+      text:"",
+      tWidth:0,
+      pos:new Vector(-999,-999),
+      time:-Infinity
+    };
+
     this.boardScene = this.addScene(new BoardScene(pageData.dims[0],pageData.dims[1],{
       torusMode:pageData.torus,
       ominoes:pageData.boardData.ominoes,
@@ -27,7 +35,7 @@ class MainScene extends Scene{
     this.paletteScene = this.addScene(new PaletteScene(pageData.palette));
     this.optionsScene = this.addScene(new OptionsScene());
 
-    const buttonWrapper = func=>{
+    const buttonWrapper = (func, text)=>{
       return s=>{
         p5.fill(255,s.isIn()?150:100);
         p5.rect(0,0,s.dims.x,s.dims.y, Math.min(s.dims.x,s.dims.y)*0.1);
@@ -37,6 +45,8 @@ class MainScene extends Scene{
         p5.scale((s.dims.x+s.dims.y)*0.01);
         func(s);
         p5.pop();
+
+        if(text&&s.isIn()) this.setHoverText(text);
       };
     };
     const drawText = _=>_=>0;
@@ -70,7 +80,7 @@ class MainScene extends Scene{
         {b:this.addScene(new OneTimeButtonScene(buttonWrapper(s=>{
           if(s.isIn()) p5.rotate(-0.4);
           drawRot();
-        }),()=>{
+        }, "Rotate Left"),()=>{
           if(!this.mouseData.omino) return;
           let oldWidth=this.mouseData.omino.width();
           this.mouseData.omino = this.mouseData.omino.rotatedCCW();
@@ -82,7 +92,7 @@ class MainScene extends Scene{
           if(s.isIn()) p5.rotate(0.4);
           p5.scale(-1,1);
           drawRot();
-        }),()=>{
+        }, "Rotate Right"),()=>{
           if(!this.mouseData.omino) return;
           let oldHeight = this.mouseData.omino.height();
           this.mouseData.omino = this.mouseData.omino.rotatedCW();
@@ -124,7 +134,7 @@ class MainScene extends Scene{
           p5.line(-3,0, -2,10);
           p5.line(3,0, 2,10);
           p5.pop();
-        }),()=>{
+        }, "Delete Omino"),()=>{
           this.mouseData.omino=undefined;
         })), key:"X"}
       ],
@@ -132,7 +142,7 @@ class MainScene extends Scene{
         {b:this.addScene(new OneTimeButtonScene(buttonWrapper(s=>{
           if(s.isIn()) p5.scale(1, 1.1);
           drawScale();
-        }),()=>{
+        }, "Vertical Flip"),()=>{
           if(!this.mouseData.omino) return;
           this.mouseData.omino = this.mouseData.omino.mirroredV();
           this.mouseData.offs.y=this.mouseData.omino.height()*this.boardScene.board.renderData.scale-
@@ -142,7 +152,7 @@ class MainScene extends Scene{
           if(s.isIn()) p5.scale(1.1, 1);
           p5.rotate(Math.PI/2);
           drawScale();
-        }),()=>{
+        }, "Horizontal Flip"),()=>{
           if(!this.mouseData.omino) return;
           this.mouseData.omino = this.mouseData.omino.mirroredH();
           this.mouseData.offs.x=this.mouseData.omino.width()*this.boardScene.board.renderData.scale-
@@ -172,7 +182,7 @@ class MainScene extends Scene{
             p5.triangle(-19,13,-17,5,-11,13);
             p5.triangle(19,13,17,5,11,13);
           }
-        }),()=>{
+        }, "Toggle Fullscreen"),()=>{
           Data.isFullscreened=!Data.isFullscreened;
           p5.windowResized();
           window.scroll({top:Data.canvElt.getBoundingClientRect().y-document.body.getBoundingClientRect().y-
@@ -192,11 +202,40 @@ class MainScene extends Scene{
 
     Data.scene = new DrawingModeScene(this);
   }
+  setHoverText(text){
+    let mousePos=new Vector(p5.mouseX, p5.mouseY);
+    if(this.hoverTextData.pos.equals(mousePos)) return;
+
+    p5.push();
+    p5.textSize(15);
+    this.hoverTextData = {
+      text,
+      tWidth:p5.textWidth(text)+10,
+      pos:mousePos,
+      time:-90
+    };
+    p5.pop();
+  }
 
   render(){
     p5.background(173, 111, 153);
 
     super.render();
+
+    if(!this.hoverTextData.pos.equals(new Vector(p5.mouseX, p5.mouseY))){
+      this.hoverTextData.time=-Infinity;
+      this.hoverTextData.pos=new Vector(-999,-999);
+    }
+    this.hoverTextData.time++;
+    if(this.hoverTextData.time>0){
+      p5.fill(255);
+      p5.rect(this.hoverTextData.pos.x-this.hoverTextData.tWidth/2,this.hoverTextData.pos.y-20,
+        this.hoverTextData.tWidth, 20, 5);
+      p5.fill(0);
+      p5.textAlign(p5.CENTER, p5.BOTTOM);
+      p5.textSize(15);
+      p5.text(this.hoverTextData.text, this.hoverTextData.pos.x, this.hoverTextData.pos.y-5/2);
+    }
 
     if(this.mouseData.omino){
       this.mouseData.omino.renderTransparent(this.boardScene.board.renderData.scale, 

@@ -29,6 +29,7 @@ function propagateDist(point, dist=0){
 }
 
 function findLongestShortest(currPoint, pool, maybePaths){
+	//let startTime=Date.now();
   let prevPoint;
   for(;;){
     for(const point of pool) point.dist=undefined;
@@ -54,6 +55,7 @@ function findLongestShortest(currPoint, pool, maybePaths){
     prevPoint=currPoint;
     currPoint=furthestPoints[0];
   }
+  //console.log(Date.now()-startTime);
 
   let maybePath=[currPoint];
   for(;;){
@@ -74,27 +76,30 @@ function calcLength(data){
 	let height=data.board.length;
 	let width=data.board[0].length;
 
-	let tiles=[];
+	let namedTiles={};
 	for(let y=0;y<height;y++){
 		for(let x=0;x<width;x++){
-			if(!board[y][x]) tiles.push({pos:new Vector(x, y)});
+			if(!board[y][x]){
+				var pos = new Vector(x,y);
+				namedTiles[pos.toURLStr()]={pos};
+			}
 		}
 	}
-	for(const tile of tiles){
-    tile.left=tiles.find(t=>tile.pos.left().equals(t.pos));
-    tile.right=tiles.find(t=>tile.pos.right().equals(t.pos));
-    tile.up=tiles.find(t=>tile.pos.up().equals(t.pos));
-    tile.down=tiles.find(t=>tile.pos.down().equals(t.pos));
+	for(const tile of Object.values(namedTiles)){
+    tile.left=namedTiles[tile.pos.left().toURLStr()];
+    tile.right=namedTiles[tile.pos.right().toURLStr()];
+    tile.up=namedTiles[tile.pos.up().toURLStr()];
+    tile.down=namedTiles[tile.pos.down().toURLStr()];
 
     if(data.torusMode){
-    	if(tile.pos.x==0) tile.left = tiles.find(d=>new Vector(width-1, tile.pos.y).equals(d.pos));
-    	else if(tile.pos.x==width-1) tile.right = tiles.find(d=>new Vector(0, tile.pos.y).equals(d.pos));
-    	if(tile.pos.y==0) tile.up = tiles.find(d=>new Vector(tile.pos.x, height-1).equals(d.pos));
-    	else if(tile.pos.y==height-1) tile.down = tiles.find(d=>new Vector(tile.pos.x, 0).equals(d.pos));
+    	if(tile.pos.x==0) tile.left = namedTiles[new Vector(width-1, tile.pos.y).toURLStr()];
+    	else if(tile.pos.x==width-1) tile.right = namedTiles[new Vector(0, tile.pos.y).toURLStr()];
+    	if(tile.pos.y==0) tile.up = namedTiles[new Vector(tile.pos.x, height-1).toURLStr()];
+    	else if(tile.pos.y==height-1) tile.down = namedTiles[new Vector(tile.pos.x, 0).toURLStr()];
     }
 	}
 
-	let remainingTiles=new Set(tiles);
+	let remainingTiles=new Set(Object.values(namedTiles));
 	let pools=[];
 	for(;;){
 		if(remainingTiles.size==0) break;
@@ -104,29 +109,42 @@ function calcLength(data){
 		pools.push(pool);
 	}
 
+	//it takes very little time to get here
+	let startTime=Date.now();
+
 	let maybePaths=[];
 	for(let pool of pools){
-	  for(const tile of pool){
-	    tile.left=pool.find(d=>tile.pos.left().equals(d.pos));
-	    tile.right=pool.find(d=>tile.pos.right().equals(d.pos));
-	    tile.up=pool.find(d=>tile.pos.up().equals(d.pos));
-	    tile.down=pool.find(d=>tile.pos.down().equals(d.pos));
+		findLongestShortest(pool[0], pool, maybePaths);
+		for(const tile of pool){
+			let map=[
+        [-1,-1],[0,-1],[1,-1],
+        [-1,0],        [1,0],
+        [-1,1], [0,1], [1,1],
+      ].map(p=>{
+        let offs=new Vector(p[0],p[1]);
+        return pool.some(p=>p.pos.equals(tile.pos.add(offs)));
+      }).reduce((a,c)=>a*2+(c?0:1),0);
 
-	    if(data.torusMode){
-	    	if(tile.pos.x==0) tile.left = pool.find(d=>new Vector(width-1, tile.pos.y).equals(d.pos));
-	    	else if(tile.pos.x==width-1) tile.right = pool.find(d=>new Vector(0, tile.pos.y).equals(d.pos));
-	    	if(tile.pos.y==0) tile.up = pool.find(d=>new Vector(tile.pos.x, height-1).equals(d.pos));
-	    	else if(tile.pos.y==height-1) tile.down = pool.find(d=>new Vector(tile.pos.x, 0).equals(d.pos));
-	    }
-	  }
+      if(map==0b0010_1111||
+          map==0b1001_0111||
+          map==0b1110_1001||
+          map==0b1111_0100||
 
-	  let maybePath = findLongestShortest(pool[0], pool, maybePaths);
+          (map|0b1010_0101)==0b1111_1101||
+          (map|0b1010_0101)==0b1011_1111||
+          (map|0b1010_0101)==0b1110_1111||
+          (map|0b1010_0101)==0b1111_0111){
+        //valid start
+        findLongestShortest(pool.find(p=>p.pos.equals(tile.pos)), pool, maybePaths);
+      }
+		}
 
+		break;
 	  for(let y=0;y<board.length;y++){
+	  	break;
 	    for(let x=0;x<board[y].length;x++){
 	      let pos = new Vector(x,y);
-	      if(!pool.some(p=>p.pos.equals(pos))||
-	        maybePath.some(p=>p.pos.equals(pos))) continue;
+	      if(!pool.some(p=>p.pos.equals(pos))) continue;
 
 	      let map=[
 	        [[-1,-1],[0,-1],[1,-1]],
