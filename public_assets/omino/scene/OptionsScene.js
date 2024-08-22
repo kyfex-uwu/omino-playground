@@ -1,4 +1,4 @@
-import {ScrollableScene, OneTimeButtonScene, Scene, DimsScene,
+ import {ScrollableScene, OneTimeButtonScene, Scene, DimsScene,
   focus, hover} from "/assets/omino/scene/Scene.js";
 import BoardScene from "/assets/omino/scene/BoardScene.js";
 import PaletteScene from "/assets/omino/scene/PaletteScene.js";
@@ -15,7 +15,7 @@ const changelog = [
 - Added a settings screen, this includes:
 . - Keybinds
 . - nothing else atm lol
-- Optimized pathfinding algorithm (thanks dad!)
+- Optimized pathfinding algorithm (thanks dad!) (...just kidding doesn't work)
 - Added comments to the board length calculator so it can be more easily understood `+
 `(/assets/omino/BoardLengthCalculator.js)
 - Added animations on omino transforms
