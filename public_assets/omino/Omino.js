@@ -58,19 +58,19 @@ class Omino{
         if(this.tiles[y][x+1]){
           env.rect(pos.x+(this.pos.x+x+1-ominoSpacing-ominoRadius)*scale,
             pos.y+(this.pos.y+y+ominoSpacing)*scale,
-            scale*(ominoRadius*2+ominoSpacing)+1,scale*(1-ominoSpacing*2));
+            scale*(ominoSpacing+ominoRadius)*2,scale*(1-ominoSpacing*2));
           corner++;
         }
         if(this.tiles[y+1]&&this.tiles[y+1][x]){
           env.rect(pos.x+(this.pos.x+x+ominoSpacing)*scale,
             pos.y+(this.pos.y+y+1-ominoSpacing-ominoRadius)*scale,
-            scale*(1-ominoSpacing*2),scale*(ominoRadius*2+ominoSpacing)+1);
+            scale*(1-ominoSpacing*2),scale*(ominoSpacing+ominoRadius)*2);
           corner++;
         }
         if(corner==2&&this.tiles[y+1]&&this.tiles[y+1][x+1]){
-          env.rect(pos.x+(this.pos.x+x+1-ominoSpacing)*scale-1,
-            pos.y+(this.pos.y+y+1-ominoSpacing)*scale-1,
-            scale*ominoSpacing*2+2,scale*ominoSpacing*2+2);
+          env.rect(pos.x+(this.pos.x+x+1-ominoSpacing-0.01)*scale,
+            pos.y+(this.pos.y+y+1-ominoSpacing-0.01)*scale,
+            scale*(ominoSpacing+0.01)*2,scale*(ominoSpacing+0.01)*2);
         }
       }
     }

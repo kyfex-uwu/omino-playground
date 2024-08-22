@@ -179,24 +179,9 @@ function fake(newPostMessage){
 	safePostMessage=newPostMessage;
 }
 
-function send(type, data){
-	safePostMessage({type,data});
-}
-function reply(data, id){
-	safePostMessage({data, id});
-}
 function onMessage(e){
-	let message = e.data;
-
-	switch(message.type){
-	case "length":
-		reply(calcLength(message.data), message.id);
-		break;
-
-  default:
-    console.log(message.type+" message received from parent, no handler");
-    break;
-	}
+	if(e.data=="_grecaptcha_ready") return;//what
+	safePostMessage(calcLength(e.data));
 }
 onmessage = onMessage;
 

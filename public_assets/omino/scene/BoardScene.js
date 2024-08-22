@@ -64,6 +64,25 @@ class BoardScene extends DimsScene{
         }
         if(!valid) break;
       }
+      if(this.board.torusMode){
+        let loopedPositions = this.parent.mouseData.omino.vectors
+          .map(p=>p.add(this.parent.mouseData.omino.pos));
+        for(const pos of loopedPositions){
+          while(pos.x<0) pos.x+=this.board.width;
+          while(pos.x>=this.board.width) pos.x-=this.board.width;
+          while(pos.y<0) pos.y+=this.board.height;
+          while(pos.y>=this.board.height) pos.y-=this.board.height;
+        }
+        for(let i=0;i<loopedPositions.length;i++){
+          for(let j=i+1;j<loopedPositions.length;j++){
+            if(loopedPositions[i].equals(loopedPositions[j])){
+              valid=false;
+              break;
+            }
+          }
+          if(!valid) break;
+        }
+      }
 
       if(valid){
         this.parent.mouseData.omino.pos = newPos;

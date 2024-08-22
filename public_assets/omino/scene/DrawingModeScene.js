@@ -9,6 +9,7 @@ class DrawingModeScene extends Scene{
     this.mainScene=mainScene;
 
     this.newTiles=[];
+    this.omino = undefined;
 
     this.confButton = this.addScene(new OneTimeButtonScene(s=>{
       p5.fill(s.isIn()?150:100);
@@ -66,11 +67,7 @@ class DrawingModeScene extends Scene{
 
     p5.push();
     p5.translate(board.pos.x,board.pos.y);
-    p5.scale(board.board.renderData.scale);
-    p5.fill(255);
-    for(const point of this.newTiles){
-      p5.rect(point.x,point.y,1,1);
-    }
+    if(this.omino) this.omino.render(board.board.renderData.scale, new Vector(0,0));
     p5.pop();
 
     super.render();
@@ -87,6 +84,12 @@ class DrawingModeScene extends Scene{
         this.newTiles.splice(this.newTiles.findIndex(p=>p.equals(newPos)),1);
       }else{
         this.newTiles.push(newPos);
+      }
+
+      if(this.newTiles.length==0){
+        this.omino=undefined;
+      }else{
+        this.omino = new Omino(new Vector(0,0), [255,255,255], this.newTiles);
       }
     }
     

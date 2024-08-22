@@ -5,45 +5,6 @@ import {pageData} from "/assets/omino/Options.js";
 import Data from "/assets/omino-playground.js";
 import * as FakeWebWorker from "/assets/omino/BoardLengthCalculator.js";
 
-let lengthWorker;
-try{
-  lengthWorker = new Worker("/assets/omino/BoardLengthCalculator.js", { type: "module" });
-}catch(e){
-  const fakePostMessage = data=>lengthWorker.onmessage({data});
-  FakeWebWorker.fake(fakePostMessage);
-
-  lengthWorker = {
-    postMessage:data=>setTimeout(_=>FakeWebWorker.onMessage({data}),0),
-  };
-}
-
-let awaitingReplies=[];
-lengthWorker.onmessage = e => {
-  let message = e.data;
-
-  let maybeReplyCallback = awaitingReplies.find(c=>c.id==message.id);
-  if(maybeReplyCallback){
-    maybeReplyCallback.onReply(message.data);
-    awaitingReplies.splice(awaitingReplies.indexOf(maybeReplyCallback), 1);
-    return;
-  }
-
-  switch(message.type){
-  default:
-    console.log(message.type+" message received from worker, no handler");
-    break;
-  }
-};
-let id=0;
-function sendAndWait(type, data, onReply){
-  awaitingReplies.push({id, onReply});
-  lengthWorker.postMessage({type, data, id});
-  id++;
-
-  return id-1;
-}
-let calcId=-1;
-
 const tileSpacing=0.07;
 const tileRadius = 0.2;
 const borderOmino = new LockedOmino([]);
@@ -103,16 +64,29 @@ class Board{
         thisAsBoolArr[y][x]=this.get(new Vector(x,y));
       }
     }
-    
-    let thisId;
-    calcId=sendAndWait("length", {
+
+    //--
+
+    let lengthWorker;
+    try{
+      lengthWorker = new Worker("/assets/omino/BoardLengthCalculator.js", { type: "module" });
+    }catch(e){
+      const fakePostMessage = data=>lengthWorker.onmessage({data});
+      FakeWebWorker.fake(fakePostMessage);
+
+      lengthWorker = {
+        postMessage:data=>FakeWebWorker.onMessage({data}),
+      };
+    }
+
+    lengthWorker.onmessage = e => {
+      this.path=e.data;
+    };
+
+    lengthWorker.postMessage({
       board:thisAsBoolArr, 
       torusMode:this.torusMode,
-    }, reply=>{
-      if(calcId!=thisId) return;
-      this.path=reply;
     });
-    thisId=calcId;
   }
   
   render(pos, env=p5){

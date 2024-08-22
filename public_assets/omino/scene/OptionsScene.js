@@ -11,11 +11,18 @@ import {pageData} from "/assets/omino/Options.js";
 import {allPalettes, nullPalette} from "/assets/omino/Palettes.js";
 
 const changelog = [
+`v0.1.9b 8/22/24
+- Made drawing ominoes look prettier
+- Fixed being able to place ominoes on top of themselves in torus mode (thanks @yeacloth)
+- Made ominoes render better at large sizes
+- Removed path calculation lag when not calculating a super long path anymore `+
+`(ex: switching from a big board to a small board)
+- Tweaked delete animation
+- Fixed the options panel scroll offsetting weirdly on app resize`,
 `v0.1.9 8/21/24
 - Added a settings screen, this includes:
 . - Keybinds
 . - nothing else atm lol
-- Optimized pathfinding algorithm (thanks dad!) (...just kidding doesn't work)
 - Added comments to the board length calculator so it can be more easily understood `+
 `(/assets/omino/BoardLengthCalculator.js)
 - Added animations on omino transforms
@@ -401,10 +408,12 @@ class OptionsScene extends ScrollableScene{
     this.dims.y=p5.height;
     this.dims.x=p5.width/4;
 
+    this.offs-=this.settingsBar.dims.y;
     this.offs*=n.x/old.x;
 
     let scale = this.dims.x/100;
     let sbSize = Math.min(this.dims.x/3, scale*30);
+    this.offs+=this.settingsBar.dims.y==0?0:sbSize;
 
     let currY=sbSize;
     const padding=scale*3;

@@ -152,8 +152,7 @@ class MainScene extends Scene{
         }, "Delete Omino"),()=>{
           let omino = this.mouseData.omino;
           let scale = this.boardScene.board.renderData.scale;
-          let sub = new Vector(omino.width()*scale/2, omino.height()*scale/2);
-          let pos = new Vector(p5.mouseX, p5.mouseY).sub(this.mouseData.offs).add(sub);
+          let pos = new Vector(p5.mouseX, p5.mouseY);
           this.mouseData.omino=undefined;
 
           let time=10;
@@ -164,7 +163,8 @@ class MainScene extends Scene{
             p5.push();
             p5.translate(pos.x,pos.y);
             p5.rotate((10-time)*0.05*dir);
-            omino.renderTransparent(scale*newScale, sub.scale(-1*newScale), p5, 170*newScale);
+            omino.renderTransparent(scale*newScale, this.mouseData.offs.scale(-1*newScale), 
+              p5, 170*newScale);
             p5.pop();
 
             time--;
@@ -318,7 +318,6 @@ class MainScene extends Scene{
       if(vals.includes(key)){
         for(const row of this.buttonGrid){
           for(const button of row){
-        console.log(key, name, button.key)
             if(button.key==name){
               button.b.click(0,0);
               consumed=true;
