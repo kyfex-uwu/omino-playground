@@ -14,7 +14,7 @@ const aroundMap = [
 
 //takes in a vector, and returns the 8 positions around it
 function getAroundPositions(pos){
-	return aroundMap.map(p=>pos.add(p[0],p[1]));
+	return aroundMap.map(p=>pos.add(new Vector(p[0],p[1])));
 }
 
 //recursive function that returns all tiles that are all connected
