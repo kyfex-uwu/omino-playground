@@ -22,6 +22,7 @@ const changelog = [
 - Boards now don't calculate path again when copying image
 - Fixed bug with ad covering canvas
 - Fixed app not resizing properly when sharing image
+- Fixed path not considering all empty groups when calculating longest path (thanks @hhhguir)
 - Fixed the "Add Omino" confirm button being offset wrong when app resized
 - Added hover text to buttons
 - Fixed the options on the left freaking out on resize`,
