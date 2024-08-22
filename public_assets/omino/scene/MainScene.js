@@ -1,5 +1,5 @@
 import Vector from "/assets/omino/Vector.js";
-import {Scene, focus} from "/assets/omino/scene/Scene.js";
+import {Scene, focus, hover} from "/assets/omino/scene/Scene.js";
 import BoardScene from "/assets/omino/scene/BoardScene.js";
 import PaletteScene from "/assets/omino/scene/PaletteScene.js";
 import OptionsScene from "/assets/omino/scene/OptionsScene.js";
@@ -21,13 +21,6 @@ class MainScene extends Scene{
   constructor(){
     super();
 
-    this.hoverTextData = {
-      text:"",
-      tWidth:0,
-      pos:new Vector(-999,-999),
-      time:-Infinity
-    };
-
     this.boardScene = this.addScene(new BoardScene(pageData.dims[0],pageData.dims[1],{
       torusMode:pageData.torus,
       ominoes:pageData.boardData.ominoes,
@@ -46,7 +39,7 @@ class MainScene extends Scene{
         func(s);
         p5.pop();
 
-        if(text&&s.isIn()) this.setHoverText(text);
+        if(text&&s.isIn()) hover.set(text, s);
       };
     };
     const drawText = _=>_=>0;
@@ -87,6 +80,17 @@ class MainScene extends Scene{
           this.mouseData.offs = new Vector(this.mouseData.offs.y,
             oldWidth*this.boardScene.board.renderData.scale-
               this.mouseData.offs.x);
+
+          this.mouseData.angle = Math.PI/2;
+          this.mouseData.scale = new Vector(1,1);
+          this.mouseData.func = _=>{
+            this.mouseData.angle*=0.8;
+            this.mouseData.angle-=0.01;
+            if(this.mouseData.angle<0){
+              this.mouseData.angle=0;
+              this.mouseData.func=_=>0;
+            }
+          };
         })), key:"CCW"},
         {b:this.addScene(new OneTimeButtonScene(buttonWrapper(s=>{
           if(s.isIn()) p5.rotate(0.4);
@@ -99,6 +103,17 @@ class MainScene extends Scene{
           this.mouseData.offs = new Vector(
             oldHeight*this.boardScene.board.renderData.scale-this.mouseData.offs.y,
             this.mouseData.offs.x);
+
+          this.mouseData.angle = -Math.PI/2;
+          this.mouseData.scale = new Vector(1,1);
+          this.mouseData.func = _=>{
+            this.mouseData.angle*=0.8;
+            this.mouseData.angle+=0.01;
+            if(this.mouseData.angle>0){
+              this.mouseData.angle=0;
+              this.mouseData.func=_=>0;
+            }
+          };
         })), key:"CW"},
         {b:{}},
         {b:this.addScene(new OneTimeButtonScene(buttonWrapper(s=>{
@@ -135,8 +150,28 @@ class MainScene extends Scene{
           p5.line(3,0, 2,10);
           p5.pop();
         }, "Delete Omino"),()=>{
+          let omino = this.mouseData.omino;
+          let scale = this.boardScene.board.renderData.scale;
+          let sub = new Vector(omino.width()*scale/2, omino.height()*scale/2);
+          let pos = new Vector(p5.mouseX, p5.mouseY).sub(this.mouseData.offs).add(sub);
           this.mouseData.omino=undefined;
-        })), key:"X"}
+
+          let time=10;
+          let dir=Math.random()<0.5?1:-1;
+          this.mouseData.func = _=>{
+            let newScale = 1-((20-time)/20)**3;
+
+            p5.push();
+            p5.translate(pos.x,pos.y);
+            p5.rotate((10-time)*0.05*dir);
+            omino.renderTransparent(scale*newScale, sub.scale(-1*newScale), p5, 170*newScale);
+            p5.pop();
+
+            time--;
+
+            if(time<0) this.mouseData.func=_=>0;
+          };
+        })), key:"DEL"}
       ],
       [
         {b:this.addScene(new OneTimeButtonScene(buttonWrapper(s=>{
@@ -147,6 +182,17 @@ class MainScene extends Scene{
           this.mouseData.omino = this.mouseData.omino.mirroredV();
           this.mouseData.offs.y=this.mouseData.omino.height()*this.boardScene.board.renderData.scale-
             this.mouseData.offs.y;
+
+          this.mouseData.angle = 0;
+          this.mouseData.scale = new Vector(1,-1);
+          this.mouseData.func = _=>{
+            this.mouseData.scale.y=1-(1-this.mouseData.scale.y)*0.8;
+            this.mouseData.scale.y+=0.03;
+            if(this.mouseData.scale.y>1){
+              this.mouseData.scale.y=1;
+              this.mouseData.func=_=>0;
+            }
+          };
         })), key:"MV"},
         {b:this.addScene(new OneTimeButtonScene(buttonWrapper(s=>{
           if(s.isIn()) p5.scale(1.1, 1);
@@ -157,6 +203,17 @@ class MainScene extends Scene{
           this.mouseData.omino = this.mouseData.omino.mirroredH();
           this.mouseData.offs.x=this.mouseData.omino.width()*this.boardScene.board.renderData.scale-
             this.mouseData.offs.x;
+
+          this.mouseData.angle = 0;
+          this.mouseData.scale = new Vector(-1,1);
+          this.mouseData.func = _=>{
+            this.mouseData.scale.x=1-(1-this.mouseData.scale.x)*0.8;
+            this.mouseData.scale.x+=0.03;
+            if(this.mouseData.scale.x>1){
+              this.mouseData.scale.x=1;
+              this.mouseData.func=_=>0;
+            }
+          };
         })), key:"MH"},
         {b:{}},
         {b:this.addScene(new OneTimeButtonScene(buttonWrapper(s=>{
@@ -193,8 +250,14 @@ class MainScene extends Scene{
 
     this.mouseData = {
       omino:undefined,
-      offs:undefined
+      offs:undefined,
+
+      angle:0,
+      scale:new Vector(1,1),
+      func:_=>0,
     };
+
+    this.resized(new Vector(p5.width, p5.height), new Vector(p5.width, p5.height));
   }
 
   enterDrawingMode(){
@@ -202,66 +265,47 @@ class MainScene extends Scene{
 
     Data.scene = new DrawingModeScene(this);
   }
-  setHoverText(text){
-    let mousePos=new Vector(p5.mouseX, p5.mouseY);
-    if(this.hoverTextData.pos.equals(mousePos)) return;
-
-    p5.push();
-    p5.textSize(15);
-    this.hoverTextData = {
-      text,
-      tWidth:p5.textWidth(text)+10,
-      pos:mousePos,
-      time:-90
-    };
-    p5.pop();
-  }
 
   render(){
     p5.background(173, 111, 153);
 
     super.render();
 
-    if(!this.hoverTextData.pos.equals(new Vector(p5.mouseX, p5.mouseY))){
-      this.hoverTextData.time=-Infinity;
-      this.hoverTextData.pos=new Vector(-999,-999);
-    }
-    this.hoverTextData.time++;
-    if(this.hoverTextData.time>0){
-      p5.fill(255);
-      p5.rect(this.hoverTextData.pos.x-this.hoverTextData.tWidth/2,this.hoverTextData.pos.y-20,
-        this.hoverTextData.tWidth, 20, 5);
-      p5.fill(0);
-      p5.textAlign(p5.CENTER, p5.BOTTOM);
-      p5.textSize(15);
-      p5.text(this.hoverTextData.text, this.hoverTextData.pos.x, this.hoverTextData.pos.y-5/2);
+    this.mouseData.func();
+    if(this.mouseData.omino){
+      p5.push();
+      p5.translate(p5.mouseX,p5.mouseY);
+      p5.rotate(this.mouseData.angle);
+      p5.scale(this.mouseData.scale.x,this.mouseData.scale.y);
+      this.mouseData.omino.renderTransparent(this.boardScene.board.renderData.scale, 
+        new Vector(0,0).sub(this.mouseData.offs));
+      p5.cursor(p5.MOVE);
+      p5.pop();
     }
 
-    if(this.mouseData.omino){
-      this.mouseData.omino.renderTransparent(this.boardScene.board.renderData.scale, 
-        new Vector(p5.mouseX,p5.mouseY).sub(this.mouseData.offs));
-      p5.cursor(p5.MOVE);
-    }
+    hover.draw();
   }
   resized(oldDims, newDims){
     let oldScale = this.boardScene.board.renderData.scale;
-    this.boardScene.setBounds(p5.width/2, p5.height*2/3);
+    this.boardScene.setBounds(newDims.x/2, newDims.y*2/3);
     this.boardScene.moveToCenter();
 
-    this.paletteScene.setXAndWidth(p5.width*3/4,p5.width/4);
-    this.optionsScene.dims.x=p5.width/4;
+    this.paletteScene.setXAndWidth(newDims.x*3/4,newDims.x/4);
+    this.optionsScene.dims.x=newDims.x/4;
 
-    let size = Math.min(p5.width/2/this.buttonGrid[0].length,p5.height/3/this.buttonGrid.length);
+    let size = Math.min(newDims.x/2/this.buttonGrid[0].length,newDims.y/3/this.buttonGrid.length);
     for(let y=0;y<this.buttonGrid.length;y++){
       for(let x=0;x<this.buttonGrid[y].length;x++){
         this.buttonGrid[y][x].b.dims = new Vector(size*0.8, size*0.8);
-        this.buttonGrid[y][x].b.pos = new Vector(p5.width/2-size*2+(x+0.1)*size, p5.height*2/3+(y+0.1)*size);
+        this.buttonGrid[y][x].b.pos = new Vector(newDims.x/2-size*2+(x+0.1)*size, newDims.y*2/3+(y+0.1)*size);
       }
     }
 
     if(this.mouseData.omino){
       this.mouseData.offs=this.mouseData.offs.scale(this.boardScene.board.renderData.scale/oldScale);
     }
+
+    this.boardScene.quickResize();
 
     super.resized(oldDims, newDims);
   }
@@ -274,6 +318,7 @@ class MainScene extends Scene{
       if(vals.includes(key)){
         for(const row of this.buttonGrid){
           for(const button of row){
+        console.log(key, name, button.key)
             if(button.key==name){
               button.b.click(0,0);
               consumed=true;

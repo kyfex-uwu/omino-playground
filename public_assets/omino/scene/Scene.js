@@ -125,6 +125,53 @@ function focus(element){
   element.focus();
 }
 
+let hoverData = {
+  text:"",
+  tWidth:0,
+
+  pos:new Vector(-999,-999),
+  time:-Infinity,
+  currScene:undefined
+};
+let hover={
+  set: function(text, scene){
+    let currScene = hoverData.currScene;
+    while(currScene){
+      if(currScene.parent==scene) return;
+      currScene=currScene.parent;
+    }
+
+    let mousePos=new Vector(p5.mouseX, p5.mouseY);
+    if(hoverData.pos.equals(mousePos)) return;
+
+    p5.push();
+    p5.textSize(15);
+    hoverData = {
+      text,
+      tWidth:p5.textWidth(text)+10,
+      pos:mousePos,
+      time:-90
+    };
+    p5.pop();
+  },
+  draw: function (){
+    if(!hoverData.pos.equals(new Vector(p5.mouseX, p5.mouseY))){
+      hoverData.pos=new Vector(-999,-999);
+      hoverData.time=-Infinity;
+      hoverData.currScene=undefined;
+    }
+    hoverData.time++;
+    if(hoverData.time>0){
+      p5.fill(255);
+      p5.rect(hoverData.pos.x-hoverData.tWidth/2,hoverData.pos.y-20, hoverData.tWidth, 20, 5);
+      p5.fill(0);
+      p5.textAlign(p5.CENTER, p5.BOTTOM);
+      p5.textSize(15);
+      p5.text(hoverData.text, hoverData.pos.x, hoverData.pos.y-5/2);
+    }
+  }
+};
+
 export default Scene;
 export {
   Scene,
@@ -133,5 +180,6 @@ export {
   OneTimeButtonScene,
   ScrollableScene,
 
-  focus
+  focus,
+  hover,
 };

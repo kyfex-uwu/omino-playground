@@ -1,6 +1,7 @@
 import Vector from "/assets/omino/Vector.js";
 import {Omino} from "/assets/omino/Omino.js";
-import {ButtonScene, ScrollableScene, DimsScene, OneTimeButtonScene} from "/assets/omino/scene/Scene.js";
+import {ButtonScene, ScrollableScene, DimsScene,
+  OneTimeButtonScene, hover} from "/assets/omino/scene/Scene.js";
 
 class OminoPaletteSpace extends ButtonScene{
   constructor(omino, index){
@@ -61,7 +62,7 @@ class PaletteScene extends ScrollableScene{
       p5.text("+", s.dims.x/2,s.dims.y/2);
       p5.pop();
 
-      if(s.isIn()) this.parent.setHoverText("Add Omino");
+      if(s.isIn()) hover.set("Add Omino", s);
     },_=>{
       this.parent.enterDrawingMode();
     }));

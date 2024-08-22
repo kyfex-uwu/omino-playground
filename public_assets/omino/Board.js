@@ -51,6 +51,8 @@ const defaultOptions = {
   lockedTiles:[],
   ominoes:[],
   torusMode:false,
+  calcPath:true,
+  path:[],
 };
 class Board{
   constructor(width, height, options={}){
@@ -68,8 +70,8 @@ class Board{
     this.torusMode=filledInOptions.torusMode;
     this.ominoes = [new LockedOmino(filledInOptions.lockedTiles), ...filledInOptions.ominoes];
 
-    this.path = [];
-    this.recalcPath();
+    this.path = filledInOptions.path;
+    if(filledInOptions.calcPath) this.recalcPath();
   }
   
   add(omino){
@@ -191,9 +193,10 @@ class Board{
   clone(){
     let toReturn = new Board(this.width, this.height, {
       torusMode:this.torusMode,
+      calcPath:false,
+      path:this.path,
     });
     toReturn.ominoes=[...this.ominoes];
-    toReturn.recalcPath();
     return toReturn;
   }
 

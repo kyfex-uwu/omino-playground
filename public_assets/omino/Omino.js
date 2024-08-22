@@ -75,12 +75,12 @@ class Omino{
       }
     }
   }
-  renderTransparent(scale, pos, env=p5){
+  renderTransparent(scale, pos, env=p5, transparency=170){
     env.push();
     env.beginClip();
     this.render(scale, pos);
     env.endClip();
-    env.background.apply(env,[...this.color, 170]);
+    env.background.apply(env,[...this.color, transparency]);
     env.pop();
   }
   

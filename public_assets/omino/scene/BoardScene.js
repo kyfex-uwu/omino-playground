@@ -8,9 +8,12 @@ class BoardScene extends DimsScene{
     super();
     this.board = new Board(w,h, options);
   }
+  quickResize(){
+    this.dims = new Vector(this.board.width, this.board.height).scale(this.board.renderData.scale);
+  }
   render(){
     this.board.render(this.getAbsolutePos());
-    this.dims = new Vector(this.board.width, this.board.height).scale(this.board.renderData.scale);
+    this.quickResize();
   }
   setBounds(width,height){
     this.board.renderData.scale = Math.min(width/this.board.width, height/this.board.height);
@@ -65,10 +68,8 @@ class BoardScene extends DimsScene{
       if(valid){
         this.parent.mouseData.omino.pos = newPos;
         this.board.add(this.parent.mouseData.omino);
-        this.parent.mouseData = {
-          omino:undefined,
-          offs:undefined
-        };
+        this.parent.mouseData.omino=undefined;
+        this.parent.mouseData.offs=undefined;
       }
     }
   }
