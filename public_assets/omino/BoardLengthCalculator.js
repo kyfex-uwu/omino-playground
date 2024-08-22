@@ -116,6 +116,7 @@ function calcLength(data){
 	for(const [k,v] of Object.entries(namedTiles)){
 		if(!v.isolated) filteredTiles[k]=v;
 	}
+	filteredTiles=namedTiles;//debug
 	for(const tile of Object.values(filteredTiles)){
     tile.left=filteredTiles[tile.pos.left().toURLStr()];
     tile.right=filteredTiles[tile.pos.right().toURLStr()];
