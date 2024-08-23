@@ -237,6 +237,56 @@ class SettingsScene extends ScrollableScene{
 			this.mainScene.resized(new Vector(p5.width, p5.height),new Vector(p5.width, p5.height));
 		}));
 
+		this.bugreport = this.addScene(new OneTimeButtonScene(s=>{
+			p5.fill(255,s.isIn()?150:100);
+        	p5.rect(0,0,s.dims.x,s.dims.y, Math.min(s.dims.x,s.dims.y)*0.1);
+
+        	p5.push();
+        	p5.translate(s.dims.x*0.5,s.dims.y*0.5);
+        	p5.scale(s.dims.x/100);
+        	p5.fill(255);
+
+        	p5.beginShape();
+        	p5.vertex(-2,-10);
+        	p5.vertex(-22,-10);
+        	p5.bezierVertex(-20,30,-12,40,-2,40);
+        	p5.endShape();
+        	p5.beginShape();
+        	p5.vertex(2,-10);
+        	p5.vertex(22,-10);
+        	p5.bezierVertex(20,30,12,40,2,40);
+        	p5.endShape();
+
+        	p5.beginShape();
+        	p5.vertex(-19,-13);
+        	p5.bezierVertex(-16,-40, 16, -40, 19,-13);
+        	p5.endShape();
+
+        	p5.strokeWeight(5);
+        	p5.stroke(255);
+        	p5.noFill();
+			p5.bezier(-10,-20, -12, -30, -13, -36,-20,-40);
+			p5.bezier(10,-20, 12, -30, 13, -36,20,-40);
+
+			p5.line(-10,5,-30,0);
+			p5.line(-30,0,-35,-15);
+			p5.line(10,5,30,0);
+			p5.line(30,0,35,-15);
+
+			p5.line(-10,20,-25,28);
+			p5.line(-25,28,-30,35);
+			p5.line(10,20,25,28);
+			p5.line(25,28,30,35);
+
+			p5.line(-10,12, -35, 16);
+			p5.line(10,12, 35, 16);
+
+        	p5.pop();
+        	if(s.isIn()) hover.set("Bug Report", s);
+		},s=>{
+			window.open("https://discord.gg/e5spvrgN9B", '_blank').focus();
+		}));
+
 		this.keybindScenes=[];
 		for(const [name, keybind] of Object.entries(Keybinds)){
 			this.keybindScenes.push(this.addScene(new KeybindScene(keybindNames[name]||name, keybind)));
@@ -250,6 +300,8 @@ class SettingsScene extends ScrollableScene{
 
 		this.backButton.pos = new Vector(unit*0.2, unit*0.2);
 		this.backButton.dims = new Vector(unit*1.2, unit*1.2);
+		this.bugreport.pos = new Vector(unit*1.5, unit*0.2);
+		this.bugreport.dims = new Vector(unit*1.2, unit*1.2);
 
 		for(let i=0;i<this.keybindScenes.length;i++){
 			let scene = this.keybindScenes[i];

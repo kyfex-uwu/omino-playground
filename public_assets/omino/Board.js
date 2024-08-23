@@ -46,7 +46,7 @@ class Board{
   }
   
   get(pos){
-    if(!this.torusMode) if(pos.x<0||pos.y<0||pos.x>=this.width||pos.y>=this.height) return borderOmino;
+    if(pos.x<0||pos.y<0||pos.x>=this.width||pos.y>=this.height) return borderOmino;
     for(const omino of this.ominoes){
       if(this.torusMode){
         if(omino.getOnTorus(pos, new Vector(this.width, this.height))) return omino;

@@ -1,4 +1,5 @@
 import Vector from "/assets/omino/Vector.js";
+import Data from "/assets/omino-playground.js";
 
 class Scene{
   constructor(){
@@ -150,15 +151,26 @@ let hover={
       text,
       tWidth:p5.textWidth(text)+10,
       pos:mousePos,
-      time:-90
+      time:-90,
+      scene:scene,
     };
     p5.pop();
   },
   draw: function (){
-    if(!hoverData.pos.equals(new Vector(p5.mouseX, p5.mouseY))){
+    let inScene=false;
+    let currScene = hoverData.scene;
+    while(currScene){
+      if(currScene==Data.scene){
+        inScene=true;
+        break;
+      }
+      currScene=currScene.parent;
+    }
+    if(!hoverData.pos.equals(new Vector(p5.mouseX, p5.mouseY))||!inScene){
       hoverData.pos=new Vector(-999,-999);
       hoverData.time=-Infinity;
       hoverData.currScene=undefined;
+      hoverData.scene = undefined;
     }
     hoverData.time++;
     if(hoverData.time>0){
