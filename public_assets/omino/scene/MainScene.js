@@ -8,14 +8,15 @@ import {OneTimeButtonScene} from "/assets/omino/scene/Scene.js";
 import {pageData} from "/assets/omino/Options.js";
 import {allPalettes} from "/assets/omino/Palettes.js";
 import Data from "/assets/omino-playground.js";
+import {getKeybinds} from "/assets/omino/Keybinds.js";
 
-const keys = {
-  CCW:"q",
-  CW:"e",
-  MH:"ad",
-  MV:"ws",
-  DEL:"x",
-};
+const buttonKeys=[
+  "CW",
+  "CCW",
+  "MH",
+  "MV",
+  "DEL"
+];
 
 class MainScene extends Scene{
   constructor(){
@@ -313,21 +314,11 @@ class MainScene extends Scene{
   keyPressed(key){
     if(super.keyPressed(key)) return true;
     
-    for(const [name,vals] of Object.entries(keys)){
-      let consumed=false;
-      if(vals.includes(key)){
-        for(const row of this.buttonGrid){
-          for(const button of row){
-            if(button.key==name){
-              button.b.click(0,0);
-              consumed=true;
-              break;
-            }
-          }
-          if(consumed) break;
-        }
-        
-        if(consumed) return true;
+    let keybinds = getKeybinds(key);
+    for(const button of this.buttonGrid.flat()){
+      for(const keybind of keybinds){
+        if(keybind==button.key)
+          button.b.click();
       }
     }
   }

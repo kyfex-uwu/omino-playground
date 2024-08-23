@@ -103,31 +103,37 @@ class Board{
     }
 
     env.push();
-    env.stroke(255, 100);
+    env.beginClip();
     env.scale(this.renderData.scale);
     env.translate(0.5,0.5);
-    env.strokeWeight(0.1);
+    const line=(x1,y1,x2,y2) => {
+      if(x2<x1) [x1,x2]=[x2,x1];
+      if(y2<y1) [y1,y2]=[y2,y1];
+      env.rect(x1-0.05,y1-0.05,x2-x1+0.1,y2-y1+0.1, 0.05);
+    };
     for(let i=1;i<this.path.length;i++){
       if(this.torusMode&&
         (Math.abs(this.path[i-1].x-this.path[i].x)>1||Math.abs(this.path[i-1].y-this.path[i].y)>1)){
         let portalDist = 0.5-tileSpacing;
 
         if(this.path[i-1].y!=this.path[i].y){
-          env.line(this.path[i-1].x,this.path[i-1].y, this.path[i].x,
+          line(this.path[i-1].x,this.path[i-1].y, this.path[i].x,
             this.path[i-1].y+(this.path[i].y>this.path[i-1].y?-1:1)*portalDist);
-          env.line(this.path[i].x,this.path[i].y, this.path[i-1].x,
+          line(this.path[i].x,this.path[i].y, this.path[i-1].x,
             this.path[i].y+(this.path[i-1].y>this.path[i].y?-1:1)*portalDist);
         }else{
-          env.line(this.path[i-1].x,this.path[i-1].y,
+          line(this.path[i-1].x,this.path[i-1].y,
             this.path[i-1].x+(this.path[i].x>this.path[i-1].x?-1:1)*portalDist, this.path[i].y);
-          env.line(this.path[i].x,this.path[i].y,
+          line(this.path[i].x,this.path[i].y,
             this.path[i].x+(this.path[i-1].x>this.path[i].x?-1:1)*portalDist, this.path[i].y);
         }
         continue;
       }
 
-      env.line(this.path[i-1].x,this.path[i-1].y, this.path[i].x,this.path[i].y);
+      line(this.path[i-1].x,this.path[i-1].y, this.path[i].x,this.path[i].y);
     }
+    env.endClip();
+    env.background(255,100);
     env.pop();
 
     env.fill(0);

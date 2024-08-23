@@ -11,6 +11,9 @@ import {pageData} from "/assets/omino/Options.js";
 import {allPalettes, nullPalette} from "/assets/omino/Palettes.js";
 
 const changelog = [
+`v0.1.9c 8/22/24
+- Made path render a bit cleaner (no overlaps at corners)
+- Added keybinds! You can view and change them`,
 `v0.1.9b 8/22/24
 - Made drawing ominoes look prettier
 - Fixed being able to place ominoes on top of themselves in torus mode (thanks @yeacloth)

@@ -1,6 +1,7 @@
 import Vector from "/assets/omino/Vector.js";
 import MainScene from "/assets/omino/scene/MainScene.js";
 import {pageData} from "/assets/omino/Options.js";
+import {rawKeys, createKey} from "/assets/omino/Keybinds.js";
 
 //--
 
@@ -64,7 +65,13 @@ new p5(p5=>{
     data.scene.mouseUp(p5.mouseX,p5.mouseY);
   }
   p5.keyPressed = function(){
+    createKey(p5.key);
+    rawKeys[p5.key].press();
     data.scene.keyPressed(p5.key);
+  }
+  p5.keyReleased = function(){
+    createKey(p5.key);
+    rawKeys[p5.key].release();
   }
   p5.mouseWheel = function(e){
     if(p5.mouseX>=0&&p5.mouseY>=0&&p5.mouseX<p5.width&&p5.mouseY<p5.height){
@@ -83,7 +90,12 @@ new p5(p5=>{
     p5.noFill();
     data.scene.render();
 
-    //document.body.style.overflow="hidden";
+    //--
+
+    for(const key of Object.values(rawKeys)){
+      key.pressed=false;
+      key.released=false;
+    }
   }
 });
 
