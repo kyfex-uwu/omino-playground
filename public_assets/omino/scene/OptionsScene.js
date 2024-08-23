@@ -11,6 +11,8 @@ import {pageData} from "/assets/omino/Options.js";
 import {allPalettes, nullPalette} from "/assets/omino/Palettes.js";
 
 const changelog = [
+`v0.1.9d 8/22/24
+- Fixed torus mode being broken`,
 `v0.1.9c 8/22/24
 - Made path render a bit cleaner (no overlaps at corners)
 - Fixed cursor changing outside of board when it shouldn't when on torus mode

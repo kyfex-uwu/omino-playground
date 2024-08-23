@@ -57,7 +57,12 @@ class BoardScene extends DimsScene{
       for(let y=0;y<this.parent.mouseData.omino.tiles.length;y++){
         for(let x=0;x<this.parent.mouseData.omino.tiles[y].length;x++){
           if(!this.parent.mouseData.omino.tiles[y][x]) continue;
-          if(this.board.get(newPos.add(new Vector(x,y)))){
+          let thisPos = newPos.add(new Vector(x,y));
+          if(this.board.torusMode){
+            if(thisPos.x<0||thisPos.y<0||thisPos.x>=this.board.width||thisPos.y>=this.board.height)
+              continue;
+          }
+          if(this.board.get(thisPos)){
             valid=false;
             break;
           }

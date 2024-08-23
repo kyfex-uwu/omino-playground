@@ -142,7 +142,6 @@ function calcLength(data){
 	}
 
 	//it takes very little time to get here
-	let startTime=Date.now();
 
 	let maybePaths=[];
 	for(let pool of pools){
