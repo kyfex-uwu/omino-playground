@@ -15,6 +15,7 @@ const changelog = [
 - Made path render a bit cleaner (no overlaps at corners)
 - Fixed cursor changing outside of board when it shouldn't when on torus mode
 - Added bug report button in settings
+- fixed a bug lol
 - Added keybinds! You can view and change them`,
 `v0.1.9b 8/22/24
 - Made drawing ominoes look prettier

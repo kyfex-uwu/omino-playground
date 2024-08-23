@@ -91,9 +91,11 @@ function getKeybinds(key){
 
 	return toReturn;
 }
-for(const [key, val] of Object.entries(userKeybinds)){
-	Keybinds[key].values=val;
-}
+try{
+	for(const [key, val] of Object.entries(userKeybinds)){
+		Keybinds[key].values=val;
+	}
+}catch(e){}
 
 update();
 
