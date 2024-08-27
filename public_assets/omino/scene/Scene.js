@@ -8,6 +8,7 @@ class Scene{
     this.parent=undefined;
 
     this.focused=false;
+    this.hasMouseAccess=true;
   }
   addScene(scene){
     this.subScenes.push(scene);
@@ -74,6 +75,7 @@ class DimsScene extends Scene{
     this.dims=new Vector(0,0);
   }
   isIn(){
+    if(this.parent&&!this.parent.hasMouseAccess) return false;
     if(this.parent instanceof DimsScene && !this.parent.isIn()) return false;
     let absPos = this.getAbsolutePos();
     return p5.mouseX>absPos.x&&p5.mouseY>absPos.y&&

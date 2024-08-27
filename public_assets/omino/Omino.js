@@ -41,6 +41,53 @@ class Omino{
     }
     return false;
   }
+  canPlace(board, pos){
+    if(board.torusMode) {
+        while(pos.x < 0) pos.x += board.width;
+        while(pos.y < 0) pos.y += board.height;
+        pos.x %= board.width;
+        pos.y %= board.height;
+    }
+
+    let valid = true;
+    for(let y = 0; y < this.tiles.length; y++) {
+        for(let x = 0; x < this.tiles[y].length; x++) {
+            if(!this.tiles[y][x]) continue;
+            let thisPos = pos.add(new Vector(x, y));
+            if(board.torusMode) {
+                while(thisPos.x < 0) thisPos.x += board.width;
+                while(thisPos.y < 0) thisPos.y += board.height;
+                thisPos.x %= board.width;
+                thisPos.y %= board.height;
+            }
+            if(board.get(thisPos)) {
+                valid = false;
+                break;
+            }
+        }
+        if(!valid) break;
+    }
+    if(board.torusMode) {
+        let loopedPositions = this.vectors.map(p => p.add(this.pos));
+        for(const pos of loopedPositions) {
+            while(pos.x < 0) pos.x += board.width;
+            while(pos.x >= board.width) pos.x -= board.width;
+            while(pos.y < 0) pos.y += board.height;
+            while(pos.y >= board.height) pos.y -= board.height;
+        }
+        for(let i = 0; i < loopedPositions.length; i++) {
+            for(let j = i + 1; j < loopedPositions.length; j++) {
+                if(loopedPositions[i].equals(loopedPositions[j])) {
+                    valid = false;
+                    break;
+                }
+            }
+            if(!valid) break;
+        }
+    }
+
+    return valid?pos:false;
+}
   height(){ return Math.max(...this.vectors.map(t=>t.y))+1; }
   width(){ return Math.max(...this.vectors.map(t=>t.x))+1; }
   
@@ -150,6 +197,16 @@ class LockedOmino extends Omino{
   }
   
   render(){}
+  clone(){
+    let cloneFrom = super.clone();
+    let toReturn = new LockedOmino([]);
+
+    toReturn.pos=cloneFrom.pos;
+    toReturn.vectors = cloneFrom.vectors;
+    toReturn.tiles = cloneFrom.tiles;
+
+    return toReturn;
+  }
 }
 
 const OminoColors = {

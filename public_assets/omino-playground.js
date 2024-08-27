@@ -1,14 +1,17 @@
 import Vector from "/assets/omino/Vector.js";
-import MainScene from "/assets/omino/scene/MainScene.js";
+import SolveScene from "/assets/omino/scene/SolveScene.js";
 import {pageData} from "/assets/omino/Options.js";
 import {rawKeys, createKey} from "/assets/omino/Keybinds.js";
+import Board from "/assets/omino/Board.js";
 
 //--
 
 const data = {
   scene:undefined,
   isFullscreened:false,
-  canvElt:undefined
+  canvElt:undefined,
+
+  mainBoard:undefined,
 };
 
 let scrollScale=0.5;
@@ -24,7 +27,16 @@ new p5(p5=>{
     data.canvElt.addEventListener("scroll", e=>e.preventDefault());
     data.canvElt.style["z-index"]=999;
 
-    data.scene = new MainScene();
+    data.mainBoard = new Board(pageData.dims[0], pageData.dims[1], {
+      torusMode:pageData.torus,
+      ominoes:pageData.boardData.ominoes,
+      lockedTiles:pageData.locked,
+      calcPath:true,
+
+      startPoint:pageData.pathType[0],
+      endPoint:pageData.pathType[1],
+    });
+    data.scene = new SolveScene();
     data.isFullscreened=pageData.fullscreen;
     p5.windowResized();
   }
