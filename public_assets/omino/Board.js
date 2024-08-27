@@ -61,9 +61,9 @@ class Board{
     return false;
   }
   recalcPath(){
+    if(!this.shouldRecalcPath) return;
     this.path=[];
     try{this.lengthWorker.terminate();}catch(e){}
-    if(!this.shouldRecalcPath) return;
 
     let thisAsBoolArr=[];
     for(let y=0;y<this.height;y++){
