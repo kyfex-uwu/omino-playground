@@ -417,7 +417,8 @@ class OptionsScene extends ScrollableScene{
       },s=>{
         navigator.clipboard.write([
             new ClipboardItem({
-              'text/plain': toLink(Data.scene.boardScene.board, Data.scene.paletteScene.palette)
+              'text/plain': toLink(Data.scene.boardScene.board, 
+                (Data.scene.paletteScene||{palette:nullPalette}).palette)
             })
         ]);
       }),//share link
