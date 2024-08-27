@@ -14,6 +14,8 @@ const defaultOptions = {
   torusMode:false,
   calcPath:true,
   path:[],
+  startPoint:undefined,
+  endPoint:undefined,
 };
 class Board{
   constructor(width, height, options={}){
@@ -31,8 +33,12 @@ class Board{
     this.torusMode=filledInOptions.torusMode;
     this.ominoes = [new LockedOmino(filledInOptions.lockedTiles), ...filledInOptions.ominoes];
 
+    this.startPoint=filledInOptions.startPoint;
+    this.endPoint=filledInOptions.endPoint;
+
     this.path = filledInOptions.path;
-    if(filledInOptions.calcPath) this.recalcPath();
+    this.shouldRecalcPath=filledInOptions.calcPath;
+    this.recalcPath();
   }
   
   add(omino){
@@ -56,6 +62,8 @@ class Board{
   }
   recalcPath(){
     this.path=[];
+    try{this.lengthWorker.terminate();}catch(e){}
+    if(!this.shouldRecalcPath) return;
 
     let thisAsBoolArr=[];
     for(let y=0;y<this.height;y++){
@@ -68,6 +76,7 @@ class Board{
     //--
 
     let lengthWorker;
+    this.lengthWorker=lengthWorker;
     try{
       lengthWorker = new Worker("/assets/omino/BoardLengthCalculator.js", { type: "module" });
     }catch(e){
@@ -76,25 +85,36 @@ class Board{
 
       lengthWorker = {
         postMessage:data=>FakeWebWorker.onMessage({data}),
+        terminate:_=>0,
       };
     }
 
     lengthWorker.onmessage = e => {
-      this.path=e.data;
+      this.path=e.data.map(p=>new Vector(...p));
+      if(this.path[0]&&this.path[0].equals(this.endPoint)||
+        this.path[this.path.length-1]&&this.path[this.path.length-1].equals(this.startPoint))
+        this.path.reverse();
+      lengthWorker.terminate();
     };
 
     lengthWorker.postMessage({
       board:thisAsBoolArr, 
       torusMode:this.torusMode,
+      
+      startPoint:this.startPoint,
+      endPoint:this.endPoint,
     });
   }
   
   render(pos, env=p5){
-    env.fill(255, 50);
     for(let y=0;y<this.height;y++){
       for(let x=0;x<this.width;x++){
-        if(this.get(new Vector(x,y))) continue;
+        let pos=new Vector(x,y);
+        if(this.get(pos)) continue;
         
+        env.fill(255, 50);
+        if(pos.equals(this.startPoint)) env.fill(164, 255, 133, 50);
+        else if(pos.equals(this.endPoint)) env.fill(255, 147, 133, 50);
         env.rect((x+tileSpacing)*this.renderData.scale,
           (y+tileSpacing)*this.renderData.scale,
           this.renderData.scale*(1-tileSpacing*2),this.renderData.scale*(1-tileSpacing*2),
@@ -178,46 +198,6 @@ class Board{
     });
     toReturn.ominoes=[...this.ominoes];
     return toReturn;
-  }
-
-  toLink(){
-    let args = {
-      fullscreen:false,
-      palette:allPalettes.indexOf(Data.scene.paletteScene.palette)+1,
-      dims:this.width+"$"+this.height,
-      torus:this.torusMode,
-      boardData:this.ominoes.map(omino=>{
-        if(omino instanceof LockedOmino) return undefined;//todo
-
-        for(const [key,data] of Object.entries(pageData.palette.data)){
-          if(!data.orig) continue;
-
-          if(data.omino.equals(omino)){
-            let posReset = omino.clone();
-            posReset.pos=new Vector(0,0);
-            let transform=-1;
-            for(let i=0;i<2;i++){
-              for(let j=0;j<4;j++){
-                if(posReset.equalsExact(data.omino)){
-                  transform=j+i*4;
-                  break;
-                }
-                posReset=i==0?posReset.rotatedCCW():posReset.rotatedCW();
-              }
-              if(transform!=-1) break;
-              posReset=posReset.mirroredH();
-            }
-
-            return `${key}-${omino.pos.toURLStr()}-${transform}`;
-          }
-        }
-
-        return omino.pos.toURLStr()+"-"+omino.vectors.map(v=>v.toURLStr()).join("-");
-      }).filter(o=>o).join("!")
-    };
-
-    return window.location.origin+window.location.pathname+"?"+
-      Object.entries(args).map(([k,v])=>k+"="+v).join("&");
   }
 }
 

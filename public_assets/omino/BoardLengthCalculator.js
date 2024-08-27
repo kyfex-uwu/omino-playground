@@ -31,34 +31,62 @@ function getConnected(tile, tiles=[]){
 	return tiles;
 }
 
+function smartMin(...args){
+	return Math.min.apply(null,args.filter(t=>t!==undefined).map(t=>t.dist===undefined?Infinity:t.dist));
+}
+
 //takes a starting tile and calculates every other tile's distance away from it,
 //and stores that distance in the tile
-function propagateDist(tile, dist=0){
-	if(tile.dist!==undefined&&tile.dist<dist) return;
-	tile.dist = dist;
-	if(tile.left) propagateDist(tile.left, dist+1);
-	if(tile.right) propagateDist(tile.right, dist+1);
-	if(tile.up) propagateDist(tile.up, dist+1);
-	if(tile.down) propagateDist(tile.down, dist+1);
+//breadth first! otherwise itll lag so bad
+function propagateDist(tile, dist=0, tilesToProcess){
+	if(tilesToProcess===undefined){
+		tilesToProcess=new Set();
+		//controller
+		tile.dist=0;
+		propagateDist(tile, 0, tilesToProcess);
+		do{
+			for(const subTile of tilesToProcess){
+				subTile.dist = smartMin(
+					subTile.right,
+					subTile.left,
+					subTile.up,
+					subTile.down)+1;
+				propagateDist(subTile, subTile.dist, tilesToProcess);
+				tilesToProcess.delete(subTile);
+			}
+		}while(tilesToProcess.size>0);
+	}else{
+		if(tile.left&&tile.left.dist===undefined) tilesToProcess.add(tile.left);
+		if(tile.right&&tile.right.dist===undefined) tilesToProcess.add(tile.right);
+		if(tile.up&&tile.up.dist===undefined) tilesToProcess.add(tile.up);
+		if(tile.down&&tile.down.dist===undefined) tilesToProcess.add(tile.down);
+	}
 }
 
 //todo: comment these
-function findLongestShortest(currPoint, pool, maybePaths){
+function findLongestShortest(currPoint, pool, maybePaths, data={}){
+  let orig=currPoint;
+
   let prevPoint;
   for(;;){
     for(const point of pool) point.dist=undefined;
     propagateDist(currPoint);
 
-  	let toPrint=[];
-  	for(const point of pool){
-  		while(!toPrint[point.pos.y]) toPrint.push([]);
-  		while(toPrint[point.pos.y][point.pos.x]==undefined) toPrint[point.pos.y].push(" ");
+  	// let toPrint=[];
+  	// for(const point of pool){
+  	// 	while(!toPrint[point.pos.y]) toPrint.push([]);
+  	// 	while(toPrint[point.pos.y][point.pos.x]==undefined) toPrint[point.pos.y].push(" ");
 
-  		toPrint[point.pos.y][point.pos.x]=point.dist.toString(36);
-  	}
+  	// 	toPrint[point.pos.y][point.pos.x]=point.dist.toString(36);
+  	// }
 
-    let furthestPoints = pool.sort((p1,p2)=>p2.dist-p1.dist);
-    furthestPoints = furthestPoints.filter(p=>p.dist==furthestPoints[0].dist);
+  	let furthestPoints;
+  	if(!data.end){
+	    furthestPoints = pool.sort((p1,p2)=>p2.dist-p1.dist);
+	    furthestPoints = furthestPoints.filter(p=>p.dist==furthestPoints[0].dist);
+	  }else{
+	  	furthestPoints=[data.end];
+	  }
 
     if(furthestPoints.includes(prevPoint)){
       prevPoint=currPoint;
@@ -68,6 +96,8 @@ function findLongestShortest(currPoint, pool, maybePaths){
 
     prevPoint=currPoint;
     currPoint=furthestPoints[0];
+
+    if(data.startFixed) break;
   }
 
   let maybePath=[currPoint];
@@ -89,11 +119,14 @@ function calcLength(data){
 	let height=data.board.length;
 	let width=data.board[0].length;
 
+	if(data.startPoint) data.startPoint = new Vector(...data.startPoint._pos);
+	if(data.endPoint) data.endPoint = new Vector(...data.endPoint._pos);
+
 	let namedTiles={};
 	for(let y=0;y<height;y++){
 		for(let x=0;x<width;x++){
 			if(!board[y][x]){
-				var pos = new Vector(x,y);
+				let pos = new Vector(x,y);
 				namedTiles[pos.toURLStr()]={pos};
 			}
 		}
@@ -112,26 +145,21 @@ function calcLength(data){
 
 		if(!hasWall) tile.isolated=true;
 	}
-	let filteredTiles={};
-	for(const [k,v] of Object.entries(namedTiles)){
-		if(!v.isolated) filteredTiles[k]=v;
-	}
-	filteredTiles=namedTiles;//debug
-	for(const tile of Object.values(filteredTiles)){
-    tile.left=filteredTiles[tile.pos.left().toURLStr()];
-    tile.right=filteredTiles[tile.pos.right().toURLStr()];
-    tile.up=filteredTiles[tile.pos.up().toURLStr()];
-    tile.down=filteredTiles[tile.pos.down().toURLStr()];
+	for(const tile of Object.values(namedTiles)){
+    tile.left=namedTiles[tile.pos.left().toURLStr()];
+    tile.right=namedTiles[tile.pos.right().toURLStr()];
+    tile.up=namedTiles[tile.pos.up().toURLStr()];
+    tile.down=namedTiles[tile.pos.down().toURLStr()];
 
     if(data.torusMode){
-    	if(tile.pos.x==0) tile.left = filteredTiles[new Vector(width-1, tile.pos.y).toURLStr()];
-    	else if(tile.pos.x==width-1) tile.right = filteredTiles[new Vector(0, tile.pos.y).toURLStr()];
-    	if(tile.pos.y==0) tile.up = filteredTiles[new Vector(tile.pos.x, height-1).toURLStr()];
-    	else if(tile.pos.y==height-1) tile.down = filteredTiles[new Vector(tile.pos.x, 0).toURLStr()];
+    	if(tile.pos.x==0) tile.left = namedTiles[new Vector(width-1, tile.pos.y).toURLStr()];
+    	else if(tile.pos.x==width-1) tile.right = namedTiles[new Vector(0, tile.pos.y).toURLStr()];
+    	if(tile.pos.y==0) tile.up = namedTiles[new Vector(tile.pos.x, height-1).toURLStr()];
+    	else if(tile.pos.y==height-1) tile.down = namedTiles[new Vector(tile.pos.x, 0).toURLStr()];
     }
 	}
 
-	let remainingTiles=new Set(Object.values(filteredTiles));
+	let remainingTiles=new Set(Object.values(namedTiles));
 	let pools=[];
 	for(;;){
 		if(remainingTiles.size==0) break;
@@ -141,34 +169,57 @@ function calcLength(data){
 		pools.push(pool);
 	}
 
-	//it takes very little time to get here
+	if(data.startPoint){
+		for(const pool of pools){
+			if(!pool.some(p=>p.pos.equals(data.startPoint)))
+				pool.length=0;
+		}
+	}
+	if(data.endPoint){
+		for(const pool of pools){
+			if(!pool.some(p=>p.pos.equals(data.endPoint)))
+				pool.length=0;
+		}
+	}
 
 	let maybePaths=[];
-	for(let pool of pools){
-		findLongestShortest(pool[0], pool, maybePaths);
+	for(const pool of pools){
+		if(pool.length==0) continue;
 
-		for(const tile of pool){
-			let map=getAroundPositions(tile.pos).map(offs=>{
-        return pool.some(p=>p.pos.equals(offs));
-      }).reduce((a,c)=>a*2+(c?0:1),0);
+		let end;
+		if(data.startPoint){
+			let start = pool.find(p=>p.pos.equals(data.startPoint));
+			if(data.endPoint) findLongestShortest(start, pool, maybePaths,
+				{startFixed:true, end:(end=pool.find(p=>p.pos.equals(data.endPoint)))});
+			else findLongestShortest(start, pool, maybePaths, {startFixed:true});
+		}else if(data.endPoint) findLongestShortest(pool[0], pool, maybePaths, 
+			{end:(end=pool.find(p=>p.pos.equals(data.endPoint)))});
+		else findLongestShortest(pool[0], pool, maybePaths);
 
-      if(map==0b0010_1111||
-          map==0b1001_0111||
-          map==0b1110_1001||
-          map==0b1111_0100||
+		if(!data.startPoint){
+			for(const tile of pool){
+				let map=getAroundPositions(tile.pos).map(offs=>{
+	        return pool.some(p=>p.pos.equals(offs));
+	      }).reduce((a,c)=>a*2+(c?0:1),0);
 
-          (map|0b1010_0101)==0b1111_1101||
-          (map|0b1010_0101)==0b1011_1111||
-          (map|0b1010_0101)==0b1110_1111||
-          (map|0b1010_0101)==0b1111_0111){
-        //valid start
-        findLongestShortest(pool.find(p=>p.pos.equals(tile.pos)), pool, maybePaths);
-      }
+	      if(map==0b0010_1111||
+	          map==0b1001_0111||
+	          map==0b1110_1001||
+	          map==0b1111_0100||
+
+	          (map|0b1010_0101)==0b1111_1101||
+	          (map|0b1010_0101)==0b1011_1111||
+	          (map|0b1010_0101)==0b1110_1111||
+	          (map|0b1010_0101)==0b1111_0111){
+	        //valid start
+	        findLongestShortest(pool.find(p=>p.pos.equals(tile.pos)), pool, maybePaths, {end, startFixed:true});
+	      }
+			}
 		}
 	}
 
 	if(maybePaths.length==0) return [];
-	else return maybePaths.sort((p1,p2)=>p2.length-p1.length)[0].map(p=>p.pos);
+	else return maybePaths.sort((p1,p2)=>p2.length-p1.length)[0].map(p=>p.pos._pos);
 }
 
 //-- unnecessary communication stuff below here

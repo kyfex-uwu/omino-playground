@@ -78,6 +78,10 @@ const Keybinds = {
   MH:new Keybind(["a","d"]),
   MV:new Keybind(["w","s"]),
   DEL:new Keybind(["x"]),
+
+  START:new Keybind(["q"]),
+  END:new Keybind(["w"]),
+  LOCK:new Keybind(["a"]),
 };
 for(const [k,v] of Object.entries(Keybinds))
 	v.name=k;

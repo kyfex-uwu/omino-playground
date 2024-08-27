@@ -35,17 +35,17 @@ class OminoPaletteSpace extends ButtonScene{
   }
 }
 class PaletteScene extends ScrollableScene{
-  constructor(palette){
+  constructor(data){
     super();
-    this.palette=palette;
+    this.palette=data.palette;
 
     this.piecesHolder = new DimsScene();
     this.drawButton = {};
 
     this.spaces=[];
     let i=0;
-    for(const ominoName of Object.keys(palette.data)){
-      this.spaces.push(this.piecesHolder.addScene(new OminoPaletteSpace(palette.get(ominoName,new Vector(0,0)), i)));
+    for(const ominoName of Object.keys(this.palette.data)){
+      this.spaces.push(this.piecesHolder.addScene(new OminoPaletteSpace(this.palette.get(ominoName,new Vector(0,0)), i)));
       i++;
     }
     this.addScene(this.piecesHolder);

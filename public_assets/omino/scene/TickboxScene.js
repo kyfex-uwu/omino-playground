@@ -1,14 +1,16 @@
 import {DimsScene, focus} from "/assets/omino/scene/Scene.js";
 
 class TickboxScene extends DimsScene{
-	constructor(){
+	constructor(value=false, callback=_=>0){
 		super();
-		this.value=false;
+		this.value=value;
+		this.callback=callback;
 	}
 	mouseDown(x,y){
 		if(this.isIn()){
 			focus(this);
 			this.value=!this.value;
+			this.callback(this);
 			return true;
 		}
 

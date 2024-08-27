@@ -1,4 +1,4 @@
- import {ScrollableScene, OneTimeButtonScene, Scene, DimsScene,
+import {ScrollableScene, OneTimeButtonScene, Scene, DimsScene,
   focus, hover} from "/assets/omino/scene/Scene.js";
 import BoardScene from "/assets/omino/scene/BoardScene.js";
 import PaletteScene from "/assets/omino/scene/PaletteScene.js";
@@ -7,10 +7,29 @@ import TickboxScene from "/assets/omino/scene/TickboxScene.js";
 import SettingsScene from "/assets/omino/scene/settings/SettingsScene.js";
 import Vector from "/assets/omino/Vector.js";
 import Data from "/assets/omino-playground.js";
-import {pageData} from "/assets/omino/Options.js";
+import {pageData, toLink} from "/assets/omino/Options.js";
+import Board from "/assets/omino/Board.js";
 import {allPalettes, nullPalette} from "/assets/omino/Palettes.js";
+import {LockedOmino} from "/assets/omino/Omino.js";
+import SolveScene from "/assets/omino/scene/SolveScene.js";
 
 const changelog = [
+`v0.1.10-alpha2 8/27/24
+- Fixed end point not showing up when enabling it
+- Started adding the custom piece palette
+- Added keybinds for building mode
+- Divided keybinds up into sections
+- Greatly optimized pathfinding algorithm (it was a bug lol)`,
+`v0.1.10-alpha1 8/26/24
+- Moved fullscreen button to top left
+- Added board data! This is meant for puzzles, and includes:
+. - Setting "locked" squares
+. - Setting an arbitrary start and/or end point
+. - Coming soon: setting a piece palette to solve the puzzle with
+- Fixed a bug where clicking on the trash without an omino would crash
+- Refactored Vectors (>:3)
+- Split the "Overwrite" button into 2 buttons: "Apply" and "Clear"
+- Added a toggle for calculating path length (so you don't lag your computer when building on big boards)`,
 `v0.1.9d 8/22/24
 - Fixed torus mode being broken`,
 `v0.1.9c 8/22/24
@@ -78,6 +97,7 @@ class ShareImageScene extends Scene{
   constructor(mainScene){
     super();
     this.mainScene=mainScene;
+    this.mainScene.hasMouseAccess=false;
 
     this.upOnce=false;
     this.board = this.mainScene.boardScene.board.clone();
@@ -132,6 +152,7 @@ class ShareImageScene extends Scene{
     });
 
     Data.scene=this.mainScene;
+    this.mainScene.hasMouseAccess=true;
     return true;
   }
   resized(oldDims, newDims){
@@ -140,7 +161,7 @@ class ShareImageScene extends Scene{
   }
 }
 class Counter extends DimsScene{
-  constructor(val, min=-Infinity,max=Infinity,inc=1){
+  constructor(val, {min=-Infinity,max=Infinity,inc=1, submit=_=>0}){
     super();
 
     this.min=min;
@@ -149,6 +170,8 @@ class Counter extends DimsScene{
 
     this.value=val;
     this.oldValue=val;
+
+    this.submit = submit;
   }
   render(){
     if(this.value==this.oldValue) p5.fill(255);
@@ -192,21 +215,24 @@ class Counter extends DimsScene{
 
   keyPressed(key){
     if(this.focused&&key=="Enter"){
-      Data.scene.optionsScene.overwriteButton.click(0,0);
+      this.submit();
       return true;
     }
     return super.keyPressed(key);
   }
 }
 class CustomTextInputScene extends TextInputScene{
-  constructor(validator, value){
+  constructor(validator, value, submit=_=>0){
     super(validator);
 
     this.value=value;
     this.oldValue=this.value;
+    this.submit=submit;
   }
 
   render(){
+    if(this.isIn()) p5.cursor(p5.TEXT);
+
     if(this.value==this.oldValue) p5.fill(255);
     else p5.fill(247, 232, 156);
 
@@ -215,12 +241,12 @@ class CustomTextInputScene extends TextInputScene{
     p5.textSize(this.dims.y*0.8);
     p5.textAlign(p5.LEFT, p5.TOP);
     p5.text(this.value, 2, 2);
-    if(this.focused&&p5.frameCount*0.015%1>0.5) p5.rect(p5.textWidth(this.value)+2, 2, 2, this.dims.y-4);
+    if(this.focused&&p5.frameCount*0.015%1>0.5) p5.rect(p5.textWidth(this.value)+2, 2, this.dims.y*0.05, this.dims.y-4);
   }
 
   keyPressed(key){
     if(this.focused&&key=="Enter"){
-      Data.scene.optionsScene.overwriteButton.click(0,0);
+      this.submit();
       return true;
     }
     return super.keyPressed(key);
@@ -278,30 +304,41 @@ class OptionsScene extends ScrollableScene{
 
     }));
 
-    this.boardDims = this.addScene(new CustomTextInputScene(/[\dx,]/, pageData.dims.join(",")));
-    this.palette = this.addScene(new Counter(allPalettes.indexOf(pageData.palette)+1, 0));
-    this.torusBox = this.addScene(new CustomTickboxScene(pageData.torus));
-    this.overwriteButton = this.addScene(new OneTimeButtonScene(s=>{
+    const submit = _=>Data.scene.optionsScene.applyButton.click(0,0);
+    this.boardDims = this.addScene(new CustomTextInputScene(/[\dx,]/,
+      Data.mainBoard.width+","+Data.mainBoard.height, submit));
+    this.palette = this.addScene(new Counter(allPalettes.indexOf(pageData.palette)+1, {min:0, submit}));
+    this.torusBox = this.addScene(new CustomTickboxScene(Data.mainBoard.torusMode));
+    this.applyButton = this.addScene(new OneTimeButtonScene(s=>{
       p5.fill(s.isIn()?255:200);
       p5.rect(0,0,s.dims.x,s.dims.y);
       p5.textSize(this.dims.x/100*6);
       p5.fill(0);
       p5.textAlign(p5.CENTER, p5.CENTER);
-      p5.text("Overwrite", s.dims.x/2,s.dims.y/2);
+      p5.text("Apply", s.dims.x/2,s.dims.y/2);
     },s=>{
       let dims = this.boardDims.value.split(/[,x]/).map(i=>parseInt(i));
       if(isNaN(dims[0])||isNaN(dims[1])) return;
 
-      Data.scene.boardScene.remove();
-      Data.scene.boardScene = Data.scene.addScene(new BoardScene(dims[0], dims[1], {
+      let newBoard = new Board(dims[0], dims[1], {
+        lockedTiles:(Data.mainBoard.ominoes.find(o=>o instanceof LockedOmino)||{vectors:[]}).vectors,
+        ominoes:Data.mainBoard.ominoes.slice(1),
         torusMode:this.torusBox.value,
-      }));
-      Data.scene.paletteScene.remove();
+      });
+      Data.mainBoard.width = dims[0];
+      Data.mainBoard.height = dims[1];
+      Data.mainBoard.torusMode=this.torusBox.value;
+      Data.mainBoard.ominoes = newBoard.ominoes;
+      
+      Data.mainBoard.recalcPath();
+      if(Data.scene.paletteScene){
+        Data.scene.paletteScene.remove();
 
-      if(allPalettes[this.palette.value-1]){
-        Data.scene.paletteScene = Data.scene.addScene(new PaletteScene(allPalettes[this.palette.value-1]));
-      }else{
-        Data.scene.paletteScene = Data.scene.addScene(new PaletteScene(nullPalette));
+        if(allPalettes[this.palette.value-1]){
+          Data.scene.paletteScene = Data.scene.addScene(new PaletteScene({palette:allPalettes[this.palette.value-1]}));
+        }else{
+          Data.scene.paletteScene = Data.scene.addScene(new PaletteScene({palette:nullPalette}));
+        }
       }
 
       this.boardDims.oldValue=this.boardDims.value;
@@ -309,6 +346,17 @@ class OptionsScene extends ScrollableScene{
       this.torusBox.oldValue = this.torusBox.value;
 
       p5.windowResized();
+    }));
+    this.clearButton = this.addScene(new OneTimeButtonScene(s=>{
+      p5.fill(s.isIn()?255:200);
+      p5.rect(0,0,s.dims.x,s.dims.y);
+      p5.textSize(this.dims.x/100*6);
+      p5.fill(0);
+      p5.textAlign(p5.CENTER, p5.CENTER);
+      p5.text("Clear", s.dims.x/2,s.dims.y/2);
+    },s=>{
+      Data.mainBoard.ominoes=[];
+      Data.mainBoard.recalcPath();
     }));
 
     const buttonWrapper = s=>{
@@ -369,7 +417,7 @@ class OptionsScene extends ScrollableScene{
       },s=>{
         navigator.clipboard.write([
             new ClipboardItem({
-              'text/plain': Data.scene.boardScene.board.toLink()
+              'text/plain': toLink(Data.scene.boardScene.board, Data.scene.paletteScene.palette)
             })
         ]);
       }),//share link
@@ -404,6 +452,41 @@ class OptionsScene extends ScrollableScene{
         p5.pop();
       },s=>{
         Data.scene = new SettingsScene(Data.scene);
+      }),
+      new OneTimeButtonScene(s=>{
+        if(s.isIn()) hover.set("Toggle Fullscreen", s);
+
+        buttonWrapper(s);
+        p5.translate(s.dims.x*0.5,s.dims.y*0.5);
+        p5.scale(s.dims.x/50);
+
+        p5.stroke(255);
+        p5.strokeWeight(3);
+        p5.line(-15,-10,-8,-5);
+        p5.line(15,-10,8,-5);
+        p5.line(-15,10,-8,5);
+        p5.line(15,10,8,5);
+        p5.noStroke();
+
+        p5.fill(255);
+        if(Data.isFullscreened){
+          if(s.isIn()) p5.scale(0.9);
+          p5.triangle(-4,-2,-12,-2,-6,-9);
+          p5.triangle(4,-2,12,-2,6,-9);
+          p5.triangle(-4,2,-12,2,-6,9);
+          p5.triangle(4,2,12,2,6,9);
+        }else{
+          if(s.isIn()) p5.scale(1.1);
+          p5.triangle(-19,-13,-17,-5,-11,-13);
+          p5.triangle(19,-13,17,-5,11,-13);
+          p5.triangle(-19,13,-17,5,-11,13);
+          p5.triangle(19,13,17,5,11,13);
+        }
+      }, s=>{
+        Data.isFullscreened=!Data.isFullscreened;
+        p5.windowResized();
+        window.scroll({top:Data.canvElt.getBoundingClientRect().y-document.body.getBoundingClientRect().y-
+          (p5.windowHeight-p5.height)/2, behavior:"instant"});
       })
     ));
 
@@ -412,7 +495,7 @@ class OptionsScene extends ScrollableScene{
       this.settingsBar,
     ];
   }
-  resized(old,n){
+  resized(old,n=old){
     this.dims.y=p5.height;
     this.dims.x=p5.width/4;
 
@@ -426,21 +509,31 @@ class OptionsScene extends ScrollableScene{
     let currY=sbSize;
     const padding=scale*3;
     p5.textSize(scale*6);
-    this.boardDims.dims = new Vector(this.dims.x*0.99 - p5.textWidth("Dimensions: ")-padding, scale*6*1.2);
-    this.boardDims.pos = new Vector(p5.textWidth("Dimensions: ")+padding, 2*scale+currY-this.offs);
+    this.boardDims.dims = new Vector(this.dims.x*0.99 - p5.textWidth("nDimensions:")-padding, scale*6*1.2);
+    this.boardDims.pos = new Vector(p5.textWidth("nDimensions")+padding, 2*scale+currY-this.offs);
     currY+=this.boardDims.dims.y+scale*3+2*scale;
 
-    this.palette.dims = new Vector(this.dims.x*0.99 - p5.textWidth("Palette: ")-padding, scale*6*1.2);
-    this.palette.pos = new Vector(p5.textWidth("Palette: ")+padding, 2*scale+currY-this.offs);
+    this.palette.dims = new Vector(this.dims.x*0.99 - p5.textWidth("nPalette:")-padding, scale*6*1.2);
+    this.palette.pos = new Vector(p5.textWidth("nPalette:")+padding, 2*scale+currY-this.offs);
     currY+=this.palette.dims.y+scale*3+2*scale;
 
     this.torusBox.dims = new Vector(p5.textSize()*1.3, p5.textSize()*1.3);
-    this.torusBox.pos = new Vector(p5.textWidth("Torus mode ")+padding, 2*scale+currY-this.offs);
+    this.torusBox.pos = new Vector(p5.textWidth("nTorus mode:")+padding, 2*scale+currY-this.offs);
     currY+=2*scale+this.torusBox.dims.y;
 
-    this.overwriteButton.dims = new Vector(p5.textWidth("Overwrite")*1.5, p5.textSize()*1.3);
-    this.overwriteButton.pos = new Vector(2*scale, 2*scale+currY-this.offs);
-    currY+=2*scale+this.overwriteButton.dims.y;
+    this.applyButton.dims = new Vector(p5.textWidth("mmApply"), p5.textSize()*1.3);
+    this.applyButton.pos = new Vector(2*scale, 2*scale+currY-this.offs);
+    currY+=2*scale+this.applyButton.dims.y;
+
+    this.clearButton.dims = new Vector(p5.textWidth("mmClear"), p5.textSize()*1.3);
+    this.clearButton.pos = new Vector(2*scale, 2*scale+currY-this.offs);
+    currY+=2*scale+this.clearButton.dims.y;
+
+    if(this.calcPathBox){
+      this.calcPathBox.dims = new Vector(p5.textSize()*1.3, p5.textSize()*1.3);
+      this.calcPathBox.pos = new Vector(p5.textWidth("nCalculate path")+padding, 2*scale+currY-this.offs);
+      currY+=2*scale+this.calcPathBox.dims.y;
+    }
 
     this.bottomBar.pos = new Vector(0,this.dims.y-sbSize);
     this.bottomBar.dims = new Vector(this.dims.x, sbSize);
@@ -451,7 +544,10 @@ class OptionsScene extends ScrollableScene{
 
     this.settingsBar.dims = new Vector(this.dims.x, sbSize);
     this.settingsBar.subScenes[0].dims = new Vector(sbSize*0.8,sbSize*0.8);
+    this.settingsBar.subScenes[1].dims = new Vector(sbSize*0.8,sbSize*0.8);
     this.settingsBar.subScenes[0].pos = new Vector(sbSize*0.1, sbSize*0.1);
+    this.settingsBar.subScenes[1].pos = new Vector(
+      this.dims.x-this.settingsBar.subScenes[1].dims.x-sbSize*0.1, sbSize*0.1);
 
     super.resized(old,n);
   }
@@ -472,6 +568,14 @@ class OptionsScene extends ScrollableScene{
   }
 
   render(){
+    if(this.parent instanceof SolveScene&&!this.calcPathBox){
+      this.calcPathBox = this.addScene(new TickboxScene(true,s=>{
+        Data.mainBoard.shouldRecalcPath=s.value;
+        Data.mainBoard.recalcPath();
+      }));
+      this.resized(new Vector(p5.width, p5.height));
+    }
+
     p5.fill(50);
     p5.rect(0,0,this.dims.x,p5.height);
 
@@ -483,7 +587,8 @@ class OptionsScene extends ScrollableScene{
     p5.textAlign(p5.LEFT, p5.TOP);
     p5.text("Dimensions: ", 2, this.boardDims.getAbsolutePos().y);
     p5.text("Palette: ", 2, this.palette.getAbsolutePos().y);
-    p5.text("Torus mode", 2, this.torusBox.getAbsolutePos().y);
+    p5.text("Torus mode: ", 2, this.torusBox.getAbsolutePos().y);
+    if(this.calcPathBox) p5.text("Calculate path: ", 2, this.calcPathBox.getAbsolutePos().y);
 
     p5.translate(0,-this.offs);
     p5.scale(sc);
@@ -499,3 +604,9 @@ class OptionsScene extends ScrollableScene{
 }
 
 export default OptionsScene;
+export {
+  OptionsScene,
+  Counter,
+  CustomTextInputScene,
+  CustomTickboxScene,
+}
