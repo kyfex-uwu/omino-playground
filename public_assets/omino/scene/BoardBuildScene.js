@@ -21,6 +21,7 @@ class BoardBuildScene extends MainScene{
 
       shouldRecalcPath:false,
     });
+    Data.mainBoard.path=[];
 
     this.state="";
 
