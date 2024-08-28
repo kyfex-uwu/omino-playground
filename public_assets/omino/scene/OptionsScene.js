@@ -14,7 +14,7 @@ import {LockedOmino} from "/assets/omino/Omino.js";
 import SolveScene from "/assets/omino/scene/SolveScene.js";
 
 const changelog = [
-`v0.1.10-alpha3
+`v0.1.10-alpha3 8/28/24
 - Added toggle for highlighting duplicate pieces
 - Added toggle for highlighting pieces not in the current palette
 - Added board dimensions in screenshot`,
