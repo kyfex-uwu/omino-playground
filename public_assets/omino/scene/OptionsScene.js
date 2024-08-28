@@ -15,8 +15,8 @@ import SolveScene from "/assets/omino/scene/SolveScene.js";
 
 const changelog = [
 `v0.1.10-alpha3 8/28/24
-- Added toggle for highlighting duplicate pieces
-- Added toggle for highlighting pieces not in the current palette
+- Added toggle for highlighting duplicate pieces (thanks @hhhguir!)
+- Added toggle for highlighting pieces not in the current palette (thanks @hhhguir!)
 - Added board dimensions in screenshot`,
 `v0.1.10-alpha2 8/27/24
 - Fixed end point not showing up when enabling it
