@@ -14,6 +14,10 @@ import {LockedOmino} from "/assets/omino/Omino.js";
 import SolveScene from "/assets/omino/scene/SolveScene.js";
 
 const changelog = [
+`v0.1.10-alpha3
+- Added toggle for highlighting duplicate pieces
+- Added toggle for highlighting pieces not in the current palette
+- Added board dimensions in screenshot`,
 `v0.1.10-alpha2 8/27/24
 - Fixed end point not showing up when enabling it
 - Started adding the custom piece palette
@@ -125,7 +129,7 @@ class ShareImageScene extends Scene{
     p5.translate(
       p5.width*0.2+p5.width*0.6/2-(this.board.renderData.scale*this.board.width)/2, 
       p5.height*0.2+p5.height*0.6/2-(this.board.renderData.scale*this.board.height)/2);
-    this.board.render(new Vector(999999,999999));
+    this.board.render(new Vector(999999,999999), this.mainScene.paletteScene.palette);
   }
   mouseUp(){
     if(!this.upOnce) return this.upOnce=true;
@@ -133,13 +137,24 @@ class ShareImageScene extends Scene{
     let canv = p5.createGraphics(this.board.width*50+10, this.board.height*50+10+15);
     canv.noStroke();
     canv.background(173, 111, 153);
+    canv.push();
     canv.translate(5,5);
     this.board.renderData.scale = 50;
-    this.board.render(new Vector(0,0), canv);
+    this.board.render(new Vector(0,0), this.mainScene.palette, canv);
+    canv.pop();
     canv.fill(0, 200);
     canv.textSize(15);
+
     canv.textAlign(p5.RIGHT,p5.BOTTOM);
-    canv.text("https://kyfexuwu.com/omino-playground", canv.width-6-5, canv.height-2-5);
+    canv.text("https://kyfexuwu.com/omino-playground", canv.width-6, canv.height-2);
+    canv.fill(173, 111, 153);
+    canv.rect(0,canv.height-2-p5.textSize(), 
+      p5.textWidth(`${this.board.width}x${this.board.height}`)+6,2+p5.textSize());
+
+    canv.fill(0, 200);
+    canv.textAlign(p5.LEFT,p5.BOTTOM);
+    canv.text(`${this.board.width}x${this.board.height}`, 6, canv.height-2);
+
 
     canv.elt.toBlob(blob=>{
       navigator.clipboard.write([
@@ -532,8 +547,16 @@ class OptionsScene extends ScrollableScene{
 
     if(this.calcPathBox){
       this.calcPathBox.dims = new Vector(p5.textSize()*1.3, p5.textSize()*1.3);
-      this.calcPathBox.pos = new Vector(p5.textWidth("nCalculate path")+padding, 2*scale+currY-this.offs);
+      this.calcPathBox.pos = new Vector(p5.textWidth("nCalculate path:")+padding, 2*scale+currY-this.offs);
       currY+=2*scale+this.calcPathBox.dims.y;
+
+      this.preventDupesBox.dims = new Vector(p5.textSize()*1.3, p5.textSize()*1.3);
+      this.preventDupesBox.pos = new Vector(p5.textWidth("nHighlight duplicate pieces:")+padding, 2*scale+currY-this.offs);
+      currY+=2*scale+this.preventDupesBox.dims.y;
+
+      this.keepInPaletteBox.dims = new Vector(p5.textSize()*1.3, p5.textSize()*1.3);
+      this.keepInPaletteBox.pos = new Vector(p5.textWidth("nHighlight non-palette pieces:")+padding, 2*scale+currY-this.offs);
+      currY+=2*scale+this.keepInPaletteBox.dims.y;
     }
 
     this.bottomBar.pos = new Vector(0,this.dims.y-sbSize);
@@ -574,6 +597,12 @@ class OptionsScene extends ScrollableScene{
         Data.mainBoard.shouldRecalcPath=s.value;
         Data.mainBoard.recalcPath();
       }));
+      this.preventDupesBox = this.addScene(new TickboxScene(Data.mainBoard.renderData.highlightDupes,s=>{
+        Data.mainBoard.renderData.highlightDupes=s.value;
+      }));
+      this.keepInPaletteBox = this.addScene(new TickboxScene(Data.mainBoard.renderData.highlightNotPalette,s=>{
+        Data.mainBoard.renderData.highlightNotPalette=s.value;
+      }));
       this.resized(new Vector(p5.width, p5.height));
     }
 
@@ -589,7 +618,11 @@ class OptionsScene extends ScrollableScene{
     p5.text("Dimensions: ", 2, this.boardDims.getAbsolutePos().y);
     p5.text("Palette: ", 2, this.palette.getAbsolutePos().y);
     p5.text("Torus mode: ", 2, this.torusBox.getAbsolutePos().y);
-    if(this.calcPathBox) p5.text("Calculate path: ", 2, this.calcPathBox.getAbsolutePos().y);
+    if(this.calcPathBox){
+      p5.text("Calculate path: ", 2, this.calcPathBox.getAbsolutePos().y);
+      p5.text("Highlight duplicate pieces: ", 2, this.preventDupesBox.getAbsolutePos().y);
+      p5.text("Highlight non-palette pieces: ", 2, this.keepInPaletteBox.getAbsolutePos().y);
+    }
 
     p5.translate(0,-this.offs);
     p5.scale(sc);

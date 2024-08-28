@@ -1,6 +1,6 @@
 import Vector from "/assets/omino/Vector.js";
 import {LockedOmino} from "/assets/omino/Omino.js";
-import {allPalettes} from "/assets/omino/Palettes.js";
+import {allPalettes, nullPalette} from "/assets/omino/Palettes.js";
 import {pageData} from "/assets/omino/Options.js";
 import Data from "/assets/omino-playground.js";
 import * as FakeWebWorker from "/assets/omino/BoardLengthCalculator.js";
@@ -23,7 +23,10 @@ class Board{
     this.height=height;
 
     this.renderData = {
-      scale:20
+      scale:20,
+
+      highlightDupes:false,
+      highlightNotPalette:false,
     };
 
     let filledInOptions={};
@@ -106,7 +109,7 @@ class Board{
     });
   }
   
-  render(pos, env=p5){
+  render(pos, palette=nullPalette, env=p5){
     for(let y=0;y<this.height;y++){
       for(let x=0;x<this.width;x++){
         let pos=new Vector(x,y);
@@ -174,18 +177,31 @@ class Board{
     env.beginClip();
     env.rect(0,0,this.renderData.scale*this.width, this.renderData.scale*this.height, this.renderData.scale*(tileRadius+tileSpacing));
     env.endClip();
+
+    let ominoesToDraw=[];
     for(const omino of this.ominoes){
+      ominoesToDraw.push({
+        omino,
+        isDupe:this.ominoes.some(o=>o!=omino&&o.equals(omino)),
+        isNotInPalette:!Object.values(palette.data).some(o=>o.orig&&o.omino.equals(omino)),
+      });
+    }
+    for(const data of ominoesToDraw){
+      const renderFunc = (this.renderData.highlightDupes&&data.isDupe)||
+          (data.isNotInPalette&&this.renderData.highlightNotPalette)?
+        o=>this.highlightFunc(o, env):
+        o=>env.background.apply(env, o.color);
       if(this.torusMode){
-        for(let y=0;y<omino.pos.y+omino.height();y+=this.height){
-          for(let x=0;x<omino.pos.x+omino.width();x+=this.width){
-            let newOmino = omino.clone();
+        for(let y=0;y<data.omino.pos.y+data.omino.height();y+=this.height){
+          for(let x=0;x<data.omino.pos.x+data.omino.width();x+=this.width){
+            let newOmino = data.omino.clone();
             newOmino.pos = newOmino.pos.clone();
             newOmino.pos.x-=x;
             newOmino.pos.y-=y;
-            newOmino.render(this.renderData.scale, new Vector(0,0), env);
+            newOmino.renderWithClip(this.renderData.scale, new Vector(0,0), env, _=>renderFunc(newOmino));
           }
         }
-      }else omino.render(this.renderData.scale, new Vector(0,0), env);
+      }else data.omino.renderWithClip(this.renderData.scale, new Vector(0,0), env, _=>renderFunc(data.omino));
     }
     env.pop();
   }
@@ -198,6 +214,23 @@ class Board{
     });
     toReturn.ominoes=[...this.ominoes];
     return toReturn;
+  }
+
+  highlightFunc(omino, env){
+    env.background.apply(env, omino.color)
+
+    env.push();
+    env.scale(this.renderData.scale);
+    env.fill.apply(env, omino.color.map(c=>255-c).concat(200));
+    for(let i=-(p5.frameCount*0.004%0.7);i<this.width+this.height*0.5;i+=0.7){
+      env.beginShape();
+      env.vertex(i, -0.05);
+      env.vertex(i+0.3,-0.05);
+      env.vertex(i+0.3-this.height*0.5,this.height+0.05);
+      env.vertex(i-this.height*0.5, this.height+0.05);
+      env.endShape();
+    }
+    env.pop();
   }
 }
 
