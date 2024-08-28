@@ -98,7 +98,7 @@ const pageData={
         if(isNew){
           let newOmino = omino.clone();
           newOmino.pos = omino.pos;
-          pageData.palette.add(newOmino);
+          pageData.palette.add(newOmino, true);
         }
 
         return omino;

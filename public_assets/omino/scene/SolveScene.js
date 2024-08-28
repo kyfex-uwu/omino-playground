@@ -247,6 +247,7 @@ class SolveScene extends MainScene{
 		      p5.translate(p5.mouseX,p5.mouseY);
 		      p5.rotate(self.mouseData.angle);
 		      p5.scale(self.mouseData.scale.x,self.mouseData.scale.y);
+
 		      self.mouseData.omino.renderTransparent(self.boardScene.board.renderData.scale, 
 		        new Vector(0,0).sub(self.mouseData.offs));
 		      p5.cursor(p5.MOVE);

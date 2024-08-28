@@ -14,7 +14,7 @@ class BoardScene extends DimsScene {
         this.dims = new Vector(this.board.width, this.board.height).scale(this.board.renderData.scale);
     }
     render() {
-        this.board.render(this.getAbsolutePos());
+        this.board.render(this.getAbsolutePos(), (this.parent.paletteScene||{}).palette);
         this.quickResize();
     }
     setBounds(width, height) {

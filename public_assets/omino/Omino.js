@@ -87,12 +87,14 @@ class Omino{
     }
 
     return valid?pos:false;
-}
+  }
   height(){ return Math.max(...this.vectors.map(t=>t.y))+1; }
   width(){ return Math.max(...this.vectors.map(t=>t.x))+1; }
   
-  render(scale, pos, env=p5){
-    env.fill.apply(env,this.color);
+  renderWithClip(scale, pos, env=p5, func){
+    env.push();
+    env.beginClip();
+    env.fill(0);
     for(let y=0;y<this.tiles.length;y++){
       for(let x=0;x<this.tiles[y].length;x++){
         if(!this.tiles[y][x]) continue;
@@ -121,14 +123,20 @@ class Omino{
         }
       }
     }
+    env.endClip();
+
+    func();
+    env.pop();
+  }
+  render(scale, pos, env=p5){
+    this.renderWithClip(scale, pos, env, _=>{
+      env.background.apply(env,this.color);
+    });
   }
   renderTransparent(scale, pos, env=p5, transparency=170){
-    env.push();
-    env.beginClip();
-    this.render(scale, pos);
-    env.endClip();
-    env.background.apply(env,[...this.color, transparency]);
-    env.pop();
+    this.renderWithClip(scale, pos, env, _=>{
+      env.background.apply(env,[...this.color, transparency]);
+    });
   }
   
   clone(){
@@ -179,12 +187,13 @@ class Omino{
 
     let minPos = new Vector(Math.max(this.pos.x, other.pos.x),
       Math.max(this.pos.y, other.pos.y));
-    let minSize = new Vector(Math.max(this.width(),other.width()),
+    let size = new Vector(Math.max(this.width(),other.width()),
       Math.max(this.height(),other.height()));
 
-    for(let y=0;y<minSize.y;y++){
-      for(let x=0;x<minSize.x;x++){
-        if(this.get(new Vector(x,y))!=other.get(new Vector(x,y)))
+    for(let y=0;y<size.y;y++){
+      for(let x=0;x<size.x;x++){
+        let pos = new Vector(x,y).add(minPos);
+        if(this.get(pos)!=other.get(pos))
           return false;
       }
     }
@@ -196,7 +205,7 @@ class LockedOmino extends Omino{
     super(new Vector(0,0), [0,0,0], vectors);
   }
   
-  render(){}
+  renderWithClip(){}
   clone(){
     let cloneFrom = super.clone();
     let toReturn = new LockedOmino([]);
