@@ -1,7 +1,38 @@
-import {OminoPalette} from "/assets/omino/Palettes.js";
+import {OminoPalette, allPalettes, nullPalette} from "/assets/omino/Palettes.js";
 import Vector from "/assets/omino/Vector.js";
-import {allPalettes, nullPalette} from "/assets/omino/Palettes.js";
 import {LockedOmino} from "/assets/omino/Omino.js";
+
+function ominoFromStr(data){
+  data=data.split("-");
+  if(data[0].length==0) return undefined;
+
+  let omino;
+  let isNew=false;
+  try{
+    omino = pageData.palette.get(data[0], Vector.fromStr(data[1]));
+    let transform = parseInt(data[2]);
+    if(transform>=4){ omino = omino.mirroredH(); transform-=4; }
+    while(transform>0){ omino = omino.rotatedCW(); transform--; }
+  }catch(e){
+    try{
+      let positions = data.slice(1).map(d=>Vector.fromStr(d));
+      let offs=Vector.fromStr(data[0]);
+
+      [omino, isNew] = pageData.palette.getFromTiles(positions);
+      omino.pos = offs;
+    }catch(e2){
+      return undefined;
+    }
+  }
+
+  if(isNew){
+    let newOmino = omino.clone();
+    newOmino.pos = omino.pos;
+    pageData.palette.add(newOmino, true);
+  }
+
+  return omino;
+}
 
 const pageData={
   fullscreen:{
@@ -17,7 +48,14 @@ const pageData={
     */
     val:"5",
     transform:d=>{
-      if(d=="_") return nullPalette;
+      if(d=="_"){
+        let toReturn = new OminoPalette([]);
+
+        for(const omino of d.slice(1).split("!").map(ominoFromStr).filter(o=>!!o))
+          toReturn.add(omino,true);
+
+        return toReturn;
+      }
       let num = parseInt(d)-1;
       if(num>=0&&num<allPalettes.length) return allPalettes[num];
       return nullPalette;
@@ -72,37 +110,7 @@ const pageData={
 
       d=d.split("$");
 
-      toReturn.ominoes=d[0].split("!").map(data=>{
-        data=data.split("-");
-        if(data[0].length==0) return undefined;
-
-        let omino;
-        let isNew=false;
-        try{
-          omino = pageData.palette.get(data[0], Vector.fromStr(data[1]));
-          let transform = parseInt(data[2]);
-          if(transform>=4){ omino = omino.mirroredH(); transform-=4; }
-          while(transform>0){ omino = omino.rotatedCW(); transform--; }
-        }catch(e){
-          try{
-            let positions = data.slice(1).map(d=>Vector.fromStr(d));
-            let offs=Vector.fromStr(data[0]);
-
-            [omino, isNew] = pageData.palette.getFromTiles(positions);
-            omino.pos = offs;
-          }catch(e2){
-            return undefined;
-          }
-        }
-
-        if(isNew){
-          let newOmino = omino.clone();
-          newOmino.pos = omino.pos;
-          pageData.palette.add(newOmino, true);
-        }
-
-        return omino;
-      }).filter(o=>!!o);
+      toReturn.ominoes=d[0].split("!").map(ominoFromStr).filter(o=>!!o);
 
       return toReturn;
     },
@@ -152,7 +160,7 @@ function toLink(board, palette){
       if(omino instanceof LockedOmino) return undefined;
 
       for(const [key,data] of Object.entries(palette.data)){
-        if(!data.orig) continue;
+        if(!data.orig||data.custom) continue;
 
         if(data.omino.equals(omino)){
           let posReset = omino.clone();
@@ -177,7 +185,7 @@ function toLink(board, palette){
       return omino.pos.toURLStr()+"-"+omino.vectors.map(v=>v.toURLStr()).join("-");
     }).filter(o=>o).join("!"),
     locked:(_=>{
-      let tiles = (board.ominoes.find(o=>o instanceof LockedOmino)||{tiles:[]}).tiles;
+      let tiles = board.lockedTiles.tiles;
       let toReturn="";
       for(let y=0;y<board.height;y++){
         if(!tiles[y]){
@@ -192,7 +200,7 @@ function toLink(board, palette){
       toReturn = toReturn.slice(0,toReturn.lastIndexOf("1")+1).split("").reverse().join("");
       toReturn = parseInt(toReturn, 2).toString(36);
 
-      return isNaN(toReturn)?"":toReturn;
+      return toReturn;
     })(),
     pathType:(board.startPoint===undefined?"":board.startPoint.toURLStr())+"$"+
       (board.endPoint===undefined?"":board.endPoint.toURLStr()),

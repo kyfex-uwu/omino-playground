@@ -34,7 +34,8 @@ class Board{
     Object.assign(filledInOptions, options);
 
     this.torusMode=filledInOptions.torusMode;
-    this.ominoes = [new LockedOmino(filledInOptions.lockedTiles), ...filledInOptions.ominoes];
+    this.lockedTiles = new LockedOmino(filledInOptions.lockedTiles);
+    this.ominoes = [...filledInOptions.ominoes];
 
     this.startPoint=filledInOptions.startPoint;
     this.endPoint=filledInOptions.endPoint;
@@ -56,7 +57,7 @@ class Board{
   
   get(pos){
     if(pos.x<0||pos.y<0||pos.x>=this.width||pos.y>=this.height) return borderOmino;
-    for(const omino of this.ominoes){
+    for(const omino of [...this.ominoes, this.lockedTiles]){
       if(this.torusMode){
         if(omino.getOnTorus(pos, new Vector(this.width, this.height))) return omino;
       }else if(omino.get(pos)) return omino;
@@ -72,7 +73,7 @@ class Board{
     for(let y=0;y<this.height;y++){
       thisAsBoolArr[y]=[];
       for(let x=0;x<this.width;x++){
-        thisAsBoolArr[y][x]=this.get(new Vector(x,y));
+        thisAsBoolArr[y][x]=!!this.get(new Vector(x,y));
       }
     }
 
@@ -187,10 +188,8 @@ class Board{
       });
     }
     for(const data of ominoesToDraw){
-      const renderFunc = (this.renderData.highlightDupes&&data.isDupe)||
-          (data.isNotInPalette&&this.renderData.highlightNotPalette)?
-        o=>this.highlightFunc(o, env):
-        o=>env.background.apply(env, o.color);
+      let renderFunc=((this.renderData.highlightDupes&&data.isDupe)||
+        (this.renderData.highlightNotPalette&&data.isNotInPalette))?"renderHighlighted":"render";
       if(this.torusMode){
         for(let y=0;y<data.omino.pos.y+data.omino.height();y+=this.height){
           for(let x=0;x<data.omino.pos.x+data.omino.width();x+=this.width){
@@ -198,39 +197,22 @@ class Board{
             newOmino.pos = newOmino.pos.clone();
             newOmino.pos.x-=x;
             newOmino.pos.y-=y;
-            newOmino.renderWithClip(this.renderData.scale, new Vector(0,0), env, _=>renderFunc(newOmino));
+            newOmino[renderFunc](this.renderData.scale, new Vector(0,0), env);
           }
         }
-      }else data.omino.renderWithClip(this.renderData.scale, new Vector(0,0), env, _=>renderFunc(data.omino));
+      }else data.omino[renderFunc](this.renderData.scale, new Vector(0,0), env);
     }
     env.pop();
   }
 
   clone(){
-    let toReturn = new Board(this.width, this.height, {
+    return new Board(this.width, this.height, {
       torusMode:this.torusMode,
       calcPath:false,
       path:this.path,
+      lockedTiles:[...this.lockedTiles.vectors.map(v=>v.clone())],
+      ominoes:this.ominoes
     });
-    toReturn.ominoes=[...this.ominoes];
-    return toReturn;
-  }
-
-  highlightFunc(omino, env){
-    env.background.apply(env, omino.color)
-
-    env.push();
-    env.scale(this.renderData.scale);
-    env.fill.apply(env, omino.color.map(c=>255-c).concat(200));
-    for(let i=-(p5.frameCount*0.004%0.7);i<this.width+this.height*0.5;i+=0.7){
-      env.beginShape();
-      env.vertex(i, -0.05);
-      env.vertex(i+0.3,-0.05);
-      env.vertex(i+0.3-this.height*0.5,this.height+0.05);
-      env.vertex(i-this.height*0.5, this.height+0.05);
-      env.endShape();
-    }
-    env.pop();
   }
 }
 

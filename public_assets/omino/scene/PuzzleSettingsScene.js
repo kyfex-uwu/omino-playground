@@ -48,6 +48,9 @@ class PuzzleSettingsScene extends ScrollableScene{
 	    p5.textAlign(p5.LEFT, p5.TOP);
 	    p5.text("Has start: ", 2, this.hasStart.getAbsolutePos().y);
 	    p5.text("Has end: ", 2, this.hasEnd.getAbsolutePos().y);
+	    p5.text("If you need/want the ability to make puzzles with "+
+	    	"a limited/custom palette, pls dm me because otherwise "+
+	    	"i have lost the motivation to work on it lol", 2, this.hasEnd.getAbsolutePos().y*1.8, this.dims.x);
 	    //p5.text("Has limited pieces: ", 2, this.hasLimitedPieces.getAbsolutePos().y);
 
 	    super.render();

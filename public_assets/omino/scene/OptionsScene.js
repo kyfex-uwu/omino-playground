@@ -14,10 +14,15 @@ import {LockedOmino} from "/assets/omino/Omino.js";
 import SolveScene from "/assets/omino/scene/SolveScene.js";
 
 const changelog = [
+`v0.1.10 xxx (the hhhguir update)
+- Fixed pieces overlapping others or going out of the board when resizing (thanks @hhhguir!)
+- Pieces in the palette that are on the board are now highlighted when "Highlight duplicate pieces" is checked (thanks @hhhguir!)
+- Clearing the board doesn't bug out locked tiles any more (thanks @hhhguir!)
+- Fixed links not having the locked tiles data (thanks @hhhguir!)`,
 `v0.1.10-alpha3 8/28/24
 - Added toggle for highlighting duplicate pieces (thanks @hhhguir!)
 - Added toggle for highlighting pieces not in the current palette (thanks @hhhguir!)
-- Added board dimensions in screenshot`,
+- Added board dimensions in screenshot (thanks @stefliew!)`,
 `v0.1.10-alpha2 8/27/24
 - Fixed end point not showing up when enabling it
 - Started adding the custom piece palette
@@ -335,11 +340,22 @@ class OptionsScene extends ScrollableScene{
       let dims = this.boardDims.value.split(/[,x]/).map(i=>parseInt(i));
       if(isNaN(dims[0])||isNaN(dims[1])) return;
 
+      let newLocked = Data.mainBoard.lockedTiles.vectors.filter(v=>v.x<dims[0]&&v.y<dims[1]);
+
       let newBoard = new Board(dims[0], dims[1], {
-        lockedTiles:(Data.mainBoard.ominoes.find(o=>o instanceof LockedOmino)||{vectors:[]}).vectors,
-        ominoes:Data.mainBoard.ominoes.slice(1),
+        lockedTiles:newLocked,
+        ominoes:[],
         torusMode:this.torusBox.value,
       });
+      for(const omino of Data.mainBoard.ominoes){
+        let pos = omino.canPlace(newBoard, omino.pos);
+        if(pos){
+          omino.pos = pos;
+          newBoard.add(omino);
+        }
+      }
+
+
       Data.mainBoard.width = dims[0];
       Data.mainBoard.height = dims[1];
       Data.mainBoard.torusMode=this.torusBox.value;
@@ -371,6 +387,7 @@ class OptionsScene extends ScrollableScene{
       p5.text("Clear", s.dims.x/2,s.dims.y/2);
     },s=>{
       Data.mainBoard.ominoes=[];
+      Data.mainBoard.lockedTiles=new LockedOmino([]);
       Data.mainBoard.recalcPath();
     }));
 

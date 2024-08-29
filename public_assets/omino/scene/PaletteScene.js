@@ -2,6 +2,7 @@ import Vector from "/assets/omino/Vector.js";
 import {Omino} from "/assets/omino/Omino.js";
 import {ButtonScene, ScrollableScene, DimsScene,
   OneTimeButtonScene, hover} from "/assets/omino/scene/Scene.js";
+import Data from "/assets/omino-playground.js";
 
 class OminoPaletteSpace extends ButtonScene{
   constructor(omino, index){
@@ -15,9 +16,11 @@ class OminoPaletteSpace extends ButtonScene{
     p5.rect(this.dims.x*0.05,this.dims.y*0.05,this.dims.x*0.9,this.dims.y*0.9,this.dims.x*0.1);
 
     let scale=this.dims.x*0.8/Math.max(this.omino.tiles.length,this.omino.tiles[0].length);
-    this.omino.render(scale, new Vector(
-      (this.dims.x-this.omino.tiles[0].length*scale)/2,
-      (this.dims.y-this.omino.tiles.length*scale)/2));
+    this.omino[(Data.mainBoard.renderData.highlightDupes&&
+        Data.mainBoard.ominoes.some(o=>o.equals(this.omino)))?"renderHighlighted":"render"](
+      scale, new Vector(
+        (this.dims.x-this.omino.tiles[0].length*scale)/2,
+        (this.dims.y-this.omino.tiles.length*scale)/2));
   }
   click(x, y){
     this.parent.parent.parent.mouseData.omino = this.omino.clone();

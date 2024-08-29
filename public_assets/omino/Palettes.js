@@ -39,6 +39,7 @@ class OminoPalette{
         color:omino.color,
 
         orig,
+        custom:true
       };
     }
   }

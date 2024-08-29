@@ -68,12 +68,12 @@ class Omino{
         if(!valid) break;
     }
     if(board.torusMode) {
-        let loopedPositions = this.vectors.map(p => p.add(this.pos));
-        for(const pos of loopedPositions) {
-            while(pos.x < 0) pos.x += board.width;
-            while(pos.x >= board.width) pos.x -= board.width;
-            while(pos.y < 0) pos.y += board.height;
-            while(pos.y >= board.height) pos.y -= board.height;
+        let loopedPositions = this.vectors.map(p => p.add(pos));
+        for(const subPos of loopedPositions) {
+            while(subPos.x < 0) subPos.x += board.width;
+            while(subPos.x >= board.width) subPos.x -= board.width;
+            while(subPos.y < 0) subPos.y += board.height;
+            while(subPos.y >= board.height) subPos.y -= board.height;
         }
         for(let i = 0; i < loopedPositions.length; i++) {
             for(let j = i + 1; j < loopedPositions.length; j++) {
@@ -136,6 +136,26 @@ class Omino{
   renderTransparent(scale, pos, env=p5, transparency=170){
     this.renderWithClip(scale, pos, env, _=>{
       env.background.apply(env,[...this.color, transparency]);
+    });
+  }
+  renderHighlighted(scale, pos, env=p5){
+    this.renderWithClip(scale, pos, env, _=>{
+      env.background.apply(env, this.color);
+
+      env.push();
+      env.translate(pos.x,pos.y);
+      env.scale(scale);
+      env.translate(this.pos.x,this.pos.y);
+      env.fill.apply(env, this.color.map(c=>255-c).concat(200));
+      for(let i=-(p5.frameCount*0.004%0.7);i<this.width()+this.height()*0.5;i+=0.7){
+        env.beginShape();
+        env.vertex(i, -0.05);
+        env.vertex(i+0.3,-0.05);
+        env.vertex(i+0.3-this.height()*0.5,this.height()+0.05);
+        env.vertex(i-this.height()*0.5, this.height()+0.05);
+        env.endShape();
+      }
+      env.pop();
     });
   }
   
