@@ -14,11 +14,12 @@ import {LockedOmino} from "/assets/omino/Omino.js";
 import SolveScene from "/assets/omino/scene/SolveScene.js";
 
 const changelog = [
-`v0.1.10 xxx (the hhhguir update)
+`v0.2.0 8/29/24 (the puzzle + hhhguir update)
 - Fixed pieces overlapping others or going out of the board when resizing (thanks @hhhguir!)
 - Pieces in the palette that are on the board are now highlighted when "Highlight duplicate pieces" is checked (thanks @hhhguir!)
 - Clearing the board doesn't bug out locked tiles any more (thanks @hhhguir!)
-- Fixed links not having the locked tiles data (thanks @hhhguir!)`,
+- Fixed links not having the locked tiles data (thanks @hhhguir!)
+note: v0.1.10 is v0.2.0`,
 `v0.1.10-alpha3 8/28/24
 - Added toggle for highlighting duplicate pieces (thanks @hhhguir!)
 - Added toggle for highlighting pieces not in the current palette (thanks @hhhguir!)
