@@ -101,13 +101,13 @@ class BoardBuildScene extends MainScene{
       this.settingsScene.hasEnd.value=true;
       break;
     case "locked":
-      let newVectors = Data.scene.boardScene.board.ominoes[0].vectors;
+      let newVectors = Data.scene.boardScene.board.lockedTiles.vectors;
       let clickPos = new Vector(x,y);
       if(newVectors.some(v=>v.equals(clickPos)))
-        Data.scene.boardScene.board.ominoes[0] = new LockedOmino(newVectors.filter(v=>!v.equals(clickPos)));
+        Data.scene.boardScene.board.lockedTiles = new LockedOmino(newVectors.filter(v=>!v.equals(clickPos)));
       else{
         newVectors.push(clickPos);
-        Data.scene.boardScene.board.ominoes[0] = new LockedOmino(newVectors);
+        Data.scene.boardScene.board.lockedTiles = new LockedOmino(newVectors);
       }
       break;
     }
