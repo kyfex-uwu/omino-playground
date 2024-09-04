@@ -2,11 +2,31 @@
  * to create your own colorfile, copy this file and edit the values to your liking.
  * you can apply this in settings, the "Use Colorfile" button at the top right.
  * 
+ * /!\ DO NOT use colorfiles unless they come from a trusted source! /!\
+ * 
+ * anything on kyfexuwu.com is safe, but if you are unsure of a colorfile, err on the side of caution.
+ * the way colorfiles work are as dangerous as pasting code into your console. 
+ * (this also means if youre smart at coding, this is more like a way to mod omino playground :3)
+ * 
+ * ###
+ * 
  * the way colorfiles work is as follows:
  * - this colorfile is loaded first (the default)
  * - then, your colorfile is loaded on top of it; any fields that you change here overwrite the default.
- * this means you can change certain variables to change large parts of the app, or change specific
- * values to only change one thing.
+ * this means you can change certain variables to edit large parts of the app, or change specific
+ * values to only modify one thing.
+ * 
+ * ###
+ * 
+ * how to use a colorfile (in depth)
+ * - download (or create) your colorfile. the example one you can use is 
+ * https://kyfexuwu.com/assets/omino/colorfiles/high_contrast.js
+ * - go to the settings screen in the app (click the settings icon at the top left)
+ * - click the Use Colorfile button in settings (the paintbrush at the top right)
+ * - drag your colorfile onto the page
+ * OR
+ * - click the page and when the file dialog opens, select your colorfile
+ * - click the back button at the top right, and you should see some changes!
  * 
  * ###
  * 
