@@ -1,6 +1,6 @@
 import Vector from "/assets/omino/Vector.js";
 import {Omino} from "/assets/omino/Omino.js";
-import {OminoColors, genHashColor} from "/assets/omino/Omino.js";
+import {genHashColor} from "/assets/omino/Omino.js";
 
 const ominoIdentifier = Math.random();
 let globalOminoKey=0;
@@ -66,25 +66,25 @@ class OminoPalette{
   }
 }
 const Pentominoes = new OminoPalette({
-  I:{ color: OminoColors.I, positions: "#/#/#/#/#" },
-  L:{ color: OminoColors.L, positions: "#/#/#/##" },
-  Y:{ color: OminoColors.Y, positions: " #/##/ #/ #" },
-  W:{ color: OminoColors.W, positions: " ##/##/#" },
-  V:{ color: OminoColors.V, positions: "  #/  #/###" },
-  T:{ color: OminoColors.T, positions: "###/ # / # " },
-  P:{ color: OminoColors.P, positions: "##/##/ #" },
-  N:{ color: OminoColors.N, positions: " ###/##" },
-  F:{ color: OminoColors.F, positions: " ##/##/ #" },
-  X:{ color: OminoColors.X, positions: " #/###/ #" },
-  Z:{ color: OminoColors.Z, positions: "##/ #/ ##" },
-  U:{ color: OminoColors.U, positions: "##/#/##" },
+  I:{ color: "I", positions: "#/#/#/#/#" },
+  L:{ color: "L", positions: "#/#/#/##" },
+  Y:{ color: "Y", positions: " #/##/ #/ #" },
+  W:{ color: "W", positions: " ##/##/#" },
+  V:{ color: "V", positions: "  #/  #/###" },
+  T:{ color: "T", positions: "###/ # / # " },
+  P:{ color: "P", positions: "##/##/ #" },
+  N:{ color: "N", positions: " ###/##" },
+  F:{ color: "F", positions: " ##/##/ #" },
+  X:{ color: "X", positions: " #/###/ #" },
+  Z:{ color: "Z", positions: "##/ #/ ##" },
+  U:{ color: "U", positions: "##/#/##" },
 });
 const Tetronimoes = new OminoPalette({
-  O:{ color: OminoColors.L, positions: "##/##" },
-  I:{ color: OminoColors.N, positions: "####" },
-  S:{ color: OminoColors.Y, positions: "##/ ##" },
-  T:{ color: OminoColors.V, positions: "###/ #" },
-  L:{ color: OminoColors.F, positions: "###/#" },
+  O:{ color: "L", positions: "##/##" },
+  I:{ color: "N", positions: "####" },
+  S:{ color: "Y", positions: "##/ ##" },
+  T:{ color: "V", positions: "###/ #" },
+  L:{ color: "F", positions: "###/#" },
 });
 const Hexonimoes = new OminoPalette([
   "######",
@@ -129,14 +129,14 @@ for(const hexomino of Hexonimoes.data){
   hexomino.omino.color = color;
 }
 const Monominoes = new OminoPalette({
-  O:{ color: OminoColors.I, positions: "#" }
+  O:{ color: "I", positions: "#" }
 });
 const Dominoes = new OminoPalette({
-  I:{ color: OminoColors.P, positions: "##" }
+  I:{ color: "P", positions: "##" }
 });
 const Triminoes = new OminoPalette({
-  I:{ color: OminoColors.T, positions: "###" },
-  L:{ color: OminoColors.F, positions: "##/#" },
+  I:{ color: "T", positions: "###" },
+  L:{ color: "F", positions: "##/#" },
 });
 
 const allPalettes = [Monominoes,Dominoes,Triminoes, Tetronimoes, Pentominoes, Hexonimoes];

@@ -12,8 +12,18 @@ import Board from "/assets/omino/Board.js";
 import {allPalettes, nullPalette} from "/assets/omino/Palettes.js";
 import {LockedOmino} from "/assets/omino/Omino.js";
 import SolveScene from "/assets/omino/scene/SolveScene.js";
+import {fill, stroke, background} from "/assets/omino/Colors.js";
 
 const changelog = [
+`v0.2.1 9/3/2024
+- Fixed locked tiles decoding incorrectly for very large boards (thanks @hhhguir!)
+- Added colorfiles! This is a way to recolor every part of Omino Playground, through a javascript file. `+
+`Open kyfexuwu.com/assets/omino/colorfiles/default.js to view an example of a colorfile, `+
+`and instructions on how to make and use your own.
+- Fixed omino adding screen letting the mouse through
+- Redid graphics for the Palette tab (add button + omino buttons)
+- Fixed some elements overlapping the settings button and fullscreen button when scrolling
+- Added board type to screenshot`,
 `v0.2.0 8/29/24 (the puzzle + hhhguir update)
 - Fixed pieces overlapping others or going out of the board when resizing (thanks @hhhguir!)
 - Pieces in the palette that are on the board are now highlighted when "Highlight duplicate pieces" is checked (thanks @hhhguir!)
@@ -114,18 +124,18 @@ class ShareImageScene extends Scene{
   }
   render(){
     this.mainScene.render();
-    p5.background(0,100);
+    background("scenes.share.darken");
 
-    p5.fill(173, 111, 153);
-    p5.stroke(255);
+    fill("scenes.share.bg");
+    stroke("scenes.share.outline");
     p5.strokeWeight((p5.height+p5.width)*0.005);
     p5.rect(p5.width*0.2,p5.height*0.2,p5.width*0.6,p5.height*0.6,(p5.height+p5.width)*0.01);
     p5.noStroke();
-    p5.fill(255);
+    fill("scenes.share.outline");
     p5.textSize((p5.height+p5.width)*0.01);
     p5.rect(p5.width/2-p5.textWidth("Click to copy")*1.4/2, p5.height*0.2-p5.textSize()*1.8, 
       p5.textWidth("Click to copy")*1.4, p5.textSize()*2,(p5.height+p5.width)*0.003);
-    p5.fill(0);
+    fill("scenes.share.text");
     p5.textAlign(p5.CENTER,p5.CENTER);
     p5.text("Click to copy", p5.width/2,p5.height*0.2-p5.textSize()*0.7);
 
@@ -142,25 +152,27 @@ class ShareImageScene extends Scene{
 
     let canv = p5.createGraphics(this.board.width*50+10, this.board.height*50+10+15);
     canv.noStroke();
-    canv.background(173, 111, 153);
+    background("scenes.share.bg", canv);
     canv.push();
     canv.translate(5,5);
     this.board.renderData.scale = 50;
     this.board.render(new Vector(0,0), this.mainScene.palette, canv);
     canv.pop();
-    canv.fill(0, 200);
+
+    fill("scenes.share.infoText", canv);
     canv.textSize(15);
+    let infoText=`${this.board.width}x${this.board.height}`;
+    if(this.board.torusMode) infoText+=" - Torus";
 
     canv.textAlign(p5.RIGHT,p5.BOTTOM);
     canv.text("https://kyfexuwu.com/omino-playground", canv.width-6, canv.height-2);
-    canv.fill(173, 111, 153);
-    canv.rect(0,canv.height-2-p5.textSize(), 
-      p5.textWidth(`${this.board.width}x${this.board.height}`)+6,2+p5.textSize());
+    fill("scenes.share.bg", canv);
+    canv.rect(0,canv.height-canv.textSize()-2, 
+      canv.textWidth(infoText+"n")+6,canv.textSize()+2);
 
-    canv.fill(0, 200);
+    fill("scenes.share.infoText", canv);
     canv.textAlign(p5.LEFT,p5.BOTTOM);
-    canv.text(`${this.board.width}x${this.board.height}`, 6, canv.height-2);
-
+    canv.text(infoText, 6, canv.height-2);
 
     canv.elt.toBlob(blob=>{
       navigator.clipboard.write([
@@ -195,20 +207,20 @@ class Counter extends DimsScene{
     this.submit = submit;
   }
   render(){
-    if(this.value==this.oldValue) p5.fill(255);
-    else p5.fill(247, 232, 156);
+    if(this.value==this.oldValue) fill("scenes.util.counter.bg");
+    else fill("scenes.util.counter.bgUnsaved");
 
     p5.rect(0,0,this.dims.x-this.dims.y*2,this.dims.y);
-    p5.fill(255);
+    fill("scenes.util.counter.bg");
     p5.rect(this.dims.x-this.dims.y*1.9, this.dims.y*0.1, this.dims.y*0.8, this.dims.y*0.8);
     p5.rect(this.dims.x-this.dims.y*0.9, this.dims.y*0.1, this.dims.y*0.8, this.dims.y*0.8);
-    p5.fill(0);
+    fill("scenes.util.counter.color");
     p5.textSize(this.dims.y*0.9);
     p5.textAlign(p5.LEFT, p5.TOP);
     p5.text(this.value, this.dims.y*0.1,this.dims.y*0.05);
 
     p5.push();
-    p5.stroke(0);
+    stroke("scenes.util.counter.color");
     p5.strokeWeight(this.dims.y*0.06);
     p5.translate(this.dims.x-this.dims.y*2, 0);
     p5.scale(this.dims.y/10);
@@ -254,11 +266,11 @@ class CustomTextInputScene extends TextInputScene{
   render(){
     if(this.isIn()) p5.cursor(p5.TEXT);
 
-    if(this.value==this.oldValue) p5.fill(255);
-    else p5.fill(247, 232, 156);
+    if(this.value==this.oldValue) fill("scenes.util.textInput.bg");
+    else fill("scenes.util.textInput.bgUnsaved");
 
     p5.rect(0,0,this.dims.x,this.dims.y);
-    p5.fill(0);
+    fill("scenes.util.textInput.color");
     p5.textSize(this.dims.y*0.8);
     p5.textAlign(p5.LEFT, p5.TOP);
     p5.text(this.value, 2, 2);
@@ -287,12 +299,12 @@ class CustomTickboxScene extends TickboxScene{
   }
 
   render(){
-    if(this.value==this.oldValue) p5.fill(255);
-    else p5.fill(247, 232, 156);
+    if(this.value==this.oldValue) fill("scenes.util.tickbox.bg");
+    else fill("scenes.util.tickbox.bgUnsaved");
 
     p5.rect(0,0,this.dims.x,this.dims.y);
     if(this.value){
-      p5.stroke(0);
+      stroke("scenes.util.tickbox.color");
       p5.scale((this.dims.x+this.dims.y)*0.05);
       p5.strokeWeight(2);
       p5.line(2,2,8,8);
@@ -308,7 +320,7 @@ class Bar extends DimsScene{
     for(const scene of subScenes) this.addScene(scene);
   }
   render(){
-    p5.fill(20);
+    fill("scenes.sidebar.bg");
     p5.rect(0,0,this.dims.x,this.dims.y);
 
     super.render();
@@ -319,22 +331,16 @@ class OptionsScene extends ScrollableScene{
   constructor(){
     super();
 
-    this.settingsButton = this.addScene(new OneTimeButtonScene(s=>{
-      if(s.isIn()) hover.set("Settings", s);
-    },s=>{
-
-    }));
-
     const submit = _=>Data.scene.optionsScene.applyButton.click(0,0);
     this.boardDims = this.addScene(new CustomTextInputScene(/[\dx,]/,
       Data.mainBoard.width+","+Data.mainBoard.height, submit));
     this.palette = this.addScene(new Counter(allPalettes.indexOf(pageData.palette)+1, {min:0, submit}));
     this.torusBox = this.addScene(new CustomTickboxScene(Data.mainBoard.torusMode));
     this.applyButton = this.addScene(new OneTimeButtonScene(s=>{
-      p5.fill(s.isIn()?255:200);
+      fill(s.isIn()?"scenes.util.button.bgHover":"scenes.util.button.bg");
       p5.rect(0,0,s.dims.x,s.dims.y);
       p5.textSize(this.dims.x/100*6);
-      p5.fill(0);
+      fill("scenes.util.button.color");
       p5.textAlign(p5.CENTER, p5.CENTER);
       p5.text("Apply", s.dims.x/2,s.dims.y/2);
     },s=>{
@@ -380,10 +386,10 @@ class OptionsScene extends ScrollableScene{
       p5.windowResized();
     }));
     this.clearButton = this.addScene(new OneTimeButtonScene(s=>{
-      p5.fill(s.isIn()?255:200);
+      fill(s.isIn()?"scenes.util.button.bgHover":"scenes.util.button.bg");
       p5.rect(0,0,s.dims.x,s.dims.y);
       p5.textSize(this.dims.x/100*6);
-      p5.fill(0);
+      fill("scenes.util.button.color");
       p5.textAlign(p5.CENTER, p5.CENTER);
       p5.text("Clear", s.dims.x/2,s.dims.y/2);
     },s=>{
@@ -392,17 +398,12 @@ class OptionsScene extends ScrollableScene{
       Data.mainBoard.recalcPath();
     }));
 
-    const buttonWrapper = s=>{
-      p5.fill(s.isIn()?100:70);
-      p5.rect(0,0,s.dims.x,s.dims.y,(s.dims.x+s.dims.y)*0.1);
-    };
-
     this.bottomBar = this.addScene(new Bar(
       new OneTimeButtonScene(s=>{
         buttonWrapper(s);
 
         let arrOffs=s.isIn()?5:0;
-        p5.fill(255);
+        fill("scenes.buttons.dark.icon");
         p5.translate(s.dims.x*0.45,s.dims.y*0.45);
         p5.scale(s.dims.x/100);
         p5.beginShape();
@@ -421,7 +422,7 @@ class OptionsScene extends ScrollableScene{
       new OneTimeButtonScene(s=>{
         buttonWrapper(s);
 
-        p5.stroke(255);
+        stroke("scenes.buttons.dark.icon");
         p5.strokeWeight(6);
         p5.noFill();
         p5.translate(s.dims.x*0.5,s.dims.y*0.5);
@@ -464,7 +465,7 @@ class OptionsScene extends ScrollableScene{
 
         p5.translate(s.dims.x*0.5,s.dims.y*0.5);
         p5.scale(s.dims.x/100);
-        p5.stroke(255);
+        stroke("scenes.buttons.dark.icon");
         p5.strokeWeight(12);
         p5.noFill();
         p5.ellipse(0,0,43,43);
@@ -473,7 +474,7 @@ class OptionsScene extends ScrollableScene{
         p5.push();
         if(s.isIn()) p5.rotate(0.2);
         for(let i=0;i<6;i++){
-          p5.fill(255);
+          fill("scenes.buttons.dark.icon");
           p5.beginShape();
           p5.vertex(-10,-25);
           p5.vertex(-7,-37);
@@ -494,7 +495,7 @@ class OptionsScene extends ScrollableScene{
         p5.translate(s.dims.x*0.5,s.dims.y*0.5);
         p5.scale(s.dims.x/50);
 
-        p5.stroke(255);
+        stroke("scenes.buttons.dark.icon");
         p5.strokeWeight(3);
         p5.line(-15,-10,-8,-5);
         p5.line(15,-10,8,-5);
@@ -502,7 +503,7 @@ class OptionsScene extends ScrollableScene{
         p5.line(15,10,8,5);
         p5.noStroke();
 
-        p5.fill(255);
+        fill("scenes.buttons.dark.icon");
         if(Data.isFullscreened){
           if(s.isIn()) p5.scale(0.9);
           p5.triangle(-4,-2,-12,-2,-6,-9);
@@ -523,6 +524,11 @@ class OptionsScene extends ScrollableScene{
           (p5.windowHeight-p5.height)/2, behavior:"instant"});
       })
     ));
+
+    const buttonWrapper = s=>{
+      fill(s.isIn()?"scenes.buttons.dark.bgHover":"scenes.buttons.dark.bg");
+      p5.rect(0,0,s.dims.x,s.dims.y,(s.dims.x+s.dims.y)*0.1);
+    };
 
     this.dontScroll=[
       this.bottomBar,
@@ -621,16 +627,22 @@ class OptionsScene extends ScrollableScene{
       this.keepInPaletteBox = this.addScene(new TickboxScene(Data.mainBoard.renderData.highlightNotPalette,s=>{
         Data.mainBoard.renderData.highlightNotPalette=s.value;
       }));
+      this.subScenes=this.subScenes.sort((s1,s2)=>{
+        if(s1==this.calcPathBox||s1==this.preventDupesBox||s1==this.keepInPaletteBox) return -1;
+        if(s2==this.calcPathBox||s2==this.preventDupesBox||s2==this.keepInPaletteBox) return 1;
+        return 0;
+      });
+
       this.resized(new Vector(p5.width, p5.height));
     }
 
-    p5.fill(50);
+    fill("scenes.sidebar.bg");
     p5.rect(0,0,this.dims.x,p5.height);
 
     p5.push();
     let sc = this.dims.x/100;
 
-    p5.fill(255);
+    fill("scenes.sidebar.text");
     p5.textSize(6*sc);
     p5.textAlign(p5.LEFT, p5.TOP);
     p5.text("Dimensions: ", 2, this.boardDims.getAbsolutePos().y);

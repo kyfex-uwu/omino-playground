@@ -1,4 +1,5 @@
 import {DimsScene, focus} from "/assets/omino/scene/Scene.js";
+import {fill} from "/assets/omino/Colors.js";
 
 class TextInputScene extends DimsScene{
 	constructor(validator=/./){
@@ -35,9 +36,9 @@ class TextInputScene extends DimsScene{
 	render(){
 		if(s.isIn()) p5.cursor(p5.TEXT);
 
-		p5.fill(255);
+		fill("scenes.util.textbox.bg");
 		p5.rect(0,0,this.dims.x,this.dims.y);
-		p5.fill(0);
+		fill("scenes.util.textbox.color");
 		p5.textSize(this.dims.y*0.8);
 		p5.textAlign(p5.LEFT, p5.TOP);
 		p5.text(this.value, 2, 2);

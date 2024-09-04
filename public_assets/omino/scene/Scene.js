@@ -1,5 +1,13 @@
 import Vector from "/assets/omino/Vector.js";
 import Data from "/assets/omino-playground.js";
+import {fill} from "/assets/omino/Colors.js";
+
+function forReverse(array, callback){
+  for(let i=array.length-1;i>=0;i--){
+    let r = callback(array[i]);
+    if(r!==undefined) return r;
+  }
+}
 
 class Scene{
   constructor(){
@@ -28,24 +36,24 @@ class Scene{
     }
   }
   mouseDown(x,y){
-    for(const scene of this.subScenes){
+    return forReverse(this.subScenes, scene=>{
       if(scene.mouseDown(x-scene.pos.x,y-scene.pos.y)) return true;
-    }
+    });
   }
   mouseUp(x,y){
-    for(const scene of this.subScenes){
+    return forReverse(this.subScenes, scene=>{
       if(scene.mouseUp(x-scene.pos.x,y-scene.pos.y)) return true;
-    }
+    });
   }
   keyPressed(key){
-    for(const scene of this.subScenes){
+    return forReverse(this.subScenes, scene=>{
       if(scene.keyPressed(key)) return true;
-    }
+    });
   }
   scrolled(x, y, delta){
-    for(const scene of this.subScenes){
+    return forReverse(this.subScenes, scene=>{
       if(scene.scrolled(x-scene.pos.x,y-scene.pos.y, delta)) return true;
-    }
+    });
   }
 
   getAbsolutePos(){
@@ -176,9 +184,9 @@ let hover={
     }
     hoverData.time++;
     if(hoverData.time>0){
-      p5.fill(255);
+      fill("hover.bg");
       p5.rect(hoverData.pos.x-hoverData.tWidth/2,hoverData.pos.y-20, hoverData.tWidth, 20, 5);
-      p5.fill(0);
+      fill("hover.text");
       p5.textAlign(p5.CENTER, p5.BOTTOM);
       p5.textSize(15);
       p5.text(hoverData.text, hoverData.pos.x, hoverData.pos.y-5/2);
@@ -196,4 +204,5 @@ export {
 
   focus,
   hover,
+  forReverse,
 };

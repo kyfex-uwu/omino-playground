@@ -1,26 +1,22 @@
 import Vector from "/assets/omino/Vector.js";
-import {
-  Scene,
-  OneTimeButtonScene
-} from "/assets/omino/scene/Scene.js";
+import {Scene, OneTimeButtonScene} from "/assets/omino/scene/Scene.js";
 import Data from "/assets/omino-playground.js";
-import {
-  Omino,
-  genHashColor
-} from "/assets/omino/Omino.js";
+import {Omino} from "/assets/omino/Omino.js";
+import {fill, stroke, background, getColor} from "/assets/omino/Colors.js";
 
 class DrawingModeScene extends Scene {
   constructor(mainScene) {
     super();
     this.mainScene = mainScene;
+    this.mainScene.hasMouseAccess=false;
 
     this.newTiles = [];
     this.omino = undefined;
 
     this.confButton = this.addScene(new OneTimeButtonScene(s => {
-      p5.fill(s.isIn() ? 150 : 100);
-      p5.rect(0, 0, s.dims.x, s.dims.y);
-      p5.fill(255);
+      fill(s.isIn()?"scenes.drawing.button.bgHover":"scenes.drawing.button.bg");
+      p5.rect(0, 0, s.dims.x, s.dims.y, s.dims.x*0.1);
+      fill("scenes.drawing.button.color");
       p5.push();
       p5.textAlign(p5.CENTER, p5.CENTER);
       p5.textSize((s.dims.x + s.dims.y) * 0.17);
@@ -28,6 +24,7 @@ class DrawingModeScene extends Scene {
       p5.pop();
     }, s => {
       Data.scene = this.mainScene;
+      this.mainScene.hasMouseAccess=true;
       if(this.newTiles.length == 0) return;
 
       let pos = new Vector(0, 0);
@@ -57,7 +54,7 @@ class DrawingModeScene extends Scene {
     this.mainScene.render();
 
     let board = this.mainScene.boardScene;
-    p5.fill(0, 100);
+    fill("scenes.drawing.darken");
     p5.beginShape();
     p5.vertex(board.pos.x, 0);
     p5.vertex(p5.width, 0);
@@ -95,7 +92,7 @@ class DrawingModeScene extends Scene {
       if(this.newTiles.length == 0) {
         this.omino = undefined;
       } else {
-        this.omino = new Omino(new Vector(0, 0), [255, 255, 255], this.newTiles);
+        this.omino = new Omino(new Vector(0, 0), "new", this.newTiles);
       }
     }
 

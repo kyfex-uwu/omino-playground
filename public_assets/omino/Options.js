@@ -2,6 +2,11 @@ import {OminoPalette, allPalettes, nullPalette} from "/assets/omino/Palettes.js"
 import Vector from "/assets/omino/Vector.js";
 import {LockedOmino} from "/assets/omino/Omino.js";
 
+const b64Chars="0123456789abcdefghijklmnopqrstuvwxyzABCEDFGHIJKLMNOPQRSTUVWXYZ_-"
+function fromB64(value) { // value: string
+  return value.split("").map(v=>BigInt(b64Chars.indexOf(v))).reduce((a,c)=>a*64n+c, 0n);
+}
+
 function ominoFromStr(data){
   data=data.split("-");
   if(data[0].length==0) return undefined;
@@ -68,9 +73,9 @@ const pageData={
     validate:v=>v instanceof Object && !isNaN(v[0]) && !isNaN(v[1]) && v[0]>0 && v[1]>0
   },
   locked:{
-    val:"",
+    val:"0",
     transform:d=>{
-      d=parseInt(d,36).toString(2).split("").reverse().join("");
+      d=fromB64(d).toString(2).split("").reverse().join("");
       let bools=d.split("").map(v=>v=="1");
       let map=[];
       for(let y=0;y<pageData.dims[1];y++)
@@ -186,21 +191,26 @@ function toLink(board, palette){
     }).filter(o=>o).join("!"),
     locked:(_=>{
       let tiles = board.lockedTiles.tiles;
-      let toReturn="";
+      let numToReturn="";
       for(let y=0;y<board.height;y++){
         if(!tiles[y]){
-          toReturn+="0".repeat(board.width);
+          numToReturn+="0".repeat(board.width);
           continue;
         }
         for(let x=0;x<board.width;x++){
-          toReturn+=tiles[y][x]?"1":"0";
+          numToReturn+=tiles[y][x]?"1":"0";
         }
       }
 
-      toReturn = toReturn.slice(0,toReturn.lastIndexOf("1")+1).split("").reverse().join("");
-      toReturn = parseInt(toReturn, 2).toString(36);
+      numToReturn = BigInt("0b0"+numToReturn.slice(0,numToReturn.lastIndexOf("1")+1).split("").reverse().join(""));
+      console.log(numToReturn)
+      let strToReturn="";
+      while(numToReturn>0n){
+        strToReturn+=b64Chars[numToReturn%64n];
+        numToReturn/=64n;// this also floors it
+      }
 
-      return toReturn;
+      return strToReturn;
     })(),
     pathType:(board.startPoint===undefined?"":board.startPoint.toURLStr())+"$"+
       (board.endPoint===undefined?"":board.endPoint.toURLStr()),

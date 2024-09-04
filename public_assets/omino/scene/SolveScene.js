@@ -10,6 +10,7 @@ import {getKeybinds} from "/assets/omino/Keybinds.js";
 import BoardBuildScene from "/assets/omino/scene/BoardBuildScene.js";
 import PaletteScene from "/assets/omino/scene/PaletteScene.js";
 import {LockedOmino} from "/assets/omino/Omino.js";
+import {fill, stroke} from "/assets/omino/Colors.js";
 
 class SolveScene extends MainScene{
   constructor(){
@@ -22,7 +23,7 @@ class SolveScene extends MainScene{
     this.paletteScene = this.addScene(new PaletteScene({palette:pageData.palette}));
 
     const drawRot = _=>{
-      p5.fill(0);
+      fill("scenes.buttons.light.icon");
       p5.scale(0.8);
       p5.beginShape();
       p5.vertex(10,10);
@@ -40,7 +41,7 @@ class SolveScene extends MainScene{
       p5.endShape();
     };
     const drawScale = _=>{
-      p5.fill(0);
+      fill("scenes.buttons.light.icon");
       p5.rect(-2,-13,4,26);
       p5.triangle(-6,-12,6,-12,0,-19);
       p5.triangle(-6,12,6,12,0,19);
@@ -94,7 +95,7 @@ class SolveScene extends MainScene{
         })), key:"CW"},
         {b:{}},
         {b:this.addScene(new OneTimeButtonScene(this.drawButton(s=>{
-          p5.fill(0);
+          fill("scenes.buttons.light.icon");
           p5.translate(0,-3);
 
           p5.push();
@@ -121,7 +122,7 @@ class SolveScene extends MainScene{
           p5.endShape();
 
           p5.push();
-          p5.stroke(0);
+          stroke("scenes.buttons.light.icon");
           p5.strokeWeight(3);
           p5.line(-3,0, -2,10);
           p5.line(3,0, 2,10);
@@ -141,7 +142,7 @@ class SolveScene extends MainScene{
             p5.translate(pos.x,pos.y);
             p5.rotate((10-time)*0.05*dir);
             omino.renderTransparent(scale*newScale, this.mouseData.offs.scale(-1*newScale), 
-              p5, 170*newScale);
+              {transparency:170*newScale});
             p5.pop();
 
             time--;
@@ -194,8 +195,7 @@ class SolveScene extends MainScene{
         })), key:"MH"},
         {b:{}},
         {b:this.addScene(new OneTimeButtonScene(this.drawButton(s=>{
-
-          p5.fill(0);
+          fill("scenes.buttons.light.icon");
           for(let i=0;i<2;i++){
             p5.push();
             if(s.isIn()) p5.translate(-5,0);
@@ -268,6 +268,7 @@ class SolveScene extends MainScene{
   }
 
   resized(oldDims, newDims=oldDims){
+    let oldScale=this.boardScene.board.renderData.scale;
     super.resized(oldDims, newDims);
 
     if(this.paletteScene) this.paletteScene.setXAndWidth(newDims.x*3/4,newDims.x/4);
