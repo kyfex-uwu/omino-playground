@@ -1,4 +1,5 @@
 import {DimsScene, focus} from "/assets/omino/scene/Scene.js";
+import {fill, stroke} from "/assets/omino/Colors.js";
 
 class TickboxScene extends DimsScene{
 	constructor(value=false, callback=_=>0){
@@ -18,10 +19,10 @@ class TickboxScene extends DimsScene{
 	}
 
 	render(){
-		p5.fill(255);
+		fill("scenes.util.tickbox.bg");
 		p5.rect(0,0,this.dims.x,this.dims.y);
 		if(this.value){
-			p5.stroke(0);
+			stroke("scenes.util.tickbox.color");
 			p5.scale((this.dims.x+this.dims.y)*0.05);
 			p5.strokeWeight(2);
 			p5.line(2,2,8,8);

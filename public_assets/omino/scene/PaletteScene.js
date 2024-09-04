@@ -3,6 +3,7 @@ import {Omino} from "/assets/omino/Omino.js";
 import {ButtonScene, ScrollableScene, DimsScene,
   OneTimeButtonScene, hover} from "/assets/omino/scene/Scene.js";
 import Data from "/assets/omino-playground.js";
+import {fill, background} from "/assets/omino/Colors.js";
 
 class OminoPaletteSpace extends ButtonScene{
   constructor(omino, index){
@@ -11,11 +12,15 @@ class OminoPaletteSpace extends ButtonScene{
     this.omino=omino;
   }
   render(){
-    p5.fill(0);
-    if(this.isIn()) p5.fill(80);
+    fill(this.isIn()?"scenes.sidebar.button.bgHover":"scenes.sidebar.button.bg");
     p5.rect(this.dims.x*0.05,this.dims.y*0.05,this.dims.x*0.9,this.dims.y*0.9,this.dims.x*0.1);
 
     let scale=this.dims.x*0.8/Math.max(this.omino.tiles.length,this.omino.tiles[0].length);
+    this.omino.renderWithClip(
+      scale, new Vector(
+        (this.dims.x-this.omino.tiles[0].length*scale)/2,
+        (this.dims.y-this.omino.tiles.length*scale)/2), 
+      _=>background("ominoColors.outline"), {stroke:scale*0.1});
     this.omino[(Data.mainBoard.renderData.highlightDupes&&
         Data.mainBoard.ominoes.some(o=>o.equals(this.omino)))?"renderHighlighted":"render"](
       scale, new Vector(
@@ -54,15 +59,14 @@ class PaletteScene extends ScrollableScene{
     this.addScene(this.piecesHolder);
 
     this.drawButton = this.addScene(new OneTimeButtonScene(s=>{
-      p5.fill(50);
-      p5.rect(s.dims.x/2-this.dims.x/2,-this.dims.y*0.01,this.dims.x,this.dims.y*0.1);
-      p5.fill(s.isIn()?150:100);
-      p5.rect(0, 0, s.dims.x,s.dims.y, (s.dims.x+s.dims.y)*0.05);
-      p5.fill(255);
+      fill(s.isIn()?"scenes.sidebar.button.bgHover":"scenes.sidebar.button.bg");
+      p5.rect(0, 0, s.dims.x,s.dims.y, (s.dims.x+s.dims.y)*0.1);
+      fill("scenes.sidebar.button.color");
       p5.push();
-      p5.textAlign(p5.CENTER,p5.CENTER);
-      p5.textSize((s.dims.x+s.dims.y)*0.4);
-      p5.text("+", s.dims.x/2,s.dims.y/2);
+      p5.translate(s.dims.x/2,s.dims.y/2);
+      p5.scale(s.dims.x/100*(s.isIn()?1.1:1));
+      p5.rect(-30,-5,60,10);
+      p5.rect(-5,-30,10,60);
       p5.pop();
 
       if(s.isIn()) hover.set("Add Omino", s);
@@ -80,8 +84,11 @@ class PaletteScene extends ScrollableScene{
       space.recalc(this);
     }
 
-    this.drawButton.dims = new Vector(this.dims.y*0.08,this.dims.y*0.08);
-    this.drawButton.pos = new Vector(this.dims.x/2-this.dims.y*0.08/2,this.dims.y*0.91);
+    let scale = this.dims.x/100;
+    let sbSize = Math.min(this.dims.x/3, scale*30);
+
+    this.drawButton.dims = new Vector(sbSize*0.8, sbSize*0.8);
+    this.drawButton.pos = new Vector((this.dims.x-sbSize*0.9)/2,this.dims.y-sbSize*0.9);
   }
   addOmino(newOmino){
     let space = this.piecesHolder.addScene(new OminoPaletteSpace(newOmino, this.spaces.length));
@@ -90,7 +97,7 @@ class PaletteScene extends ScrollableScene{
   }
 
   render(){
-    p5.fill(50);
+    fill("scenes.sidebar.bg");
     p5.rect(0,0,this.dims.x,this.dims.y);
 
     super.render();

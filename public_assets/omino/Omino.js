@@ -1,4 +1,5 @@
-import Vector from "/assets/omino/Vector.js"
+import Vector from "/assets/omino/Vector.js";
+import {Colors, background, getColor, fill} from "/assets/omino/Colors.js";
 
 const ominoSpacing=0.05;
 const ominoRadius = 0.15;
@@ -91,35 +92,36 @@ class Omino{
   height(){ return Math.max(...this.vectors.map(t=>t.y))+1; }
   width(){ return Math.max(...this.vectors.map(t=>t.x))+1; }
   
-  renderWithClip(scale, pos, env=p5, func){
+  renderWithClip(scale, pos, func, {env=p5, stroke=0}={}){
     env.push();
     env.beginClip();
     env.fill(0);
     for(let y=0;y<this.tiles.length;y++){
       for(let x=0;x<this.tiles[y].length;x++){
         if(!this.tiles[y][x]) continue;
-        env.rect(pos.x+(this.pos.x+x+ominoSpacing)*scale,
-          pos.y+(this.pos.y+y+ominoSpacing)*scale,
-          scale*(1-ominoSpacing*2),scale*(1-ominoSpacing*2),
-          scale*ominoRadius);
-        
+        env.rect(pos.x+(this.pos.x+x+ominoSpacing)*scale-stroke,
+          pos.y+(this.pos.y+y+ominoSpacing)*scale-stroke,
+          scale*(1-ominoSpacing*2)+stroke*2,scale*(1-ominoSpacing*2)+stroke*2,
+          scale*ominoRadius+stroke);
+        if(isNaN(stroke)) console.trace()
+
         let corner=0;
         if(this.tiles[y][x+1]){
-          env.rect(pos.x+(this.pos.x+x+1-ominoSpacing-ominoRadius)*scale,
-            pos.y+(this.pos.y+y+ominoSpacing)*scale,
-            scale*(ominoSpacing+ominoRadius)*2,scale*(1-ominoSpacing*2));
+          env.rect(pos.x+(this.pos.x+x+1-ominoSpacing-ominoRadius)*scale-stroke,
+            pos.y+(this.pos.y+y+ominoSpacing)*scale-stroke,
+            scale*(ominoSpacing+ominoRadius)*2+stroke*2,scale*(1-ominoSpacing*2)+stroke*2);
           corner++;
         }
         if(this.tiles[y+1]&&this.tiles[y+1][x]){
-          env.rect(pos.x+(this.pos.x+x+ominoSpacing)*scale,
-            pos.y+(this.pos.y+y+1-ominoSpacing-ominoRadius)*scale,
-            scale*(1-ominoSpacing*2),scale*(ominoSpacing+ominoRadius)*2);
+          env.rect(pos.x+(this.pos.x+x+ominoSpacing)*scale-stroke,
+            pos.y+(this.pos.y+y+1-ominoSpacing-ominoRadius)*scale-stroke,
+            scale*(1-ominoSpacing*2)+stroke*2,scale*(ominoSpacing+ominoRadius)*2+stroke*2);
           corner++;
         }
         if(corner==2&&this.tiles[y+1]&&this.tiles[y+1][x+1]){
-          env.rect(pos.x+(this.pos.x+x+1-ominoSpacing-0.01)*scale,
-            pos.y+(this.pos.y+y+1-ominoSpacing-0.01)*scale,
-            scale*(ominoSpacing+0.01)*2,scale*(ominoSpacing+0.01)*2);
+          env.rect(pos.x+(this.pos.x+x+1-ominoSpacing-0.01)*scale-stroke,
+            pos.y+(this.pos.y+y+1-ominoSpacing-0.01)*scale-stroke,
+            scale*(ominoSpacing+0.01)*2+stroke*2,scale*(ominoSpacing+0.01)*2+stroke*2);
         }
       }
     }
@@ -128,25 +130,29 @@ class Omino{
     func();
     env.pop();
   }
-  render(scale, pos, env=p5){
-    this.renderWithClip(scale, pos, env, _=>{
-      env.background.apply(env,this.color);
-    });
+  render(scale, pos, {env=p5, stroke=0}={}){
+    this.renderWithClip(scale, pos, _=>{
+      background("ominoColors."+this.color, env);
+    }, {env, stroke});
   }
-  renderTransparent(scale, pos, env=p5, transparency=170){
-    this.renderWithClip(scale, pos, env, _=>{
-      env.background.apply(env,[...this.color, transparency]);
-    });
+  renderTransparent(scale, pos, {env=p5, transparency=170, stroke=0}={}){
+    this.renderWithClip(scale, pos, _=>{
+      let newColors=[...getColor("ominoColors."+this.color)];
+      newColors[3]=transparency;
+      env.background.apply(env,newColors);
+    }, {env, stroke});
   }
-  renderHighlighted(scale, pos, env=p5){
-    this.renderWithClip(scale, pos, env, _=>{
-      env.background.apply(env, this.color);
+  renderHighlighted(scale, pos, {env=p5, stroke=0}={}){
+    this.renderWithClip(scale, pos, _=>{
+      background("ominoColors."+this.color, env);
 
       env.push();
       env.translate(pos.x,pos.y);
       env.scale(scale);
       env.translate(this.pos.x,this.pos.y);
-      env.fill.apply(env, this.color.map(c=>255-c).concat(200));
+      let color=getColor("ominoColors."+this.color).map(c=>255-c);
+      color[3]=200;
+      env.fill.apply(env, color);
       for(let i=-(p5.frameCount*0.004%0.7);i<this.width()+this.height()*0.5;i+=0.7){
         env.beginShape();
         env.vertex(i, -0.05);
@@ -156,7 +162,7 @@ class Omino{
         env.endShape();
       }
       env.pop();
-    });
+    }, {env, stroke});
   }
   
   clone(){
@@ -238,20 +244,7 @@ class LockedOmino extends Omino{
   }
 }
 
-const OminoColors = {
-  I: [255, 23, 69],
-  L: [255, 212, 23],
-  Y: [8, 156, 8],
-  W: [31, 181, 133],
-  V: [212, 121, 237],
-  T: [50, 82, 199],
-  P: [87, 242, 110],
-  N: [133, 253, 255],
-  F: [237, 123, 36],
-  X: [255, 133, 222],
-  Z: [107, 64, 33],
-  U: [100, 14, 176],
-};
+const colorNames="ILYWVTPNFXZU".split("");
 function genHashColor(tiles){
   let w=0;
   for(const tile of tiles)
@@ -262,12 +255,11 @@ function genHashColor(tiles){
     data=data^num;
   }
 
-  return Object.values(OminoColors)[data%Object.values(OminoColors).length];
+  return colorNames[data%colorNames.length];
 }
 
 export {
   Omino,
   LockedOmino,
-  OminoColors,
   genHashColor
 };

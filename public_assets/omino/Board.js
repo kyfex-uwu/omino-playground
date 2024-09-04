@@ -3,6 +3,7 @@ import {LockedOmino} from "/assets/omino/Omino.js";
 import {allPalettes, nullPalette} from "/assets/omino/Palettes.js";
 import {pageData} from "/assets/omino/Options.js";
 import Data from "/assets/omino-playground.js";
+import {fill, background} from "/assets/omino/Colors.js";
 import * as FakeWebWorker from "/assets/omino/BoardLengthCalculator.js";
 
 const tileSpacing=0.07;
@@ -114,9 +115,9 @@ class Board{
     for(let y=0;y<this.height;y++){
       for(let x=0;x<this.width;x++){
         let pos=new Vector(x,y);
-        if(this.get(pos)) continue;
+        fill(this.get(pos)?"board.filled":"board.grid",env);
         
-        env.fill(255, 50);
+        //todo
         if(pos.equals(this.startPoint)) env.fill(164, 255, 133, 50);
         else if(pos.equals(this.endPoint)) env.fill(255, 147, 133, 50);
         env.rect((x+tileSpacing)*this.renderData.scale,
@@ -157,10 +158,10 @@ class Board{
       line(this.path[i-1].x,this.path[i-1].y, this.path[i].x,this.path[i].y);
     }
     env.endClip();
-    env.background(255,100);
+    background("board.pathColor");
     env.pop();
 
-    env.fill(0);
+    fill("board.text",env);
     env.push();
     env.textAlign(env.CENTER,env.CENTER);
     env.textSize(this.renderData.scale*0.5);
@@ -197,10 +198,10 @@ class Board{
             newOmino.pos = newOmino.pos.clone();
             newOmino.pos.x-=x;
             newOmino.pos.y-=y;
-            newOmino[renderFunc](this.renderData.scale, new Vector(0,0), env);
+            newOmino[renderFunc](this.renderData.scale, new Vector(0,0), {env});
           }
         }
-      }else data.omino[renderFunc](this.renderData.scale, new Vector(0,0), env);
+      }else data.omino[renderFunc](this.renderData.scale, new Vector(0,0), {env});
     }
     env.pop();
   }

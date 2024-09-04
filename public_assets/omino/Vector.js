@@ -47,8 +47,6 @@ class Vector{
   }
 }
 
-try{window.vector=Vector;}catch(e){}
-
 Vector.dirs="left,right,up,down".split(",");
 Vector.fromStr = str=>{
   return new Vector(...str.split(".").map(s=>parseInt(s,36)));

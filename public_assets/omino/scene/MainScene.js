@@ -3,6 +3,7 @@ import {Scene, focus, hover} from "/assets/omino/scene/Scene.js";
 import BoardScene from "/assets/omino/scene/BoardScene.js";
 import OptionsScene from "/assets/omino/scene/OptionsScene.js";
 import Data from "/assets/omino-playground.js";
+import {fill, stroke, background, getColor} from "/assets/omino/Colors.js";
 
 class MainScene extends Scene{
   constructor(data){
@@ -21,7 +22,7 @@ class MainScene extends Scene{
   }
   drawButton(clickFunc, hoverText){
     return s=>{
-      p5.fill(255,s.isIn()?150:100);
+      fill(s.isIn()?"scenes.buttons.light.bgHover":"scenes.buttons.light.bg");
       p5.rect(0,0,s.dims.x,s.dims.y, Math.min(s.dims.x,s.dims.y)*0.1);
 
       p5.push();
@@ -35,7 +36,7 @@ class MainScene extends Scene{
   }
 
   render(){
-    p5.background(173, 111, 153);
+    background("bg");
     super.render();
     hover.draw();
   }

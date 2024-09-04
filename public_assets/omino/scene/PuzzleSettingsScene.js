@@ -3,6 +3,7 @@ import {Counter, CustomTextInputScene} from "/assets/omino/scene/OptionsScene.js
 import TickboxScene from "/assets/omino/scene/TickboxScene.js";
 import Vector from "/assets/omino/Vector.js";
 import Data from "/assets/omino-playground.js";
+import {fill} from "/assets/omino/Colors.js";
 
 class PuzzleSettingsScene extends ScrollableScene{
 	constructor(){
@@ -38,19 +39,20 @@ class PuzzleSettingsScene extends ScrollableScene{
 		this.dontScroll=[];
 	}
 	render(){
-	    p5.fill(50);
+	    fill("scenes.sidebar.bg");
 	    p5.rect(0,0,this.dims.x,p5.height);
 
 	    let sc = this.dims.x/100;
 
-	    p5.fill(255);
+	    fill("scenes.sidebar.text");
 	    p5.textSize(6*sc);
 	    p5.textAlign(p5.LEFT, p5.TOP);
 	    p5.text("Has start: ", 2, this.hasStart.getAbsolutePos().y);
 	    p5.text("Has end: ", 2, this.hasEnd.getAbsolutePos().y);
 	    p5.text("If you need/want the ability to make puzzles with "+
 	    	"a limited/custom palette, pls dm me because otherwise "+
-	    	"i have lost the motivation to work on it lol", 2, this.hasEnd.getAbsolutePos().y*1.8, this.dims.x);
+	    	"i have lost the motivation to work on it lol "+
+	    	"(if you dm me i will make it)", 2, this.hasEnd.getAbsolutePos().y*1.8, this.dims.x);
 	    //p5.text("Has limited pieces: ", 2, this.hasLimitedPieces.getAbsolutePos().y);
 
 	    super.render();

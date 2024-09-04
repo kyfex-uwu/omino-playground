@@ -1,3 +1,19 @@
+import {loadColors} from "/assets/omino/Colors.js";
+window.exportMod=mod=>{
+  loadColors(mod);
+};
+import("/assets/omino/colorfiles/default.js").then(_=>{
+  let script=localStorage.getItem("Colorfile");
+  if(!script) return;
+  
+  const tempScript = document.createElement("script");
+  document.body.appendChild(tempScript);
+  tempScript.type="module";
+  tempScript.innerHTML=script;
+});
+
+//--
+
 import Vector from "/assets/omino/Vector.js";
 import SolveScene from "/assets/omino/scene/SolveScene.js";
 import {pageData} from "/assets/omino/Options.js";
