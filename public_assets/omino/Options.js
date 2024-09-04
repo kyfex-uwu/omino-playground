@@ -203,7 +203,6 @@ function toLink(board, palette){
       }
 
       numToReturn = BigInt("0b0"+numToReturn.slice(0,numToReturn.lastIndexOf("1")+1).split("").reverse().join(""));
-      console.log(numToReturn)
       let strToReturn="";
       while(numToReturn>0n){
         strToReturn+=b64Chars[numToReturn%64n];

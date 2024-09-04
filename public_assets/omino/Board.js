@@ -207,13 +207,17 @@ class Board{
   }
 
   clone(){
-    return new Board(this.width, this.height, {
+    let toReturn = new Board(this.width, this.height, {
       torusMode:this.torusMode,
       calcPath:false,
       path:this.path,
       lockedTiles:[...this.lockedTiles.vectors.map(v=>v.clone())],
-      ominoes:this.ominoes
+      ominoes:this.ominoes,
     });
+    toReturn.renderData.highlightDupes=this.renderData.highlightDupes;
+    toReturn.renderData.highlightNotPalette=this.renderData.highlightNotPalette;
+
+    return toReturn;
   }
 }
 

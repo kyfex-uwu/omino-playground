@@ -23,7 +23,8 @@ const changelog = [
 - Fixed omino adding screen letting the mouse through
 - Redid graphics for the Palette tab (add button + omino buttons)
 - Fixed some elements overlapping the settings button and fullscreen button when scrolling
-- Added board type to screenshot`,
+- Added board type to screenshot
+- Added highlights to screenshot`,
 `v0.2.0 8/29/24 (the puzzle + hhhguir update)
 - Fixed pieces overlapping others or going out of the board when resizing (thanks @hhhguir!)
 - Pieces in the palette that are on the board are now highlighted when "Highlight duplicate pieces" is checked (thanks @hhhguir!)
@@ -139,9 +140,8 @@ class ShareImageScene extends Scene{
     p5.textAlign(p5.CENTER,p5.CENTER);
     p5.text("Click to copy", p5.width/2,p5.height*0.2-p5.textSize()*0.7);
 
-    this.board.renderData = {
-      scale:Math.min(p5.width*0.6/this.board.width*0.9, p5.height*0.6/this.board.height*0.9)
-    };
+    this.board.renderData.scale=
+      Math.min(p5.width*0.6/this.board.width*0.9, p5.height*0.6/this.board.height*0.9);
     p5.translate(
       p5.width*0.2+p5.width*0.6/2-(this.board.renderData.scale*this.board.width)/2, 
       p5.height*0.2+p5.height*0.6/2-(this.board.renderData.scale*this.board.height)/2);
