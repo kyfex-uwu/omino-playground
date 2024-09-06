@@ -26,7 +26,7 @@ class UploadColorfile extends Scene{
             p5.push();
             p5.textAlign(p5.CENTER, p5.CENTER);
             p5.textSize((s.dims.x + s.dims.y) * 0.17);
-            p5.text("Cancel", s.dims.x / 2, s.dims.y / 2);
+            p5.text("Close", s.dims.x / 2, s.dims.y / 2);
             p5.pop();
         }, s => {
             this.close();
