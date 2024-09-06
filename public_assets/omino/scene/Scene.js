@@ -2,12 +2,16 @@ import Vector from "/assets/omino/Vector.js";
 import Data from "/assets/omino-playground.js";
 import {fill} from "/assets/omino/Colors.js";
 
+const isKindaMobile = 'ontouchstart' in document.documentElement;
+
 function forReverse(array, callback){
   for(let i=array.length-1;i>=0;i--){
     let r = callback(array[i]);
     if(r!==undefined) return r;
   }
 }
+
+//--
 
 class Scene{
   constructor(){
@@ -116,10 +120,46 @@ class OneTimeButtonScene extends ButtonScene{
   render(){ this.renderFunc(this); }
   click(x, y){ this.clickFunc(this, x, y); return true; }
 }
+const maxClickDist=5;
 class ScrollableScene extends DimsScene{
   constructor(){
     super();
     this.offs=0;
+
+    this.maybeScrolling=undefined;
+    this.lastScroll=undefined;
+    this.mouseMoveListener=undefined;
+    this.mouseUpListener=undefined;
+  }
+  mouseDown(x, y){
+    if(!isKindaMobile) super.mouseDown(x,y);
+    if(!this.isIn()||!isKindaMobile) return;
+
+    this.maybeScrolling=new Vector(p5.mouseX, p5.mouseY);
+    this.lastScroll=undefined;
+
+    Data.canvElt.removeEventListener("mousemove", this.mouseMoveListener);
+    Data.canvElt.removeEventListener("touchmove", this.mouseMoveListener);
+    Data.canvElt.removeEventListener("mouseup", this.mouseUpListener);
+    Data.canvElt.removeEventListener("touchend", this.mouseUpListener);
+
+    Data.canvElt.addEventListener("mousemove",this.mouseMoveListener= e=>{
+      let offsY=e.offsetY||(e.touches[0].pageY-Data.canvElt.offsetTop);
+      console.log(this.lastScroll&&this.lastScroll.toURLStr(), this.maybeScrolling.toURLStr(), e.offsetY)
+
+      if(this.lastScroll||Math.abs(this.maybeScrolling.y-offsY)>maxClickDist){
+        if(!this.lastScroll) this.lastScroll=this.maybeScrolling;
+        this.scrolled(p5.mouseX, p5.mouseY, this.lastScroll.y-p5.mouseY);
+        this.lastScroll=new Vector(p5.mouseX, p5.mouseY);
+      }
+    });
+    Data.canvElt.addEventListener("touchmove", this.mouseMoveListener);
+    Data.canvElt.addEventListener("mouseup", this.mouseUpListener=e=>{
+      Data.canvElt.removeEventListener("mousemove", this.mouseMoveListener);
+      if(this.maybeScrolling.distTo(new Vector(p5.mouseX, p5.mouseY))<maxClickDist)
+        super.mouseDown(p5.mouseX,p5.mouseY);
+    });
+    Data.canvElt.addEventListener("touchend", this.mouseUpListener);
   }
   scrolled(x,y,delta){
     if(!this.isIn()) return false;
@@ -205,4 +245,5 @@ export {
   focus,
   hover,
   forReverse,
+  isKindaMobile
 };

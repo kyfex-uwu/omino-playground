@@ -14,6 +14,7 @@ import SolveScene from "/assets/omino/scene/SolveScene.js";
 import {pageData} from "/assets/omino/Options.js";
 import {rawKeys, createKey} from "/assets/omino/Keybinds.js";
 import Board from "/assets/omino/Board.js";
+import {isKindaMobile} from "/assets/omino/scene/Scene.js";
 
 //--
 
@@ -36,6 +37,7 @@ new p5(p5=>{
     try{document.getElementById("app").appendChild(data.canvElt);}catch(e){}
     data.canvElt.addEventListener("contextmenu", e=>e.preventDefault());
     data.canvElt.addEventListener("scroll", e=>e.preventDefault());
+    data.canvElt.addEventListener("touchmove", e=>e.preventDefault());
     data.canvElt.style["z-index"]=999;
 
     data.mainBoard = new Board(pageData.dims[0], pageData.dims[1], {
@@ -59,6 +61,7 @@ new p5(p5=>{
     let newWidth;
     let newHeight;
     if(data.isFullscreened){
+      if(isKindaMobile) p5.fullscreen(true);
       newWidth=p5.windowWidth;
       newHeight=p5.windowHeight;
 
@@ -69,6 +72,7 @@ new p5(p5=>{
       });
       try{document.getElementById("lightmode-toggle").style.display="none";}catch(e){}
     }else{
+      p5.fullscreen(false);
       newWidth = data.canvElt.parentElement.clientWidth;
       newHeight = Math.min(data.canvElt.parentElement.clientWidth*3/4, p5.windowHeight*0.96);
 
@@ -84,9 +88,11 @@ new p5(p5=>{
   p5.mousePressed = function(){
     data.scene.mouseDown(p5.mouseX,p5.mouseY);
   }
+  p5.touchStarted=p5.mousePressed;
   p5.mouseReleased = function(){
     data.scene.mouseUp(p5.mouseX,p5.mouseY);
   }
+  p5.mouseReleased=p5.mouseReleased;
   p5.keyPressed = function(){
     createKey(p5.key);
     rawKeys[p5.key].press();
@@ -100,7 +106,7 @@ new p5(p5=>{
     if(p5.mouseX>=0&&p5.mouseY>=0&&p5.mouseX<p5.width&&p5.mouseY<p5.height){
       if(data.scene.scrolled(p5.mouseX, p5.mouseY, e.delta*scrollScale)){
         window.scroll(0,data.canvElt.getBoundingClientRect().y-document.body.getBoundingClientRect().y-
-          (p5.windowHeight-p5.height)/2)
+          (p5.windowHeight-p5.height)/2);
       }
     }
   }
