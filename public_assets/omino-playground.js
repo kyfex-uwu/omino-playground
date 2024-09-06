@@ -1,15 +1,10 @@
-import {loadColors} from "/assets/omino/Colors.js";
+import {loadDefaultColors, loadColorScript} from "/assets/omino/Colors.js";
 window.exportMod=mod=>{
-  loadColors(mod);
+  loadDefaultColors(mod);
 };
 import("/assets/omino/colorfiles/default.js").then(_=>{
   let script=localStorage.getItem("Colorfile");
-  if(!script) return;
-  
-  const tempScript = document.createElement("script");
-  document.body.appendChild(tempScript);
-  tempScript.type="module";
-  tempScript.innerHTML=script;
+  if(script) loadColorScript(script);
 });
 
 //--

@@ -15,7 +15,15 @@ import SolveScene from "/assets/omino/scene/SolveScene.js";
 import {fill, stroke, background} from "/assets/omino/Colors.js";
 
 const changelog = [
-`v0.2.1 9/3/2024
+`v0.2.2 9/6/24
+- Fixed the High Contrast colorfile to make creating ominoes actually visible
+- Made the High Contrast colorfile more easily accessible (there's a button for it now)
+- Improved changing colorfiles
+- Added more functions for use in colorfiles (lighten, darken)
+- Added board building to colorfiles
+- Fixed locked tiles in links (again again) (thanks @hhhguir :3)
+- Fixed the cursor still showing you can grab ominoes under the Share Board screen`,
+`v0.2.1 9/3/24
 - Fixed locked tiles decoding incorrectly for very large boards (thanks @hhhguir!)
 - Added colorfiles! This is a way to recolor every part of Omino Playground, through a javascript file. `+
 `Open kyfexuwu.com/assets/omino/colorfiles/default.js to view an example of a colorfile, `+
@@ -118,6 +126,8 @@ class ShareImageScene extends Scene{
   constructor(mainScene){
     super();
     this.mainScene=mainScene;
+    this.mainDrawMouse=this.mainScene.boardScene.drawMouse;
+    this.mainScene.boardScene.drawMouse=false;
     this.mainScene.hasMouseAccess=false;
 
     this.upOnce=false;
@@ -145,7 +155,7 @@ class ShareImageScene extends Scene{
     p5.translate(
       p5.width*0.2+p5.width*0.6/2-(this.board.renderData.scale*this.board.width)/2, 
       p5.height*0.2+p5.height*0.6/2-(this.board.renderData.scale*this.board.height)/2);
-    this.board.render(new Vector(999999,999999), this.mainScene.paletteScene.palette);
+    this.board.render(new Vector(0,0), {palette:this.mainScene.paletteScene.palette, mouse:false});
   }
   mouseUp(){
     if(!this.upOnce) return this.upOnce=true;
@@ -186,6 +196,7 @@ class ShareImageScene extends Scene{
 
     Data.scene=this.mainScene;
     this.mainScene.hasMouseAccess=true;
+    this.mainScene.boardScene.drawMouse=this.mainDrawMouse;
     return true;
   }
   resized(oldDims, newDims){

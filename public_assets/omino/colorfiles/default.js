@@ -70,11 +70,6 @@ exportMod({
 					icon:colorFuncs.hexToRGB(0x000000),
 				}
 			},
-			board:{
-				grid:colorFuncs.hexToRGB(0xBD8BAD),
-				filled:colorFuncs.hexToRGBA(0x00000000),
-				text:colorFuncs.hexToRGB(0x000000),
-			},
 			options:{
 				unsaved:colorFuncs.hexToRGB(0xf7e89c),
 			},
@@ -159,6 +154,30 @@ exportMod({
 				color:"default:util.button.color",
 			},
 		},
+		buildPuzz:{
+			buttons:{
+				"default":{
+					bg:"default:buttons.light.bg",
+					bgHover:"default:buttons.light.bgHover",
+					icon:"default:buttons.light.icon",
+				},
+				start:{
+					bg:colorFuncs.hexToRGB(0xa4ff85),
+					bgHover:colorFuncs.lighten("scenes.buildPuzz.buttons.start.bg", 0.6),
+					icon:"default:buttons.light.icon",
+				},
+				end:{
+					bg:colorFuncs.hexToRGB(0xff8585),
+					bgHover:colorFuncs.lighten("scenes.buildPuzz.buttons.end.bg", 0.3),
+					icon:"default:buttons.light.icon",
+				},
+				locked:{
+					bg:colorFuncs.hexToRGB(0x323232),
+					bgHover:colorFuncs.lighten("scenes.buildPuzz.buttons.locked.bg", 0.15),
+					icon:"default:buttons.dark.icon",
+				}
+			}
+		},
 	},
 
 	bg:"default:bg",
@@ -180,13 +199,16 @@ exportMod({
 		"new":colorFuncs.hexToRGB(0xffffff),
 	},
 	board:{
-		grid:"default:board.grid",
-		filled:"default:board.filled",
-		text:"default:board.text",
+		grid:colorFuncs.hexToRGB(0xBD8BAD),
+		text:colorFuncs.hexToRGB(0x000000),
 		pathColor:colorFuncs.hexToRGBA(0xffffff80),
+
+		filled:colorFuncs.hexToRGBA(0x00000000),
+		start:colorFuncs.hexToRGB(0xafdea0),
+		end:colorFuncs.hexToRGB(0xdea0a0),
 	},
 	hover:{
 		bg:colorFuncs.hexToRGB(0xffffff),
 		text:colorFuncs.hexToRGB(0x000000),
-	}
+	},
 });

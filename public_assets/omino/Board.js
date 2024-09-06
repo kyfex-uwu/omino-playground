@@ -111,15 +111,14 @@ class Board{
     });
   }
   
-  render(pos, palette=nullPalette, env=p5){
+  render(pos, {palette=nullPalette, env=p5, mouse=true}={}){
     for(let y=0;y<this.height;y++){
       for(let x=0;x<this.width;x++){
         let pos=new Vector(x,y);
         fill(this.get(pos)?"board.filled":"board.grid",env);
         
-        //todo
-        if(pos.equals(this.startPoint)) env.fill(164, 255, 133, 50);
-        else if(pos.equals(this.endPoint)) env.fill(255, 147, 133, 50);
+        if(pos.equals(this.startPoint)) fill("board.start", env);
+        else if(pos.equals(this.endPoint)) fill("board.end", env);
         env.rect((x+tileSpacing)*this.renderData.scale,
           (y+tileSpacing)*this.renderData.scale,
           this.renderData.scale*(1-tileSpacing*2),this.renderData.scale*(1-tileSpacing*2),
@@ -172,7 +171,7 @@ class Board{
     
     let over = this.get(new Vector(p5.mouseX,p5.mouseY).sub(pos).scale(1/this.renderData.scale)
       .sub(new Vector(0.5,0.5)).round());
-    if(over&&!(over instanceof LockedOmino))
+    if(mouse&&over&&!(over instanceof LockedOmino))
       p5.cursor(p5.MOVE);
     
     env.push();

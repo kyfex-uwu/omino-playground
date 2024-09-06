@@ -18,6 +18,7 @@ class SolveScene extends MainScene{
     	optionsData:{
     		locked:false,
     	},
+      drawMouse:true,
     });
 
     this.paletteScene = this.addScene(new PaletteScene({palette:pageData.palette}));
@@ -223,7 +224,7 @@ class SolveScene extends MainScene{
             p5.ellipse(8,0,5,5);
           }
         }, "Board Data"),s=>{
-          Data.mainBoard.ominoes=Data.mainBoard.ominoes.filter(o=>o instanceof LockedOmino);
+          //Data.mainBoard.ominoes=Data.mainBoard.ominoes.filter(o=>o instanceof LockedOmino);
         	Data.scene = new BoardBuildScene();
         }))},
       ],

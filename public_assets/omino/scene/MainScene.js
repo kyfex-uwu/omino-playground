@@ -15,7 +15,7 @@ class MainScene extends Scene{
 
     this.buttonGrid=[];
 
-    this.boardScene = this.addScene(new BoardScene(Data.mainBoard));
+    this.boardScene = this.addScene(new BoardScene(Data.mainBoard, data.drawMouse));
     this.optionsScene = this.addScene(new OptionsScene(data.optionsData));
 
     this.resized(new Vector(p5.width, p5.height), new Vector(p5.width, p5.height));
