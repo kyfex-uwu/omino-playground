@@ -209,7 +209,7 @@ function toLink(board, palette){
         numToReturn/=64n;// this also floors it
       }
 
-      return strToReturn;
+      return strToReturn.split("").reverse().join("");
     })(),
     pathType:(board.startPoint===undefined?"":board.startPoint.toURLStr())+"$"+
       (board.endPoint===undefined?"":board.endPoint.toURLStr()),

@@ -4,9 +4,10 @@ import { DimsScene } from "/assets/omino/scene/Scene.js";
 import { LockedOmino } from "/assets/omino/Omino.js";
 
 class BoardScene extends DimsScene {
-    constructor(board) {
+    constructor(board, drawMouse=true) {
         super();
         this.board = board;
+        this.drawMouse=drawMouse;
 
         this.clickListener=_=>0;
     }
@@ -14,7 +15,7 @@ class BoardScene extends DimsScene {
         this.dims = new Vector(this.board.width, this.board.height).scale(this.board.renderData.scale);
     }
     render() {
-        this.board.render(this.getAbsolutePos(), (this.parent.paletteScene||{}).palette);
+        this.board.render(this.getAbsolutePos(), {palette:(this.parent.paletteScene||{}).palette, mouse:this.drawMouse});
         this.quickResize();
     }
     setBounds(width, height) {

@@ -132,25 +132,25 @@ class Omino{
   }
   render(scale, pos, {env=p5, stroke=0}={}){
     this.renderWithClip(scale, pos, _=>{
-      background("ominoColors."+this.color, env);
+      background(this.color, env);
     }, {env, stroke});
   }
   renderTransparent(scale, pos, {env=p5, transparency=170, stroke=0}={}){
     this.renderWithClip(scale, pos, _=>{
-      let newColors=[...getColor("ominoColors."+this.color)];
+      let newColors=[...getColor(this.color)];
       newColors[3]=transparency;
       env.background.apply(env,newColors);
     }, {env, stroke});
   }
   renderHighlighted(scale, pos, {env=p5, stroke=0}={}){
     this.renderWithClip(scale, pos, _=>{
-      background("ominoColors."+this.color, env);
+      background(this.color, env);
 
       env.push();
       env.translate(pos.x,pos.y);
       env.scale(scale);
       env.translate(this.pos.x,this.pos.y);
-      let color=getColor("ominoColors."+this.color).map(c=>255-c);
+      let color=getColor(this.color).map(c=>255-c);
       color[3]=200;
       env.fill.apply(env, color);
       for(let i=-(p5.frameCount*0.004%0.7);i<this.width()+this.height()*0.5;i+=0.7){
@@ -255,7 +255,7 @@ function genHashColor(tiles){
     data=data^num;
   }
 
-  return colorNames[data%colorNames.length];
+  return "ominoColors."+colorNames[data%colorNames.length];
 }
 
 export {

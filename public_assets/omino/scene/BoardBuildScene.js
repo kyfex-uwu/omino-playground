@@ -7,8 +7,9 @@ import Data from "/assets/omino-playground.js";
 import PuzzleSettingsScene from "/assets/omino/scene/PuzzleSettingsScene.js";
 import {Omino, LockedOmino} from "/assets/omino/Omino.js";
 import {getKeybinds} from "/assets/omino/Keybinds.js";
+import {fill, background} from "/assets/omino/Colors.js";
 
-const displayOmino = new Omino(new Vector(0,0), [0,0,0], [
+const displayOmino = new Omino(new Vector(0,0), "scenes.buildPuzz.buttons.default.icon", [
   [1,0],[0,1],[1,1],[1,2],[2,2],
   [-2,-1],[-1,-1],[-2,-2]
   ].map(v=>new Vector(v[0]+2,v[1]+2)));
@@ -20,6 +21,7 @@ class BoardBuildScene extends MainScene{
     	},
 
       shouldRecalcPath:false,
+      drawMouse:false,
     });
     Data.mainBoard.path=[];
 
@@ -27,26 +29,44 @@ class BoardBuildScene extends MainScene{
 
     const gridRect=(x,y)=>{
       p5.rect(x+0.7,y+0.7,8.6,8.6,2);
-    }
+    };
+    const drawPencil=type=>{
+      fill(`scenes.buildPuzz.buttons.${type}.icon`);
+      p5.beginShape();
+      p5.vertex(-19,12);
+      p5.vertex(-13,20);
+      p5.vertex(10,0);
+      p5.vertex(4,-8);
+      p5.endShape();
+      p5.beginShape();
+      p5.vertex(11,-1);
+      p5.vertex(5,-9);
+      p5.vertex(11,-11);
+      p5.vertex(14,-7);
+      p5.endShape();
+      p5.beginShape();
+      p5.vertex(12,-12);
+      p5.vertex(15,-8);
+      p5.vertex(17,-11);
+      p5.vertex(16,-14);
+      p5.endShape();
+    };
     this.buttonGrid=[
       [{b:this.addScene(new OneTimeButtonScene(this.drawButton(s=>{
-        if(this.state=="start")
-          p5.background(255, 100);
-      },"Set Start", [164, 255, 133]),s=>{
+        if(this.state=="start") drawPencil("start");
+      },"Set Start", "scenes.buildPuzz.buttons.start"),s=>{
         if(this.state=="start") this.state="";
         else this.state="start";
       })), key:"START"},{b:this.addScene(new OneTimeButtonScene(this.drawButton(s=>{
-        if(this.state=="end")
-          p5.background(255, 100);
-      },"Set End", [255, 147, 133]),s=>{
+        if(this.state=="end") drawPencil("end");
+      },"Set End", "scenes.buildPuzz.buttons.end"),s=>{
         if(this.state=="end") this.state="";
         else this.state="end";
       })), key:"END"},{b:{}},{b:{}}],
 
       [{b:this.addScene(new OneTimeButtonScene(this.drawButton(s=>{
-        if(this.state=="locked")
-          p5.background(255, 100);
-      },"Draw Locked Tiles", [50]),s=>{
+        if(this.state=="locked") drawPencil("locked");
+      },"Draw Locked Tiles", "scenes.buildPuzz.buttons.locked"),s=>{
         if(this.state=="locked") this.state="";
         else this.state="locked";
       })), key:"LOCK"},{b:{}},{b:{}},
@@ -69,11 +89,11 @@ class BoardBuildScene extends MainScene{
     super.resized(oldDims, newDims);
   }
 
-  drawButton(clickFunc, hoverText, color=[255,255,255]){
+  drawButton(clickFunc, hoverText, color="scenes.buildPuzz.buttons.default"){
     return s=>{
       let padding = Math.min(s.dims.x,s.dims.y)*0.1;
 
-      p5.fill.apply(p5, color.concat(s.isIn()?150:100));
+      fill(color+(s.isIn()?".bgHover":".bg"));
       p5.rect(0,0,s.dims.x,s.dims.y, padding);
 
       p5.push();

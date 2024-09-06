@@ -14,13 +14,22 @@ exportMod({
 					icon:"default:buttons.dark.icon",
 				}
 			},
-			board:{
-				grid:colorFuncs.hexToRGB(0x888888),
-				filled:colorFuncs.hexToRGBA(0x555555),
-			},
 			bg:colorFuncs.hexToRGB(0x000000),
 			sidebar:{
 				bg:colorFuncs.hexToRGB(0x252525),
+			},
+		},
+	},
+
+	scenes:{
+		buildPuzz:{
+			buttons:{
+				start:{
+					icon:colorFuncs.hexToRGB(0x000000),
+				},
+				end:{
+					icon:colorFuncs.hexToRGB(0x000000),
+				},
 			},
 		},
 	},
@@ -38,5 +47,13 @@ exportMod({
 		X: colorFuncs.hexToRGB(0xff00ff),
 		Z: colorFuncs.hexToRGB(0x805000),
 		U: colorFuncs.hexToRGB(0x8800ff),
+
+		new: colorFuncs.hexToRGB(0xffffff),
+	},
+
+	board:{
+		grid:colorFuncs.hexToRGB(0x888888),
+		start:colorFuncs.hexToRGB(0x00ff00),
+		end:colorFuncs.hexToRGB(0xff0000),
 	},
 });

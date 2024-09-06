@@ -92,7 +92,7 @@ class DrawingModeScene extends Scene {
       if(this.newTiles.length == 0) {
         this.omino = undefined;
       } else {
-        this.omino = new Omino(new Vector(0, 0), "new", this.newTiles);
+        this.omino = new Omino(new Vector(0, 0), "ominoColors.new", this.newTiles);
       }
     }
 

@@ -66,25 +66,25 @@ class OminoPalette{
   }
 }
 const Pentominoes = new OminoPalette({
-  I:{ color: "I", positions: "#/#/#/#/#" },
-  L:{ color: "L", positions: "#/#/#/##" },
-  Y:{ color: "Y", positions: " #/##/ #/ #" },
-  W:{ color: "W", positions: " ##/##/#" },
-  V:{ color: "V", positions: "  #/  #/###" },
-  T:{ color: "T", positions: "###/ # / # " },
-  P:{ color: "P", positions: "##/##/ #" },
-  N:{ color: "N", positions: " ###/##" },
-  F:{ color: "F", positions: " ##/##/ #" },
-  X:{ color: "X", positions: " #/###/ #" },
-  Z:{ color: "Z", positions: "##/ #/ ##" },
-  U:{ color: "U", positions: "##/#/##" },
+  I:{ color: "ominoColors.I", positions: "#/#/#/#/#" },
+  L:{ color: "ominoColors.L", positions: "#/#/#/##" },
+  Y:{ color: "ominoColors.Y", positions: " #/##/ #/ #" },
+  W:{ color: "ominoColors.W", positions: " ##/##/#" },
+  V:{ color: "ominoColors.V", positions: "  #/  #/###" },
+  T:{ color: "ominoColors.T", positions: "###/ # / # " },
+  P:{ color: "ominoColors.P", positions: "##/##/ #" },
+  N:{ color: "ominoColors.N", positions: " ###/##" },
+  F:{ color: "ominoColors.F", positions: " ##/##/ #" },
+  X:{ color: "ominoColors.X", positions: " #/###/ #" },
+  Z:{ color: "ominoColors.Z", positions: "##/ #/ ##" },
+  U:{ color: "ominoColors.U", positions: "##/#/##" },
 });
 const Tetronimoes = new OminoPalette({
-  O:{ color: "L", positions: "##/##" },
-  I:{ color: "N", positions: "####" },
-  S:{ color: "Y", positions: "##/ ##" },
-  T:{ color: "V", positions: "###/ #" },
-  L:{ color: "F", positions: "###/#" },
+  O:{ color: "ominoColors.L", positions: "##/##" },
+  I:{ color: "ominoColors.N", positions: "####" },
+  S:{ color: "ominoColors.Y", positions: "##/ ##" },
+  T:{ color: "ominoColors.V", positions: "###/ #" },
+  L:{ color: "ominoColors.F", positions: "###/#" },
 });
 const Hexonimoes = new OminoPalette([
   "######",
