@@ -1,5 +1,5 @@
 import {ScrollableScene, OneTimeButtonScene, Scene, DimsScene,
-  focus, hover} from "/assets/omino/scene/Scene.js";
+  focus, hover, isKindaMobile} from "/assets/omino/scene/Scene.js";
 import BoardScene from "/assets/omino/scene/BoardScene.js";
 import PaletteScene from "/assets/omino/scene/PaletteScene.js";
 import TextInputScene from "/assets/omino/scene/TextInputScene.js";
@@ -15,6 +15,8 @@ import SolveScene from "/assets/omino/scene/SolveScene.js";
 import {fill, stroke, background} from "/assets/omino/Colors.js";
 
 const changelog = [
+`v0.2.3 9/6/24
+- added mobile support :3`,
 `v0.2.2 9/6/24
 - Fixed the High Contrast colorfile to make creating ominoes actually visible
 - Made the High Contrast colorfile more easily accessible (there's a button for it now)
@@ -611,7 +613,8 @@ class OptionsScene extends ScrollableScene{
     super.resized(old,n);
   }
   scrolled(x,y,delta){
-    delta*=this.dims.x/100*0.3;
+    delta*=this.dims.x/100;
+    if(!isKindaMobile) delta*=0.3;
 
     let oldOffs=this.offs;
     if(!super.scrolled(x,y,delta)) return false;
