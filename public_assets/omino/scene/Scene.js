@@ -155,10 +155,16 @@ class ScrollableScene extends DimsScene{
     Data.canvElt.addEventListener("touchmove", this.mouseMoveListener);
     Data.canvElt.addEventListener("mouseup", this.mouseUpListener=e=>{
       Data.canvElt.removeEventListener("mousemove", this.mouseMoveListener);
-      if(this.maybeScrolling.distTo(new Vector(p5.mouseX, p5.mouseY))<maxClickDist)
+      if(this.maybeScrolling.distTo(new Vector(p5.mouseX, p5.mouseY))<maxClickDist){
+        this.lastScroll=undefined;
         super.mouseUp(p5.mouseX,p5.mouseY);
+      }
     });
     Data.canvElt.addEventListener("touchend", this.mouseUpListener);
+  }
+  mouseUp(x,y){
+    if(this.lastScroll) return;
+    super.mouseUp(x,y);
   }
   scrolled(x,y,delta){
     if(!this.isIn()) return false;
