@@ -24,7 +24,8 @@ const changelog = [
 - Added more functions for use in colorfiles (lighten, darken)
 - Added board building to colorfiles
 - Fixed locked tiles in links (again again) (thanks @hhhguir :3)
-- Fixed the cursor still showing you can grab ominoes under the Share Board screen`,
+- Fixed the cursor still showing you can grab ominoes under the Share Board screen
+- Stopped removing pieces when going into puzzle editing mode`,
 `v0.2.1 9/3/24
 - Fixed locked tiles decoding incorrectly for very large boards (thanks @hhhguir!)
 - Added colorfiles! This is a way to recolor every part of Omino Playground, through a javascript file. `+
