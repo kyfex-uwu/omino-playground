@@ -92,7 +92,7 @@ new p5(p5=>{
   p5.mouseReleased = function(){
     data.scene.mouseUp(p5.mouseX,p5.mouseY);
   }
-  p5.mouseReleased=p5.mouseReleased;
+  p5.touchEnded=p5.mouseReleased;
   p5.keyPressed = function(){
     createKey(p5.key);
     rawKeys[p5.key].press();

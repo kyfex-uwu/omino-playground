@@ -98,7 +98,7 @@ class ButtonScene extends DimsScene{
   constructor(){
     super();
   }
-  mouseDown(x,y){
+  mouseUp(x,y){
     if(this.isIn()){
       focus(this);
       
@@ -156,7 +156,7 @@ class ScrollableScene extends DimsScene{
     Data.canvElt.addEventListener("mouseup", this.mouseUpListener=e=>{
       Data.canvElt.removeEventListener("mousemove", this.mouseMoveListener);
       if(this.maybeScrolling.distTo(new Vector(p5.mouseX, p5.mouseY))<maxClickDist)
-        super.mouseDown(p5.mouseX,p5.mouseY);
+        super.mouseUp(p5.mouseX,p5.mouseY);
     });
     Data.canvElt.addEventListener("touchend", this.mouseUpListener);
   }

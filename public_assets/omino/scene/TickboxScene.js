@@ -7,7 +7,7 @@ class TickboxScene extends DimsScene{
 		this.value=value;
 		this.callback=callback;
 	}
-	mouseDown(x,y){
+	mouseUp(x,y){
 		if(this.isIn()){
 			focus(this);
 			this.value=!this.value;
@@ -15,7 +15,7 @@ class TickboxScene extends DimsScene{
 			return true;
 		}
 
-		return super.mouseDown(x,y);
+		return super.mouseUp(x,y);
 	}
 
 	render(){

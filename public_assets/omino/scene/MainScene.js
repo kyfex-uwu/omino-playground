@@ -60,10 +60,10 @@ class MainScene extends Scene{
     super.resized(oldDims, newDims);
   }
 
-  mouseDown(){
+  mouseUp(x, y){
     focus(this);
 
-    return super.mouseDown();
+    return super.mouseUp(x, y);
   }
 }
 

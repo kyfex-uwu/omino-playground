@@ -76,7 +76,7 @@ class DrawingModeScene extends Scene {
     super.render();
   }
 
-  mouseDown(x, y) {
+  mouseUp(x, y) {
     let board = this.mainScene.boardScene;
     if(x > board.pos.x && y > board.pos.y && x < board.pos.x + board.dims.x && y < board.pos.y + board.dims.y) {
       let newX = Math.floor((x - board.pos.x) / board.dims.x * board.board.width);
@@ -96,7 +96,7 @@ class DrawingModeScene extends Scene {
       }
     }
 
-    super.mouseDown(x, y);
+    super.mouseUp(x, y);
   }
 
   resized(oldDims, newDims) {
