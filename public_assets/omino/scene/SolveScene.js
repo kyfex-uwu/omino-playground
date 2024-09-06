@@ -293,23 +293,23 @@ class SolveScene extends MainScene{
 
   onBoardClick(x,y){
     if(!this.parent.mouseData.omino) {
-        let omino = this.board.get(new Vector(x, y));
-        if(omino && !(omino instanceof LockedOmino)) {
-            this.board.remove(omino);
+      let omino = this.board.get(new Vector(x, y));
+      if(omino && !(omino instanceof LockedOmino)) {
+        this.board.remove(omino);
 
-            this.parent.mouseData.omino = omino;
-            this.parent.mouseData.offs = new Vector(p5.mouseX, p5.mouseY).sub(
-                this.parent.mouseData.omino.pos
-                .scale(this.board.renderData.scale)
-                .add(this.getAbsolutePos()));
+        this.parent.mouseData.omino = omino;
+        this.parent.mouseData.offs = new Vector(p5.mouseX, p5.mouseY).sub(
+          this.parent.mouseData.omino.pos
+          .scale(this.board.renderData.scale)
+          .add(this.getAbsolutePos()));
 
-            if(omino.pos.x > x) this.parent.mouseData.offs.x += this.board.renderData.scale * this.board.width;
-            if(omino.pos.y > y) this.parent.mouseData.offs.y += this.board.renderData.scale * this.board.height;
+        if(omino.pos.x > x) this.parent.mouseData.offs.x += this.board.renderData.scale * this.board.width;
+        if(omino.pos.y > y) this.parent.mouseData.offs.y += this.board.renderData.scale * this.board.height;
 
-            omino.pos = new Vector(0, 0);
-            
-            return true;
-        }
+        omino.pos = new Vector(0, 0);
+        
+        return true;
+      }
     } else {
         let newPos;
         if(newPos=this.parent.mouseData.omino.canPlace(this.board, new Vector(p5.mouseX, p5.mouseY)

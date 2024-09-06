@@ -7,13 +7,13 @@ class TextInputScene extends DimsScene{
 		this.validator=validator;
 		this.value="";
 	}
-	mouseDown(x,y){
+	mouseUp(x,y){
 		if(this.isIn()){
 			focus(this);
 			return true;
 		}
 
-		return super.mouseDown(x,y);
+		return super.mouseUp(x,y);
 	}
 
   	keyPressed(key){

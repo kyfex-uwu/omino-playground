@@ -101,8 +101,8 @@ class UploadColorfile extends Scene{
         p5.text(message,p5.width/2,p5.height/2-p5.width*0.04);
         super.render();
     }
-    mouseDown(x,y){
-        if(super.mouseDown(x,y)) return true;
+    mouseUp(x,y){
+        if(super.mouseUp(x,y)) return true;
 
         const filePicker = document.createElement("input");
         filePicker.type="file";

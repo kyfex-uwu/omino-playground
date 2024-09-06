@@ -38,7 +38,7 @@ class KeybindScene extends DimsScene{
         }
     }
 
-    mouseDown(x, y){
+    mouseUp(x, y){
         if(!this.isIn()) return false;
 
         Data.scene = new ChangeKeysScene(Data.scene, this.keybind);
