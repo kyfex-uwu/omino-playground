@@ -72,7 +72,7 @@ new p5(p5=>{
       });
       try{document.getElementById("lightmode-toggle").style.display="none";}catch(e){}
     }else{
-      p5.fullscreen(false);
+      if(isKindaMobile) p5.fullscreen(false);
       newWidth = data.canvElt.parentElement.clientWidth;
       newHeight = Math.min(data.canvElt.parentElement.clientWidth*3/4, p5.windowHeight*0.96);
 
