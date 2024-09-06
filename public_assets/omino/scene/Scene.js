@@ -145,7 +145,6 @@ class ScrollableScene extends DimsScene{
 
     Data.canvElt.addEventListener("mousemove",this.mouseMoveListener= e=>{
       let offsY=e.offsetY||(e.touches[0].pageY-Data.canvElt.offsetTop);
-      console.log(this.lastScroll&&this.lastScroll.toURLStr(), this.maybeScrolling.toURLStr(), e.offsetY)
 
       if(this.lastScroll||Math.abs(this.maybeScrolling.y-offsY)>maxClickDist){
         if(!this.lastScroll) this.lastScroll=this.maybeScrolling;
