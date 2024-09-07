@@ -15,6 +15,11 @@ import SolveScene from "/assets/omino/scene/SolveScene.js";
 import {fill, stroke, background} from "/assets/omino/Colors.js";
 
 const changelog = [
+`v0.2.4 xxx
+- Reworked pathfinding algorithm under the hood (this does not come with performance improvements sadge
+- Fixed the "Calculate Path" tickbox incorrectly recalculating the path when it shouldn't`,
+`v0.2.3b 9/6/24
+- Fixed image copying not working`,
 `v0.2.3 9/6/24
 - added mobile support :3`,
 `v0.2.2 9/6/24
@@ -634,7 +639,8 @@ class OptionsScene extends ScrollableScene{
     if(this.parent instanceof SolveScene&&!this.calcPathBox){
       this.calcPathBox = this.addScene(new TickboxScene(true,s=>{
         Data.mainBoard.shouldRecalcPath=s.value;
-        Data.mainBoard.recalcPath();
+        if(s.value) Data.mainBoard.recalcPath();
+        else Data.mainBoard.path=[];
       }));
       this.preventDupesBox = this.addScene(new TickboxScene(Data.mainBoard.renderData.highlightDupes,s=>{
         Data.mainBoard.renderData.highlightDupes=s.value;
