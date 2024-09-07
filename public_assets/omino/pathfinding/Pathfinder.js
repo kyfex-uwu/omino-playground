@@ -4,11 +4,14 @@
  */
 
 import Vector from "/assets/omino/Vector.js";
+
 import SquareEuclidean from "/assets/omino/pathfinding/SquareEuclidean.js";
 import SquareTorus from "/assets/omino/pathfinding/SquareTorus.js";
+import TriangleEuclidean from "/assets/omino/pathfinding/TriangleEuclidean.js";
 const methods={
 	SquareEuclidean,
-	SquareTorus
+	SquareTorus,
+	TriangleEuclidean
 };
 
 //recursive function that returns all tiles that are all connected
@@ -104,7 +107,6 @@ function findLongestShortest(currPoint, pool, maybePaths, data={}){
 }
 
 async function calcLength(data){
-	let board=data.board;
 	if(data.startPoint) data.startPoint=new Vector(...data.startPoint._pos);
 	if(data.endPoint) data.endPoint=new Vector(...data.endPoint._pos);
 	const method=methods[data.method];
@@ -112,7 +114,7 @@ async function calcLength(data){
 	//split tiles into pools
 	//a pool is just an area of connected tiles. on most boards there is only 1 pool but
 	//we need to run the pathfinding algorithm on each pool just in case
-	let remainingTiles=new Set(Object.values(method.getAllTiles(board)));
+	let remainingTiles=new Set(Object.values(method.getAllTiles(data.board)));
 	let pools=[];
 	for(;;){
 		if(remainingTiles.size==0) break;
