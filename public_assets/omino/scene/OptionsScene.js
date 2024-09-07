@@ -8,7 +8,6 @@ import SettingsScene from "/assets/omino/scene/settings/SettingsScene.js";
 import Vector from "/assets/omino/Vector.js";
 import Data from "/assets/omino-playground.js";
 import {pageData, toLink} from "/assets/omino/Options.js";
-import Board from "/assets/omino/Board.js";
 import {allPalettes, nullPalette} from "/assets/omino/Palettes.js";
 import {LockedOmino} from "/assets/omino/Omino.js";
 import SolveScene from "/assets/omino/scene/SolveScene.js";
@@ -368,6 +367,7 @@ class OptionsScene extends ScrollableScene{
 
       let newLocked = Data.mainBoard.lockedTiles.vectors.filter(v=>v.x<dims[0]&&v.y<dims[1]);
 
+      //TODO
       let newBoard = new Board(dims[0], dims[1], {
         lockedTiles:newLocked,
         ominoes:[],

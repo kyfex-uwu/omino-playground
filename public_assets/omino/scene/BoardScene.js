@@ -1,5 +1,4 @@
 import Vector from "/assets/omino/Vector.js";
-import Board from "/assets/omino/Board.js"
 import { DimsScene } from "/assets/omino/scene/Scene.js";
 import { LockedOmino } from "/assets/omino/Omino.js";
 

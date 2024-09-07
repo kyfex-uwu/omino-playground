@@ -13,7 +13,7 @@ import Vector from "/assets/omino/Vector.js";
 import SolveScene from "/assets/omino/scene/SolveScene.js";
 import {pageData} from "/assets/omino/Options.js";
 import {rawKeys, createKey} from "/assets/omino/Keybinds.js";
-import Board from "/assets/omino/Board.js";
+import SquareEuclideanBoard from "/assets/omino/boards/SquareEuclideanBoard.js";
 import {isKindaMobile} from "/assets/omino/scene/Scene.js";
 
 //--
@@ -40,7 +40,7 @@ new p5(p5=>{
     data.canvElt.addEventListener("touchmove", e=>e.preventDefault());
     data.canvElt.style["z-index"]=999;
 
-    data.mainBoard = new Board(pageData.dims[0], pageData.dims[1], {
+    data.mainBoard = new SquareEuclideanBoard(pageData.dims[0], pageData.dims[1], {
       torusMode:pageData.torus,
       ominoes:pageData.boardData.ominoes,
       lockedTiles:pageData.locked,
