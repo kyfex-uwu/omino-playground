@@ -4,7 +4,7 @@ import {allPalettes, nullPalette} from "/assets/omino/Palettes.js";
 import {pageData} from "/assets/omino/Options.js";
 import Data from "/assets/omino-playground.js";
 import {fill, background} from "/assets/omino/Colors.js";
-import * as FakeWebWorker from "/assets/omino/BoardLengthCalculator.js";
+import * as FakeWebWorker from "/assets/omino/pathfinding/Pathfinder.js";
 
 const tileSpacing=0.07;
 const tileRadius = 0.2;
@@ -66,9 +66,9 @@ class Board{
     return false;
   }
   recalcPath(){
+    try{this.lengthWorker.terminate();}catch(e){}
     if(!this.shouldRecalcPath) return;
     this.path=[];
-    try{this.lengthWorker.terminate();}catch(e){}
 
     let thisAsBoolArr=[];
     for(let y=0;y<this.height;y++){
@@ -83,7 +83,7 @@ class Board{
     let lengthWorker;
     this.lengthWorker=lengthWorker;
     try{
-      lengthWorker = new Worker("/assets/omino/BoardLengthCalculator.js", { type: "module" });
+      lengthWorker = new Worker("/assets/omino/pathfinding/Pathfinder.js", { type: "module" });
     }catch(e){
       const fakePostMessage = data=>lengthWorker.onmessage({data});
       FakeWebWorker.fake(fakePostMessage);
@@ -104,7 +104,7 @@ class Board{
 
     lengthWorker.postMessage({
       board:thisAsBoolArr, 
-      torusMode:this.torusMode,
+      method:this.torusMode?"SquareTorus":"SquareEuclidean",
       
       startPoint:this.startPoint,
       endPoint:this.endPoint,
