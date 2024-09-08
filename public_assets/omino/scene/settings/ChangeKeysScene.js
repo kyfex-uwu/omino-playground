@@ -1,7 +1,7 @@
 import {Scene, OneTimeButtonScene} from "/assets/omino/scene/Scene.js";
 import Vector from "/assets/omino/Vector.js";
 import {keybindGroups, PressKeyScene} from "/assets/omino/scene/settings/SettingsScene.js";
-import Data from "/assets/omino-playground.js";
+import Data from "/assets/omino/Main.js";
 
 let keybindNames;
 

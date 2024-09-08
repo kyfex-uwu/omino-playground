@@ -5,7 +5,7 @@ import {Scene, focus} from "/assets/omino/scene/Scene.js";
 import DrawingModeScene from "/assets/omino/scene/DrawingModeScene.js";
 import {OneTimeButtonScene} from "/assets/omino/scene/Scene.js";
 import {pageData} from "/assets/omino/Options.js";
-import Data from "/assets/omino-playground.js";
+import Data from "/assets/omino/Main.js";
 import {getKeybinds} from "/assets/omino/Keybinds.js";
 import BoardBuildScene from "/assets/omino/scene/BoardBuildScene.js";
 import PaletteScene from "/assets/omino/scene/PaletteScene.js";

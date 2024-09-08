@@ -2,7 +2,7 @@ import Vector from "/assets/omino/Vector.js";
 import {LockedOmino} from "/assets/omino/Omino.js";
 import {allPalettes, nullPalette} from "/assets/omino/Palettes.js";
 import {pageData} from "/assets/omino/Options.js";
-import Data from "/assets/omino-playground.js";
+import Data from "/assets/omino/Main.js";
 import {fill, background} from "/assets/omino/Colors.js";
 import * as FakeWebWorker from "/assets/omino/pathfinding/Pathfinder.js";
 

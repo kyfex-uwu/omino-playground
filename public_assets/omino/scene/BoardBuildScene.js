@@ -3,7 +3,7 @@ import MainScene from "/assets/omino/scene/MainScene.js";
 import {OneTimeButtonScene, hover} from "/assets/omino/scene/Scene.js";
 import Vector from "/assets/omino/Vector.js";
 import SolveScene from "/assets/omino/scene/SolveScene.js";
-import Data from "/assets/omino-playground.js";
+import Data from "/assets/omino/Main.js";
 import PuzzleSettingsScene from "/assets/omino/scene/PuzzleSettingsScene.js";
 import {Omino, LockedOmino} from "/assets/omino/Omino.js";
 import {getKeybinds} from "/assets/omino/Keybinds.js";

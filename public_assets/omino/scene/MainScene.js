@@ -2,7 +2,7 @@ import Vector from "/assets/omino/Vector.js";
 import {Scene, focus, hover} from "/assets/omino/scene/Scene.js";
 import BoardScene from "/assets/omino/scene/BoardScene.js";
 import OptionsScene from "/assets/omino/scene/OptionsScene.js";
-import Data from "/assets/omino-playground.js";
+import Data from "/assets/omino/Main.js";
 import {fill, stroke, background, getColor} from "/assets/omino/Colors.js";
 
 class MainScene extends Scene{

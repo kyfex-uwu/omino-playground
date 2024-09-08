@@ -1,6 +1,6 @@
 import {Scene, DimsScene, OneTimeButtonScene, ScrollableScene, hover} from "/assets/omino/scene/Scene.js";
 import Vector from "/assets/omino/Vector.js";
-import Data from "/assets/omino-playground.js";
+import Data from "/assets/omino/Main.js";
 import {Keybinds} from "/assets/omino/Keybinds.js";
 import {loadColors, loadColorScript, fill, background} from "/assets/omino/Colors.js";
 import KeybindScene from "/assets/omino/scene/settings/KeybindScene.js";
