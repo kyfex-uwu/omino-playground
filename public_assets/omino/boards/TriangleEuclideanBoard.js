@@ -9,7 +9,7 @@ import Board from "/assets/omino/boards/Board.js";
 const tileSpacing=0.07;
 const tileRadius = 0.2;
 
-class SquareEuclideanBoard extends Board{
+class TriangleEuclideanBoard extends Board{
   constructor(width, height, options={}){
     super(s=>{
       s.width=width;
@@ -135,7 +135,7 @@ class SquareEuclideanBoard extends Board{
   }
 
   clone(){
-    let toReturn = new SquareEuclideanBoard(this.width, this.height, {
+    let toReturn = new TriangleEuclideanBoard(this.width, this.height, {
       torusMode:this.torusMode,
       calcPath:false,
       path:this.path,
@@ -149,4 +149,4 @@ class SquareEuclideanBoard extends Board{
   }
 }
 
-export default SquareEuclideanBoard;
+export default TriangleEuclideanBoard;
