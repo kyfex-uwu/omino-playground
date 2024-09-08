@@ -1,5 +1,6 @@
 import {ScrollableScene, OneTimeButtonScene, Scene, DimsScene,
   focus, hover, isKindaMobile} from "/assets/omino/scene/Scene.js";
+import Board from "/assets/omino/Board.js";
 import BoardScene from "/assets/omino/scene/BoardScene.js";
 import PaletteScene from "/assets/omino/scene/PaletteScene.js";
 import TextInputScene from "/assets/omino/scene/TextInputScene.js";
@@ -15,7 +16,6 @@ import {fill, stroke, background} from "/assets/omino/Colors.js";
 
 const changelog = [
 `v0.2.4 xxx
-- Reworked pathfinding algorithm under the hood (this does not come with performance improvements sadge
 - Fixed the "Calculate Path" tickbox incorrectly recalculating the path when it shouldn't`,
 `v0.2.3b 9/6/24
 - Fixed image copying not working`,
@@ -639,6 +639,7 @@ class OptionsScene extends ScrollableScene{
     if(this.parent instanceof SolveScene&&!this.calcPathBox){
       this.calcPathBox = this.addScene(new TickboxScene(true,s=>{
         Data.mainBoard.shouldRecalcPath=s.value;
+        
         if(s.value) Data.mainBoard.recalcPath();
         else Data.mainBoard.path=[];
       }));

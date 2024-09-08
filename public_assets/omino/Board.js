@@ -1,24 +1,63 @@
 import Vector from "/assets/omino/Vector.js";
 import {LockedOmino} from "/assets/omino/Omino.js";
 import {allPalettes, nullPalette} from "/assets/omino/Palettes.js";
+import {pageData} from "/assets/omino/Options.js";
+import Data from "/assets/omino/Main.js";
 import {fill, background} from "/assets/omino/Colors.js";
-import * as FakeWebWorker from "/assets/omino/pathfinding/Pathfinder.js";
-
-import Board from "/assets/omino/boards/Board.js";
+import * as FakeWebWorker from "/assets/omino/BoardLengthCalculator.js";
 
 const tileSpacing=0.07;
 const tileRadius = 0.2;
-
-class SquareEuclideanBoard extends Board{
+const borderOmino = new LockedOmino([]);
+const defaultOptions = {
+  lockedTiles:[],
+  ominoes:[],
+  torusMode:false,
+  calcPath:true,
+  path:[],
+  startPoint:undefined,
+  endPoint:undefined,
+};
+class Board{
   constructor(width, height, options={}){
-    super(s=>{
-      s.width=width;
-      s.height=height;
-    },options);
+    this.width=width;
+    this.height=height;
+
+    this.renderData = {
+      scale:20,
+
+      highlightDupes:false,
+      highlightNotPalette:false,
+    };
+
+    let filledInOptions={};
+    Object.assign(filledInOptions, defaultOptions);
+    Object.assign(filledInOptions, options);
+
+    this.torusMode=filledInOptions.torusMode;
+    this.lockedTiles = new LockedOmino(filledInOptions.lockedTiles);
+    this.ominoes = [...filledInOptions.ominoes];
+
+    this.startPoint=filledInOptions.startPoint;
+    this.endPoint=filledInOptions.endPoint;
+
+    this.path = filledInOptions.path;
+    this.shouldRecalcPath=filledInOptions.calcPath;
+    this.recalcPath();
+  }
+  
+  add(omino){
+    this.ominoes.push(omino);
+    this.recalcPath();
+  }
+  remove(omino){
+    if(this.ominoes.includes(omino))
+      this.ominoes.splice(this.ominoes.indexOf(omino),1);
+    this.recalcPath();
   }
   
   get(pos){
-    if(pos.x<0||pos.y<0||pos.x>=this.width||pos.y>=this.height) return Board.borderOmino;
+    if(pos.x<0||pos.y<0||pos.x>=this.width||pos.y>=this.height) return borderOmino;
     for(const omino of [...this.ominoes, this.lockedTiles]){
       if(this.torusMode){
         if(omino.getOnTorus(pos, new Vector(this.width, this.height))) return omino;
@@ -26,7 +65,11 @@ class SquareEuclideanBoard extends Board{
     }
     return false;
   }
-  toData(){
+  recalcPath(){
+    try{this.lengthWorker.terminate();}catch(e){}
+    if(!this.shouldRecalcPath) return;
+    this.path=[];
+
     let thisAsBoolArr=[];
     for(let y=0;y<this.height;y++){
       thisAsBoolArr[y]=[];
@@ -34,10 +77,38 @@ class SquareEuclideanBoard extends Board{
         thisAsBoolArr[y][x]=!!this.get(new Vector(x,y));
       }
     }
-    return thisAsBoolArr;
-  }
-  recalcPath(){
-    super.recalcPath(this.torusMode?"SquareTorus":"SquareEuclidean");
+
+    //--
+
+    let lengthWorker;
+    this.lengthWorker=lengthWorker;
+    try{
+      lengthWorker = new Worker("/assets/omino/BoardLengthCalculator.js", { type: "module" });
+    }catch(e){
+      const fakePostMessage = data=>lengthWorker.onmessage({data});
+      FakeWebWorker.fake(fakePostMessage);
+
+      lengthWorker = {
+        postMessage:data=>FakeWebWorker.onMessage({data}),
+        terminate:_=>0,
+      };
+    }
+
+    lengthWorker.onmessage = e => {
+      this.path=e.data.map(p=>new Vector(...p));
+      if(this.path[0]&&this.path[0].equals(this.endPoint)||
+        this.path[this.path.length-1]&&this.path[this.path.length-1].equals(this.startPoint))
+        this.path.reverse();
+      lengthWorker.terminate();
+    };
+
+    lengthWorker.postMessage({
+      board:thisAsBoolArr, 
+      torusMode:this.torusMode,
+      
+      startPoint:this.startPoint,
+      endPoint:this.endPoint,
+    });
   }
   
   render(pos, {palette=nullPalette, env=p5, mouse=true}={}){
@@ -135,7 +206,7 @@ class SquareEuclideanBoard extends Board{
   }
 
   clone(){
-    let toReturn = new SquareEuclideanBoard(this.width, this.height, {
+    let toReturn = new Board(this.width, this.height, {
       torusMode:this.torusMode,
       calcPath:false,
       path:this.path,
@@ -149,4 +220,4 @@ class SquareEuclideanBoard extends Board{
   }
 }
 
-export default SquareEuclideanBoard;
+export default Board;
