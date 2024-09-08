@@ -1,7 +1,7 @@
 import {loadColors, loadColorScript, fill, background} from "/assets/omino/Colors.js";
 import {Scene, OneTimeButtonScene} from "/assets/omino/scene/Scene.js";
 import Vector from "/assets/omino/Vector.js";
-import Data from "/assets/omino-playground.js";
+import Data from "/assets/omino/Main.js";
 
 const builtins=[
     {

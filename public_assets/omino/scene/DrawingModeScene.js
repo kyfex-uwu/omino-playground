@@ -1,6 +1,6 @@
 import Vector from "/assets/omino/Vector.js";
 import {Scene, OneTimeButtonScene} from "/assets/omino/scene/Scene.js";
-import Data from "/assets/omino-playground.js";
+import Data from "/assets/omino/Main.js";
 import {Omino} from "/assets/omino/Omino.js";
 import {fill, stroke, background, getColor} from "/assets/omino/Colors.js";
 

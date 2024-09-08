@@ -2,7 +2,7 @@ import {DimsScene} from "/assets/omino/scene/Scene.js";
 import {OneKeyScene} from "/assets/omino/scene/settings/SettingsScene.js";
 import ChangeKeysScene from "/assets/omino/scene/settings/ChangeKeysScene.js";
 import Vector from "/assets/omino/Vector.js";
-import Data from "/assets/omino-playground.js";
+import Data from "/assets/omino/Main.js";
 import {keybindGroups} from "/assets/omino/scene/settings/SettingsScene.js";
 
 class KeybindScene extends DimsScene{

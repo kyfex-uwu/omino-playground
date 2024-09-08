@@ -6,7 +6,7 @@ import TextInputScene from "/assets/omino/scene/TextInputScene.js";
 import TickboxScene from "/assets/omino/scene/TickboxScene.js";
 import SettingsScene from "/assets/omino/scene/settings/SettingsScene.js";
 import Vector from "/assets/omino/Vector.js";
-import Data from "/assets/omino-playground.js";
+import Data from "/assets/omino/Main.js";
 import {pageData, toLink} from "/assets/omino/Options.js";
 import {allPalettes, nullPalette} from "/assets/omino/Palettes.js";
 import {LockedOmino} from "/assets/omino/Omino.js";
