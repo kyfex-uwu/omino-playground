@@ -18,7 +18,7 @@ new p5(p5=>{
   p5.setup = function() {
     p5.noStroke();
     data.canvElt = p5.createCanvas(0,0).elt;
-    document.getElementById("app").appendChild(data.canvElt);
+    try{document.getElementById("app").appendChild(data.canvElt);}catch(e){}
     data.canvElt.addEventListener("contextmenu", e=>e.preventDefault());
     data.canvElt.addEventListener("scroll", e=>e.preventDefault());
 
@@ -42,7 +42,7 @@ new p5(p5=>{
         left:0,
         top:0
       });
-      document.getElementById("lightmode-toggle").style.display="none";
+      try{document.getElementById("lightmode-toggle").style.display="none";}catch(e){}
     }else{
       newWidth = data.canvElt.parentElement.clientWidth;
       newHeight = Math.min(data.canvElt.parentElement.clientWidth*3/4, p5.windowHeight*0.96);
@@ -50,7 +50,7 @@ new p5(p5=>{
       Object.assign(data.canvElt.style,{
         position:"static"
       });
-      document.getElementById("lightmode-toggle").style.display="unset";
+      try{document.getElementById("lightmode-toggle").style.display="unset";}catch(e){}
     }
     p5.resizeCanvas(newWidth, newHeight);
     data.scene.resized(new Vector(oldWidth, oldHeight), new Vector(p5.width, p5.height));

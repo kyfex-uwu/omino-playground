@@ -1,0 +1,23 @@
+{
+  "name": "omino-playground",
+  "version": "0.0.0",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kyfex-uwu/omino-playground.git"
+  },
+  "author": "kyfex",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kyfex-uwu/omino-playground/issues"
+  },
+  "homepage": "https://github.com/kyfex-uwu/omino-playground#readme",
+  "description": "",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
