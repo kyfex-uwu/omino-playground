@@ -274,9 +274,10 @@ class Counter extends DimsScene{
 }
 class CustomTextInputScene extends TextInputScene{
   constructor(validator, value, submit=_=>0){
-    super(validator);
+    super();
 
     this.value=value;
+    this.validator=validator;
     this.oldValue=this.value;
     this.submit=submit;
   }
@@ -284,7 +285,8 @@ class CustomTextInputScene extends TextInputScene{
   render(){
     if(this.isIn()) p5.cursor(p5.TEXT);
 
-    if(this.value==this.oldValue) fill("scenes.util.textInput.bg");
+    if(!this.validator.test(this.value)) fill("scenes.util.textInput.invalid");
+    else if(this.value==this.oldValue) fill("scenes.util.textInput.bg");
     else fill("scenes.util.textInput.bgUnsaved");
 
     p5.rect(0,0,this.dims.x,this.dims.y);
@@ -295,8 +297,9 @@ class CustomTextInputScene extends TextInputScene{
     if(this.focused&&p5.frameCount*0.015%1>0.5) p5.rect(p5.textWidth(this.value)+2, 2, this.dims.y*0.05, this.dims.y-4);
   }
 
+  valid(){ return this.validator.test(this.value); }
   keyPressed(key){
-    if(this.focused&&key=="Enter"){
+    if(this.focused&&this.valid()&&key=="Enter"){
       this.submit();
       return true;
     }
@@ -350,7 +353,7 @@ class OptionsScene extends ScrollableScene{
     super();
 
     const submit = _=>Data.scene.optionsScene.applyButton.click(0,0);
-    this.boardDims = this.addScene(new CustomTextInputScene(/[\dx,]/,
+    this.boardDims = this.addScene(new CustomTextInputScene(/^[1-9]\d*(,|x)[1-9]\d*$/,
       Data.mainBoard.width+","+Data.mainBoard.height, submit));
     this.palette = this.addScene(new Counter(allPalettes.indexOf(pageData.palette)+1, {min:0, submit}));
     this.torusBox = this.addScene(new CustomTickboxScene(Data.mainBoard.torusMode));
@@ -362,6 +365,7 @@ class OptionsScene extends ScrollableScene{
       p5.textAlign(p5.CENTER, p5.CENTER);
       p5.text("Apply", s.dims.x/2,s.dims.y/2);
     },s=>{
+      if(!this.boardDims.valid()) return;
       let dims = this.boardDims.value.split(/[,x]/).map(i=>parseInt(i));
       if(isNaN(dims[0])||isNaN(dims[1])) return;
 

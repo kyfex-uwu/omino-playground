@@ -72,6 +72,7 @@ exportMod({
 			},
 			options:{
 				unsaved:colorFuncs.hexToRGB(0xf7e89c),
+				invalid:colorFuncs.hexToRGB(0xf07067),
 			},
 			bg:colorFuncs.hexToRGB(0xAD6F99),
 			sidebar:{
@@ -86,21 +87,25 @@ exportMod({
 				bg:"default:util.field.bg",
 				bgUnsaved:"default:options.unsaved",
 				color:"default:util.field.color",
+				invalid:"default:options.invalid",
 			},
 			counter:{
 				bg:"default:util.field.bg",
 				bgUnsaved:"default:options.unsaved",
 				color:"default:util.field.color",
+				invalid:"default:options.invalid",
 			},
 			textInput:{
 				bg:"default:util.field.bg",
 				bgUnsaved:"default:options.unsaved",
 				color:"default:util.field.color",
+				invalid:"default:options.invalid",
 			},
 			button:{
 				bg:"default:util.button.bg",
 				bgHover:"default:util.button.bgHover",
 				color:"default:util.button.color",
+				invalid:"default:options.invalid",
 			},
 			text:"default:util.text"
 		},

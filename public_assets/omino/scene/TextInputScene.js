@@ -2,9 +2,8 @@ import {DimsScene, focus} from "/assets/omino/scene/Scene.js";
 import {fill} from "/assets/omino/Colors.js";
 
 class TextInputScene extends DimsScene{
-	constructor(validator=/./){
+	constructor(){
 		super();
-		this.validator=validator;
 		this.value="";
 	}
 	mouseUp(x,y){
@@ -26,7 +25,7 @@ class TextInputScene extends DimsScene{
   		default:
   			if(key.length>1) break;
 
-  			if(this.validator.test(key)) this.value+=key;
+  			this.value+=key;
   			break;
   		}
     
