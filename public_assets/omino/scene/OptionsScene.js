@@ -1,5 +1,5 @@
 const changelog = [
-`v0.2.4 xxx
+`v0.2.4 9/9/24
 - Fixed the "Calculate Path" tickbox incorrectly recalculating the path when it shouldn't
 - Fixed the app crashing when trying to set a size of 0 in torus torusMode (thanks @hhhguir!)
 - Fixed keybindings not working when Caps Lock is on (thanks @bruhh9930!)
