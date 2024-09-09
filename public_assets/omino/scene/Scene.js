@@ -2,7 +2,7 @@ import Vector from "/assets/omino/Vector.js";
 import Data from "/assets/omino/Main.js";
 import {fill} from "/assets/omino/Colors.js";
 
-const isKindaMobile = 'ontouchstart' in document.documentElement||1;
+const isKindaMobile = 'ontouchstart' in document.documentElement||0;
 
 function forReverse(array, callback){
   for(let i=array.length-1;i>=0;i--){
