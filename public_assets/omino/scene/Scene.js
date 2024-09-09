@@ -140,7 +140,7 @@ class ScrollableScene extends DimsScene{
   }
   mouseDown(x, y){
     if(!isKindaMobile) super.mouseDown(x,y);
-    if(!this.isIn()) return;
+    if(!isKindaMobile&&!this.isIn()) return;
 
     this.maybeScrolling=new Vector(p5.mouseX, p5.mouseY);
     this.lastScroll=false;
