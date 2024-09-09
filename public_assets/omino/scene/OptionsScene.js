@@ -16,7 +16,13 @@ import {fill, stroke, background} from "/assets/omino/Colors.js";
 
 const changelog = [
 `v0.2.4 xxx
-- Fixed the "Calculate Path" tickbox incorrectly recalculating the path when it shouldn't`,
+- Fixed the "Calculate Path" tickbox incorrectly recalculating the path when it shouldn't
+- Fixed the app crashing when trying to set a size of 0 in torus torusMode
+- Fixed keybindings not working when Caps Lock is on
+- Fixed some palettes not having correct colors
+- Added more advanced wrapping in the changelog
+- Increased Options size on mobile
+- Fixed more mobile controls jank`,
 `v0.2.3b 9/6/24
 - Fixed image copying not working`,
 `v0.2.3 9/6/24
@@ -33,7 +39,7 @@ const changelog = [
 `v0.2.1 9/3/24
 - Fixed locked tiles decoding incorrectly for very large boards (thanks @hhhguir!)
 - Added colorfiles! This is a way to recolor every part of Omino Playground, through a javascript file. `+
-`Open kyfexuwu.com/assets/omino/colorfiles/default.js to view an example of a colorfile, `+
+`Open kyfexuwu.com/‍assets/‍omino/‍colorfiles/‍default.js to view an example of a colorfile, `+
 `and instructions on how to make and use your own.
 - Fixed omino adding screen letting the mouse through
 - Redid graphics for the Palette tab (add button + omino buttons)
@@ -87,7 +93,7 @@ note: v0.1.10 is v0.2.0`,
 . - Keybinds
 . - nothing else atm lol
 - Added comments to the board length calculator so it can be more easily understood `+
-`(/assets/omino/BoardLengthCalculator.js)
+`(/assets/‍omino/‍BoardLengthCalculator.js)
 - Added animations on omino transforms
 - Boards now don't calculate path again when copying image
 - Fixed bug with ad covering canvas
@@ -128,6 +134,38 @@ note: v0.1.10 is v0.2.0`,
 - Added better(?) fullscreen
 - Added changelog (+ arbitrary version number lol)`
 ];
+
+const spaceRegex=/[ \u200d]/;
+function smartText(text, x, y, w){
+  let splitText=text.split("\n").map(l=>l.split(spaceRegex));
+  let joiners=text.split("").filter(c=>spaceRegex.test(c));
+
+  let toRender=[];
+  let joinerIndex=0;
+  for(const line of splitText){
+    let lines=[];
+
+    let newLine=[];
+    for(const section of line){
+      let toAdd=section+joiners[joinerIndex];
+      if(p5.textWidth(newLine.join("")+toAdd||newLine.length==0)<w){
+        newLine.push(toAdd);
+      }else{
+        lines.push(newLine);
+        newLine=[toAdd];
+      }
+      joinerIndex++;
+    }
+
+    lines.push(newLine);
+    toRender=toRender.concat(lines);
+    joinerIndex--;
+  }
+
+  p5.text(toRender.map(l=>l.join("")).join("\n"), x,y);
+}
+
+//--
 
 class ShareImageScene extends Scene{
   constructor(mainScene){
@@ -239,7 +277,7 @@ class Counter extends DimsScene{
 
     p5.push();
     stroke("scenes.util.counter.color");
-    p5.strokeWeight(this.dims.y*0.06);
+    p5.strokeWeight(this.dims.y*0.04);
     p5.translate(this.dims.x-this.dims.y*2, 0);
     p5.scale(this.dims.y/10);
     p5.line(3,7,5,3);
@@ -360,7 +398,7 @@ class OptionsScene extends ScrollableScene{
     this.applyButton = this.addScene(new OneTimeButtonScene(s=>{
       fill(s.isIn()?"scenes.util.button.bgHover":"scenes.util.button.bg");
       p5.rect(0,0,s.dims.x,s.dims.y);
-      p5.textSize(this.dims.x/100*6);
+      p5.textSize(this.getScale()*6);
       fill("scenes.util.button.color");
       p5.textAlign(p5.CENTER, p5.CENTER);
       p5.text("Apply", s.dims.x/2,s.dims.y/2);
@@ -411,7 +449,7 @@ class OptionsScene extends ScrollableScene{
     this.clearButton = this.addScene(new OneTimeButtonScene(s=>{
       fill(s.isIn()?"scenes.util.button.bgHover":"scenes.util.button.bg");
       p5.rect(0,0,s.dims.x,s.dims.y);
-      p5.textSize(this.dims.x/100*6);
+      p5.textSize(this.getScale()*6);
       fill("scenes.util.button.color");
       p5.textAlign(p5.CENTER, p5.CENTER);
       p5.text("Clear", s.dims.x/2,s.dims.y/2);
@@ -558,6 +596,11 @@ class OptionsScene extends ScrollableScene{
       this.settingsBar,
     ];
   }
+  getScale(){
+    let scale = this.dims.x/100;
+    if(isKindaMobile) scale*=1.5;
+    return scale;
+  }
   resized(old,n=old){
     this.dims.y=p5.height;
     this.dims.x=p5.width/4;
@@ -565,7 +608,7 @@ class OptionsScene extends ScrollableScene{
     this.offs-=this.settingsBar.dims.y;
     this.offs*=n.x/old.x;
 
-    let scale = this.dims.x/100;
+    let scale = this.getScale();
     let sbSize = Math.min(this.dims.x/3, scale*30);
     this.offs+=this.settingsBar.dims.y==0?0:sbSize;
 
@@ -597,12 +640,14 @@ class OptionsScene extends ScrollableScene{
       this.calcPathBox.pos = new Vector(p5.textWidth("nCalculate path:")+padding, 2*scale+currY-this.offs);
       currY+=2*scale+this.calcPathBox.dims.y;
 
+      currY+=2*scale+this.calcPathBox.dims.y;
+
       this.preventDupesBox.dims = new Vector(p5.textSize()*1.3, p5.textSize()*1.3);
-      this.preventDupesBox.pos = new Vector(p5.textWidth("nHighlight duplicate pieces:")+padding, 2*scale+currY-this.offs);
+      this.preventDupesBox.pos = new Vector(p5.textWidth("nDuplicate pieces")+padding, 2*scale+currY-this.offs);
       currY+=2*scale+this.preventDupesBox.dims.y;
 
       this.keepInPaletteBox.dims = new Vector(p5.textSize()*1.3, p5.textSize()*1.3);
-      this.keepInPaletteBox.pos = new Vector(p5.textWidth("nHighlight non-palette pieces:")+padding, 2*scale+currY-this.offs);
+      this.keepInPaletteBox.pos = new Vector(p5.textWidth("nNon-palette pieces")+padding, 2*scale+currY-this.offs);
       currY+=2*scale+this.keepInPaletteBox.dims.y;
     }
 
@@ -623,9 +668,6 @@ class OptionsScene extends ScrollableScene{
     super.resized(old,n);
   }
   scrolled(x,y,delta){
-    delta*=this.dims.x/100;
-    if(!isKindaMobile) delta*=0.3;
-
     let oldOffs=this.offs;
     if(!super.scrolled(x,y,delta)) return false;
     if(this.offs<0){
@@ -666,26 +708,28 @@ class OptionsScene extends ScrollableScene{
     p5.rect(0,0,this.dims.x,p5.height);
 
     p5.push();
-    let sc = this.dims.x/100;
+    let scale = this.getScale();
 
     fill("scenes.sidebar.text");
-    p5.textSize(6*sc);
+    p5.textSize(6*scale);
     p5.textAlign(p5.LEFT, p5.TOP);
     p5.text("Dimensions: ", 2, this.boardDims.getAbsolutePos().y);
     p5.text("Palette: ", 2, this.palette.getAbsolutePos().y);
     p5.text("Torus mode: ", 2, this.torusBox.getAbsolutePos().y);
     if(this.calcPathBox){
       p5.text("Calculate path: ", 2, this.calcPathBox.getAbsolutePos().y);
-      p5.text("Highlight duplicate pieces: ", 2, this.preventDupesBox.getAbsolutePos().y);
-      p5.text("Highlight non-palette pieces: ", 2, this.keepInPaletteBox.getAbsolutePos().y);
+      p5.text("Highlight: ", 2+p5.textSize(), this.calcPathBox.getAbsolutePos().y+p5.textSize()*2);
+      p5.text("Duplicate pieces ", 2, this.preventDupesBox.getAbsolutePos().y);
+      p5.text("Non-palette pieces ", 2, this.keepInPaletteBox.getAbsolutePos().y);
     }
 
     p5.translate(0,-this.offs);
-    p5.scale(sc);
+    p5.scale(scale);
 
     p5.textSize(4.5);
     p5.textAlign(p5.LEFT, p5.TOP);
-    p5.text("Changelog\n\n"+changelog.join("\n\n"), 3,130, 100-3*2);
+
+    smartText("Changelog\n\n"+changelog.join("\n\n"), 3,130, 1/scale*this.dims.x-3*2);
 
     p5.pop();
 

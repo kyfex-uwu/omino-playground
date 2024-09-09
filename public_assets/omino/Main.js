@@ -93,14 +93,17 @@ new p5(p5=>{
     data.scene.mouseUp(p5.mouseX,p5.mouseY);
   }
   p5.touchEnded=p5.mouseReleased;
-  p5.keyPressed = function(){
-    createKey(p5.key);
-    rawKeys[p5.key].press();
-    data.scene.keyPressed(p5.key);
+  p5.keyPressed = function(e){
+    let key=p5.key.length==1?p5.key.toLowerCase():p5.key;
+    createKey(key);
+    rawKeys[key].press();
+    data.scene.keyPressed(key);
   }
   p5.keyReleased = function(){
-    createKey(p5.key);
-    rawKeys[p5.key].release();
+    let key=p5.key.length==1?p5.key.toLowerCase():p5.key;
+    createKey(key);
+    rawKeys[key].release();
+    data.scene.keyReleased(key);
   }
   p5.mouseWheel = function(e){
     if(p5.mouseX>=0&&p5.mouseY>=0&&p5.mouseX<p5.width&&p5.mouseY<p5.height){

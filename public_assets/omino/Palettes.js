@@ -129,14 +129,14 @@ for(const hexomino of Hexonimoes.data){
   hexomino.omino.color = color;
 }
 const Monominoes = new OminoPalette({
-  O:{ color: "I", positions: "#" }
+  O:{ color: "ominoColors.I", positions: "#" }
 });
 const Dominoes = new OminoPalette({
-  I:{ color: "P", positions: "##" }
+  I:{ color: "ominoColors.P", positions: "##" }
 });
 const Triminoes = new OminoPalette({
-  I:{ color: "T", positions: "###" },
-  L:{ color: "F", positions: "##/#" },
+  I:{ color: "ominoColors.T", positions: "###" },
+  L:{ color: "ominoColors.F", positions: "##/#" },
 });
 
 const allPalettes = [Monominoes,Dominoes,Triminoes, Tetronimoes, Pentominoes, Hexonimoes];

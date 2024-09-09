@@ -54,6 +54,11 @@ class Scene{
       if(scene.keyPressed(key)) return true;
     });
   }
+  keyReleased(key){
+    return forReverse(this.subScenes, scene=>{
+      if(scene.keyReleased(key)) return true;
+    });
+  }
   scrolled(x, y, delta){
     return forReverse(this.subScenes, scene=>{
       if(scene.scrolled(x-scene.pos.x,y-scene.pos.y, delta)) return true;
@@ -143,7 +148,12 @@ class ScrollableScene extends DimsScene{
     Data.canvElt.removeEventListener("mouseup", this.mouseUpListener);
     Data.canvElt.removeEventListener("touchend", this.mouseUpListener);
 
-    Data.canvElt.addEventListener("mousemove",this.mouseMoveListener= e=>{
+    let shouldMouse={
+      up:false,
+      move:false
+    };
+    Data.canvElt.addEventListener("mousemove",this.mouseMoveListener=e=>{
+      if(!shouldMouse.move) return;
       let offsY=e.offsetY||(e.touches[0].pageY-Data.canvElt.offsetTop);
 
       if(this.lastScroll||Math.abs(this.maybeScrolling.y-offsY)>maxClickDist){
@@ -152,18 +162,31 @@ class ScrollableScene extends DimsScene{
         this.lastScroll=new Vector(p5.mouseX, p5.mouseY);
       }
     });
-    Data.canvElt.addEventListener("touchmove", this.mouseMoveListener);
+    Data.canvElt.addEventListener("touchmove", e=>{
+      shouldMouse.move=true;
+      this.mouseMoveListener(e);
+      shouldMouse.move=false;
+    });
+
     Data.canvElt.addEventListener("mouseup", this.mouseUpListener=e=>{
+      if(!shouldMouse.up) return;
+
       Data.canvElt.removeEventListener("mousemove", this.mouseMoveListener);
       if(this.maybeScrolling.distTo(new Vector(p5.mouseX, p5.mouseY))<maxClickDist){
-        this.lastScroll=undefined;
+        this.lastScroll=false;
         super.mouseUp(p5.mouseX,p5.mouseY);
+        this.lastScroll=true;
       }
     });
-    Data.canvElt.addEventListener("touchend", this.mouseUpListener);
+    Data.canvElt.addEventListener("touchend", e=>{
+      shouldMouse.up=true;
+      this.mouseUpListener(e);
+      shouldMouse.up=false;
+    });
   }
   mouseUp(x,y){
     if(this.lastScroll) return;
+    console.log(0)
     super.mouseUp(x,y);
   }
   scrolled(x,y,delta){
