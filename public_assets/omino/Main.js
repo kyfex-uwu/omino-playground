@@ -90,7 +90,7 @@ new p5(p5=>{
   }
   p5.touchStarted=p5.mousePressed;
   p5.mouseReleased = function(){
-    data.scene.mouseUp(p5.mouseX,p5.mouseY);
+    data.scene.mouseUp(p5.mouseX,p5.mouseY)
   }
   p5.touchEnded=p5.mouseReleased;
   p5.keyPressed = function(e){

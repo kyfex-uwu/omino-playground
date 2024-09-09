@@ -331,7 +331,7 @@ class CustomTextInputScene extends TextInputScene{
     if(this.isIn()){
       focus(this);
 
-      if(isKindaMobile){
+      if(isKindaMobile&&!this.keyboard){
         this.keyboard=this.addScene(new MobileKeyboard([
           [1,2,3],[4,5,6],[7,8,9],[",",0,"Backspace"]
         ]));
@@ -714,6 +714,8 @@ class OptionsScene extends ScrollableScene{
     }
 
     for(const child of this.subScenes) if(!this.dontScroll.includes(child)) child.pos.y-=delta;
+    if(this.boardDims.keyboard) this.boardDims.keyboard.pos = 
+      new Vector(p5.width/2+p5.height*0.1,p5.height*0.1).sub(this.boardDims.getAbsolutePos().trimTo(2))
 
     return true;
   }

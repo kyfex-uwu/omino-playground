@@ -86,7 +86,6 @@ class MobileKeyboard extends DimsScene{
 	}
 
 	mouseUp(x,y){
-		console.log("ae")
 		if(super.mouseUp(x,y)) return true;
 		if(this.isIn()) return true;
 	}

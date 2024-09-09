@@ -240,7 +240,7 @@ class SolveScene extends MainScene{
     };
 
     let self=this;
-    this.addScene(new (class extends Scene{
+    this.addScene(new (class HeldOminoDrawer extends Scene{
     	render(){
     		self.mouseData.func();
 		    if(self.mouseData.omino){

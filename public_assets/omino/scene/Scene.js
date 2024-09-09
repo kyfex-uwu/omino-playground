@@ -46,7 +46,6 @@ class Scene{
     });
   }
   mouseUp(x,y){
-    console.log(Object.getPrototypeOf(this).constructor.name)
     return forReverse(this.subScenes, scene=>{
       if(scene.mouseUp(x-scene.pos.x,y-scene.pos.y)) return true;
     });
@@ -141,54 +140,46 @@ class ScrollableScene extends DimsScene{
   }
   mouseDown(x, y){
     if(!isKindaMobile) super.mouseDown(x,y);
-    if(!this.isIn()||!isKindaMobile) return;
+    if(!this.isIn()) return;
 
     this.maybeScrolling=new Vector(p5.mouseX, p5.mouseY);
-    this.lastScroll=undefined;
+    this.lastScroll=false;
 
-    Data.canvElt.removeEventListener("mousemove", this.mouseMoveListener);
-    Data.canvElt.removeEventListener("touchmove", this.mouseMoveListener);
-    Data.canvElt.removeEventListener("mouseup", this.mouseUpListener);
-    Data.canvElt.removeEventListener("touchend", this.mouseUpListener);
-
-    let shouldMouse={
-      up:false,
-      move:false
+    if(this.abortControllers){
+      this.abortControllers.up.abort();
+      this.abortControllers.move.abort();
+    }
+    this.abortControllers = {
+      up:new AbortController(),
+      move:new AbortController(),
     };
-    Data.canvElt.addEventListener("mousemove",this.mouseMoveListener=e=>{
-      if(!shouldMouse.move) return;
+
+    let listeners={};
+    Data.canvElt.addEventListener("mousemove",listeners.mousemove=e=>{
       let offsY=e.offsetY||(e.touches[0].pageY-Data.canvElt.offsetTop);
 
       if(this.lastScroll||Math.abs(this.maybeScrolling.y-offsY)>maxClickDist){
-        if(!this.lastScroll) this.lastScroll=this.maybeScrolling;
+        if(!this.lastScroll){
+          this.lastScroll=this.maybeScrolling;
+          this.abortControllers.up.abort();
+
+          Data.canvElt.addEventListener("mouseup", listeners.mouseup=e=>{
+            this.abortControllers.move.abort();
+            this.abortControllers.up.abort();
+            this.lastScroll=false;
+          });
+          Data.canvElt.addEventListener("touchend", listeners.mouseup);
+        }
         this.scrolled(p5.mouseX, p5.mouseY, this.lastScroll.y-p5.mouseY);
         this.lastScroll=new Vector(p5.mouseX, p5.mouseY);
       }
-    });
-    Data.canvElt.addEventListener("touchmove", e=>{
-      shouldMouse.move=true;
-      this.mouseMoveListener(e);
-      shouldMouse.move=false;
-    });
-
-    Data.canvElt.addEventListener("mouseup", this.mouseUpListener=e=>{
-      if(!shouldMouse.up) return;
-
-      Data.canvElt.removeEventListener("mousemove", this.mouseMoveListener);
-      if(this.maybeScrolling.distTo(new Vector(p5.mouseX, p5.mouseY))<maxClickDist){
-        this.lastScroll=false;
-        super.mouseUp(p5.mouseX,p5.mouseY);
-        this.lastScroll=true;
-      }
-    });
-    Data.canvElt.addEventListener("touchend", e=>{
-      shouldMouse.up=true;
-      this.mouseUpListener(e);
-      shouldMouse.up=false;
-    });
+    },{signal:this.abortControllers.move.signal});
+    Data.canvElt.addEventListener("touchmove", listeners.mousemove, 
+      {signal:this.abortControllers.move.signal});
   }
   mouseUp(x,y){
     if(this.lastScroll) return;
+    if(this.abortControllers) this.abortControllers.move.abort();
     return super.mouseUp(x,y);
   }
   scrolled(x,y,delta){
