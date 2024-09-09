@@ -1,28 +1,14 @@
-import {ScrollableScene, OneTimeButtonScene, Scene, DimsScene,
-  focus, hover, isKindaMobile} from "/assets/omino/scene/Scene.js";
-import Board from "/assets/omino/Board.js";
-import BoardScene from "/assets/omino/scene/BoardScene.js";
-import PaletteScene from "/assets/omino/scene/PaletteScene.js";
-import TextInputScene from "/assets/omino/scene/TextInputScene.js";
-import TickboxScene from "/assets/omino/scene/TickboxScene.js";
-import SettingsScene from "/assets/omino/scene/settings/SettingsScene.js";
-import Vector from "/assets/omino/Vector.js";
-import Data from "/assets/omino/Main.js";
-import {pageData, toLink} from "/assets/omino/Options.js";
-import {allPalettes, nullPalette} from "/assets/omino/Palettes.js";
-import {LockedOmino} from "/assets/omino/Omino.js";
-import SolveScene from "/assets/omino/scene/SolveScene.js";
-import {fill, stroke, background} from "/assets/omino/Colors.js";
-
 const changelog = [
 `v0.2.4 xxx
 - Fixed the "Calculate Path" tickbox incorrectly recalculating the path when it shouldn't
-- Fixed the app crashing when trying to set a size of 0 in torus torusMode
-- Fixed keybindings not working when Caps Lock is on
-- Fixed some palettes not having correct colors
+- Fixed the app crashing when trying to set a size of 0 in torus torusMode (thanks @hhhguir!)
+- Fixed keybindings not working when Caps Lock is on (thanks @bruhh9930!)
+- Fixed some palettes not having correct colors (thanks @hhhguir!)
 - Added more advanced wrapping in the changelog
 - Increased Options size on mobile
-- Fixed more mobile controls jank`,
+- Added a number pad for mobile (so they can change the size now!)
+- Fixed more mobile controls jank
+- Fixed the Add Omino button not having a background`,
 `v0.2.3b 9/6/24
 - Fixed image copying not working`,
 `v0.2.3 9/6/24
@@ -134,6 +120,23 @@ note: v0.1.10 is v0.2.0`,
 - Added better(?) fullscreen
 - Added changelog (+ arbitrary version number lol)`
 ];
+
+import {ScrollableScene, OneTimeButtonScene, Scene, DimsScene,
+  focus, hover, isKindaMobile} from "/assets/omino/scene/Scene.js";
+import Board from "/assets/omino/Board.js";
+import BoardScene from "/assets/omino/scene/BoardScene.js";
+import PaletteScene from "/assets/omino/scene/PaletteScene.js";
+import TextInputScene from "/assets/omino/scene/TextInputScene.js";
+import TickboxScene from "/assets/omino/scene/TickboxScene.js";
+import SettingsScene from "/assets/omino/scene/settings/SettingsScene.js";
+import Vector from "/assets/omino/Vector.js";
+import Data from "/assets/omino/Main.js";
+import {pageData, toLink} from "/assets/omino/Options.js";
+import {allPalettes, nullPalette} from "/assets/omino/Palettes.js";
+import {LockedOmino} from "/assets/omino/Omino.js";
+import SolveScene from "/assets/omino/scene/SolveScene.js";
+import MobileKeyboard from "/assets/omino/scene/MobileKeyboard.js";
+import {fill, stroke, background} from "/assets/omino/Colors.js";
 
 const spaceRegex=/[ \u200d]/;
 function smartText(text, x, y, w){
@@ -319,6 +322,36 @@ class CustomTextInputScene extends TextInputScene{
     this.oldValue=this.value;
     this.submit=submit;
   }
+  mouseUp(x,y){
+    if(DimsScene.prototype.mouseUp.call(this, x,y)){
+      this.value=this.keyboard.value;
+      return true;
+    }
+
+    if(this.isIn()){
+      focus(this);
+
+      if(isKindaMobile){
+        this.keyboard=this.addScene(new MobileKeyboard([
+          [1,2,3],[4,5,6],[7,8,9],[",",0,"Backspace"]
+        ]));
+        this.keyboard.value=this.value;
+        this.recalc();
+      }
+
+      return true;
+    }else if(this.keyboard){
+      if(this.keyboard) this.keyboard.remove();
+      this.keyboard=undefined;
+      return true;
+    }
+  }
+  recalc(){
+    if(!this.keyboard) return;
+    this.keyboard.changePosAndDims(new Vector(p5.width/2+p5.height*0.1,p5.height*0.1).sub(this.getAbsolutePos().trimTo(2)), 
+      new Vector(p5.width/2-p5.height*0.2,p5.height*0.8));
+    this.keyboard.recalculate();
+  }
 
   render(){
     if(this.isIn()) p5.cursor(p5.TEXT);
@@ -333,6 +366,8 @@ class CustomTextInputScene extends TextInputScene{
     p5.textAlign(p5.LEFT, p5.TOP);
     p5.text(this.value, 2, 2);
     if(this.focused&&p5.frameCount*0.015%1>0.5) p5.rect(p5.textWidth(this.value)+2, 2, this.dims.y*0.05, this.dims.y-4);
+
+    Scene.renderChildren(this);
   }
 
   valid(){ return this.validator.test(this.value); }
@@ -389,9 +424,10 @@ class Bar extends DimsScene{
 class OptionsScene extends ScrollableScene{
   constructor(){
     super();
+    this.pos.z=10;
 
     const submit = _=>Data.scene.optionsScene.applyButton.click(0,0);
-    this.boardDims = this.addScene(new CustomTextInputScene(/^[1-9]\d*(,|x)[1-9]\d*$/,
+    this.boardDims = this.addScene(new CustomTextInputScene(/^[1-9]\d*,[1-9]\d*$/,
       Data.mainBoard.width+","+Data.mainBoard.height, submit));
     this.palette = this.addScene(new Counter(allPalettes.indexOf(pageData.palette)+1, {min:0, submit}));
     this.torusBox = this.addScene(new CustomTickboxScene(Data.mainBoard.torusMode));
@@ -617,6 +653,7 @@ class OptionsScene extends ScrollableScene{
     p5.textSize(scale*6);
     this.boardDims.dims = new Vector(this.dims.x*0.99 - p5.textWidth("nDimensions:")-padding, scale*6*1.2);
     this.boardDims.pos = new Vector(p5.textWidth("nDimensions")+padding, 2*scale+currY-this.offs);
+    this.boardDims.recalc();
     currY+=this.boardDims.dims.y+scale*3+2*scale;
 
     this.palette.dims = new Vector(this.dims.x*0.99 - p5.textWidth("nPalette:")-padding, scale*6*1.2);

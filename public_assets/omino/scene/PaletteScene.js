@@ -59,6 +59,11 @@ class PaletteScene extends ScrollableScene{
     this.addScene(this.piecesHolder);
 
     this.drawButton = this.addScene(new OneTimeButtonScene(s=>{
+      let scale = this.dims.x/100;
+      let sbSize = Math.min(this.dims.x/3, scale*30);
+      fill("scenes.sidebar.bg");
+      p5.rect(-s.pos.x,-s.pos.y+this.dims.y-sbSize,this.dims.x,sbSize);
+
       fill(s.isIn()?"scenes.sidebar.button.bgHover":"scenes.sidebar.button.bg");
       p5.rect(0, 0, s.dims.x,s.dims.y, (s.dims.x+s.dims.y)*0.1);
       fill("scenes.sidebar.button.color");
@@ -78,7 +83,6 @@ class PaletteScene extends ScrollableScene{
     this.pos.x=x;
     this.dims.y=p5.height;
     this.dims.x=width;
-    this.piecesHolder.dims = new Vector(this.dims.x,this.dims.y*0.9);
     
     for(const space of this.spaces){
       space.recalc(this);
@@ -89,6 +93,8 @@ class PaletteScene extends ScrollableScene{
 
     this.drawButton.dims = new Vector(sbSize*0.8, sbSize*0.8);
     this.drawButton.pos = new Vector((this.dims.x-sbSize*0.9)/2,this.dims.y-sbSize*0.9);
+
+    this.piecesHolder.dims = new Vector(this.dims.x,this.dims.y-sbSize);
   }
   addOmino(newOmino){
     let space = this.piecesHolder.addScene(new OminoPaletteSpace(newOmino, this.spaces.length));

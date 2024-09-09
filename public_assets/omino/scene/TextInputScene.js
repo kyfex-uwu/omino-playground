@@ -33,7 +33,7 @@ class TextInputScene extends DimsScene{
 	}
 
 	render(){
-		if(s.isIn()) p5.cursor(p5.TEXT);
+		if(this.isIn()) p5.cursor(p5.TEXT);
 
 		fill("scenes.util.textbox.bg");
 		p5.rect(0,0,this.dims.x,this.dims.y);

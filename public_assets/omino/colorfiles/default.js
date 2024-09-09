@@ -55,6 +55,19 @@ exportMod({
 				},
 				text:colorFuncs.hexToRGB(0xffffff),
 
+				keypad:{
+					bg:colorFuncs.hexToRGB(0x263d22),
+					button:{
+						bg:colorFuncs.hexToRGB(0x8e9482),
+						bgHover:colorFuncs.hexToRGB(0xa9ada1),
+						color:"default:util.field.color",
+					},
+
+					display:"default:util.field.bg",
+					text:"default:util.field.color",
+					shadow:colorFuncs.hexToRGBA(0x33333350),
+				},
+
 				darken:colorFuncs.hexToRGBA(0x00000064),
 			},
 
@@ -68,7 +81,7 @@ exportMod({
 					bg:colorFuncs.hexToRGB(0xcda7c1),
 					bgHover:colorFuncs.hexToRGB(0xddc4d5),
 					icon:colorFuncs.hexToRGB(0x000000),
-				}
+				},
 			},
 			options:{
 				unsaved:colorFuncs.hexToRGB(0xf7e89c),
@@ -107,7 +120,20 @@ exportMod({
 				color:"default:util.button.color",
 				invalid:"default:options.invalid",
 			},
-			text:"default:util.text"
+			text:"default:util.text",
+
+			keypad:{
+				bg:"default:util.keypad.bg",
+				button:{
+					bg:"default:util.keypad.button.bg",
+					bgHover:"default:util.keypad.button.bgHover",
+					color:"default:util.keypad.button.color",
+				},
+
+				display:"default:util.keypad.display",
+				text:"default:util.keypad.text",
+				shadow:"default:util.keypad.shadow",
+			},
 		},
 		buttons:{
 			dark:{

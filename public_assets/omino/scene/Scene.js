@@ -2,7 +2,7 @@ import Vector from "/assets/omino/Vector.js";
 import Data from "/assets/omino/Main.js";
 import {fill} from "/assets/omino/Colors.js";
 
-const isKindaMobile = 'ontouchstart' in document.documentElement;
+const isKindaMobile = 'ontouchstart' in document.documentElement||1;
 
 function forReverse(array, callback){
   for(let i=array.length-1;i>=0;i--){
@@ -24,6 +24,7 @@ class Scene{
   }
   addScene(scene){
     this.subScenes.push(scene);
+    this.subScenes=this.subScenes.sort((s1,s2)=>s1.pos.z-s2.pos.z);
     scene.parent=this;
 
     return scene;
@@ -45,6 +46,7 @@ class Scene{
     });
   }
   mouseUp(x,y){
+    console.log(Object.getPrototypeOf(this).constructor.name)
     return forReverse(this.subScenes, scene=>{
       if(scene.mouseUp(x-scene.pos.x,y-scene.pos.y)) return true;
     });
@@ -90,10 +92,11 @@ class DimsScene extends Scene{
   constructor(){
     super();
     this.dims=new Vector(0,0);
+    this.clipParent=true;
   }
   isIn(){
     if(this.parent&&!this.parent.hasMouseAccess) return false;
-    if(this.parent instanceof DimsScene && !this.parent.isIn()) return false;
+    if(this.parent instanceof DimsScene && (this.clipParent&&!this.parent.isIn())) return false;
     let absPos = this.getAbsolutePos();
     return p5.mouseX>absPos.x&&p5.mouseY>absPos.y&&
       p5.mouseX<absPos.x+this.dims.x&&p5.mouseY<absPos.y+this.dims.y;
@@ -186,8 +189,7 @@ class ScrollableScene extends DimsScene{
   }
   mouseUp(x,y){
     if(this.lastScroll) return;
-    console.log(0)
-    super.mouseUp(x,y);
+    return super.mouseUp(x,y);
   }
   scrolled(x,y,delta){
     if(!this.isIn()) return false;

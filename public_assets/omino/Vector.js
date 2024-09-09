@@ -10,6 +10,7 @@ class Vector{
   set y(v){ return this.set(1, v); }
   get z(){ return this.get(2); }
   set z(v){ return this.set(2, v); }
+  trimTo(place){ return new Vector(...this._pos.slice(0,place)); }
   
   add(other){
     if(other._pos.length>this._pos.length) return other.add(this);
@@ -18,6 +19,14 @@ class Vector{
   sub(other){
     if(other._pos.length>this._pos.length) return other.sub(this);
     return new Vector(...this._pos.map((v,i)=>v-other.get(i)));
+  }
+  mult(other){
+    if(other._pos.length>this._pos.length) return other.mult(this);
+    return new Vector(...this._pos.map((v,i)=>v*other.get(i)));
+  }
+  div(other){
+    if(other._pos.length>this._pos.length) return other.div(this);
+    return new Vector(...this._pos.map((v,i)=>v/other.get(i)));
   }
   scale(amt){ return new Vector(...this._pos.map(v=>v*amt)); }
 
