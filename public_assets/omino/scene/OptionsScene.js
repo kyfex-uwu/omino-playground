@@ -1,7 +1,8 @@
 const changelog = [
 `v0.2.5 xxx
 - Highlighting ominoes not in palette now works for unfilled palettes (heptominoes, octominoes...)
-- Changed rendering on torus mode to make the board easier to visualize`,
+- Changed rendering on torus mode to make the board easier to visualize
+- Fixed screenshot not capturing board correctly (again)`,
 `v0.2.4 9/9/24
 - Fixed the "Calculate Path" tickbox incorrectly recalculating the path when it shouldn't
 - Fixed the app crashing when trying to set a size of 0 in torus torusMode (thanks @hhhguir!)
@@ -181,7 +182,6 @@ class ShareImageScene extends Scene{
     this.mainScene.boardScene.drawMouse=false;
     this.mainScene.hasMouseAccess=false;
 
-    this.upOnce=false;
     this.board = this.mainScene.boardScene.board.clone();
   }
   render(){
@@ -209,15 +209,13 @@ class ShareImageScene extends Scene{
     this.board.render(new Vector(0,0), {palette:this.mainScene.paletteScene.palette, mouse:false});
   }
   mouseUp(){
-    if(!this.upOnce) return this.upOnce=true;
-
     let canv = p5.createGraphics(this.board.width*50+10, this.board.height*50+10+15);
     canv.noStroke();
     background("scenes.share.bg", canv);
     canv.push();
     canv.translate(5,5);
     this.board.renderData.scale = 50;
-    this.board.render(new Vector(0,0), this.mainScene.palette, canv);
+    this.board.render(new Vector(0,0), {palette:this.mainScene.palette, env:canv});
     canv.pop();
 
     fill("scenes.share.infoText", canv);

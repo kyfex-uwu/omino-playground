@@ -64,7 +64,7 @@ function loadColors(colorObj){
 				setTimeout(_=>{
 					p5.textFont(addedFont.family);
 					p5.windowResized();
-				},1);
+				},100);
 			});
 			for(const font of fonts) loadedFonts.add(font);
 		});
