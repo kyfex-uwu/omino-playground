@@ -410,6 +410,19 @@ class CustomTickboxScene extends TickboxScene{
     }
   }
 }
+class ListElement extends DimsScene{
+  constructor(label, element, resizeCallback=_=>0){
+    super();
+    this.label=label;
+    this.element=this.addScene(element);
+    this.resizeCallback=resizeCallback;
+  }
+  resized(oldDims, newDims=oldDims){
+    this.dims = new Vector(newDims.x*0.99, p5.textSize()*1.5);
+    super.resized(oldDims,newDims);
+    this.resizeCallback(p5.textWidth(this.label+"r"));
+  }
+}
 
 class Bar extends DimsScene{
   constructor(...subScenes){

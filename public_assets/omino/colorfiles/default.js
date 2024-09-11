@@ -212,6 +212,8 @@ exportMod({
 	},
 
 	bg:"default:bg",
+	font:"https://fonts.googleapis.com/css2?family=Comfortaa:wght@500&display=swap",
+
 	ominoColors:{
 		I: colorFuncs.hexToRGB(0xff1745),
 		L: colorFuncs.hexToRGB(0xffd417),

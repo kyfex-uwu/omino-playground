@@ -22,16 +22,17 @@ function deepAssign(target,source){
 }
 
 function loadColorScript(script, callback=orig=>orig()){
-	const tempScript = document.createElement("script");
-	document.body.appendChild(tempScript);
-	tempScript.type="module";
-	tempScript.innerHTML=script;
 	window.exportMod=mod=>{
 		callback(_=>{
 			loadColors(mod);
 			tempScript.remove();
 		});
 	};
+
+	const tempScript = document.createElement("script");
+	document.body.appendChild(tempScript);
+	tempScript.type="module";
+	tempScript.innerHTML=script;
 }
 let defaultColors;
 function loadDefaultColors(colorObj){
@@ -39,6 +40,11 @@ function loadDefaultColors(colorObj){
 	loadColors(colorObj);
 }
 
+
+const fontStyle = document.createElement("style");
+const loadedFontLinks=new Set();
+const loadedFonts=new Set();
+document.body.appendChild(fontStyle);
 function loadColors(colorObj){
 	currColorEnv=colorObj;
 	for(const key in Colors) delete Colors[key];
@@ -46,6 +52,23 @@ function loadColors(colorObj){
 
 	//error checking?
 	deepAssign(Colors, colorObj);
+
+	if(!loadedFontLinks.has(Colors.font)){
+		loadedFontLinks.add(Colors.font);
+		fontStyle.innerHTML=`@import url("${Colors.font}");`;
+
+		document.fonts.ready.then(fontFaceSet => {
+			const fonts = [...fontFaceSet];
+			let addedFont=fonts.filter(font=>!loadedFonts.has(font))[0];
+			addedFont.load().then(_=>{
+				setTimeout(_=>{
+					p5.textFont(addedFont.family);
+					p5.windowResized();
+				},1);
+			});
+			for(const font of fonts) loadedFonts.add(font);
+		});
+	}
 
 	colorCache={};
 	loggedColors={};
