@@ -1,4 +1,7 @@
 const changelog = [
+`v0.2.5 xxx
+- Highlighting ominoes not in palette now works for unfilled palettes (heptominoes, octominoes...)
+- Changed rendering on torus mode to make the board easier to visualize`,
 `v0.2.4 9/9/24
 - Fixed the "Calculate Path" tickbox incorrectly recalculating the path when it shouldn't
 - Fixed the app crashing when trying to set a size of 0 in torus torusMode (thanks @hhhguir!)
@@ -722,17 +725,31 @@ class OptionsScene extends ScrollableScene{
 
   render(){
     if(this.parent instanceof SolveScene&&!this.calcPathBox){
+      let highlights={
+        dupes:false,
+        nonPalettes:false,
+      };
+      Data.mainBoard.renderData.highlightFunc=(omino, ominoes, palette)=>{
+        if(highlights.dupes&&ominoes.some(o=>o!=omino&&o.equals(omino))) return "renderHighlighted";
+        if(highlights.nonPalettes&&
+            (palette.size==-1?(omino.vectors.length!=this.palette.oldValue):omino.vectors.length!=palette.size)&&
+            !Object.values(palette.data).some(o=>o.orig&&o.omino.equals(omino))) 
+          return "renderHighlighted";
+
+        return "render";
+      };
+
       this.calcPathBox = this.addScene(new TickboxScene(true,s=>{
         Data.mainBoard.shouldRecalcPath=s.value;
         
         if(s.value) Data.mainBoard.recalcPath();
         else Data.mainBoard.path=[];
       }));
-      this.preventDupesBox = this.addScene(new TickboxScene(Data.mainBoard.renderData.highlightDupes,s=>{
-        Data.mainBoard.renderData.highlightDupes=s.value;
+      this.preventDupesBox = this.addScene(new TickboxScene(false,s=>{
+        highlights.dupes=s.value;
       }));
-      this.keepInPaletteBox = this.addScene(new TickboxScene(Data.mainBoard.renderData.highlightNotPalette,s=>{
-        Data.mainBoard.renderData.highlightNotPalette=s.value;
+      this.keepInPaletteBox = this.addScene(new TickboxScene(false,s=>{
+        highlights.nonPalettes=s.value;
       }));
       this.subScenes=this.subScenes.sort((s1,s2)=>{
         if(s1==this.calcPathBox||s1==this.preventDupesBox||s1==this.keepInPaletteBox) return -1;

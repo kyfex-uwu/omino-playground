@@ -26,8 +26,7 @@ class Board{
     this.renderData = {
       scale:20,
 
-      highlightDupes:false,
-      highlightNotPalette:false,
+      highlightFunc:_=>"render",
     };
 
     let filledInOptions={};
@@ -111,6 +110,7 @@ class Board{
     });
   }
   
+  renderType(omino, palette=nullPalette){ return this.renderData.highlightFunc(omino, this.ominoes, palette); }
   render(pos, {palette=nullPalette, env=p5, mouse=true}={}){
     for(let y=0;y<this.height;y++){
       for(let x=0;x<this.width;x++){
@@ -179,28 +179,19 @@ class Board{
     env.rect(0,0,this.renderData.scale*this.width, this.renderData.scale*this.height, this.renderData.scale*(tileRadius+tileSpacing));
     env.endClip();
 
-    let ominoesToDraw=[];
     for(const omino of this.ominoes){
-      ominoesToDraw.push({
-        omino,
-        isDupe:this.ominoes.some(o=>o!=omino&&o.equals(omino)),
-        isNotInPalette:!Object.values(palette.data).some(o=>o.orig&&o.omino.equals(omino)),
-      });
-    }
-    for(const data of ominoesToDraw){
-      let renderFunc=((this.renderData.highlightDupes&&data.isDupe)||
-        (this.renderData.highlightNotPalette&&data.isNotInPalette))?"renderHighlighted":"render";
+      let renderFunc = this.renderType(omino, palette);
       if(this.torusMode){
-        for(let y=0;y<data.omino.pos.y+data.omino.height();y+=this.height){
-          for(let x=0;x<data.omino.pos.x+data.omino.width();x+=this.width){
-            let newOmino = data.omino.clone();
+        for(let y=0;y<omino.pos.y+omino.height();y+=this.height){
+          for(let x=0;x<omino.pos.x+omino.width();x+=this.width){
+            let newOmino = omino.clone();
             newOmino.pos = newOmino.pos.clone();
             newOmino.pos.x-=x;
             newOmino.pos.y-=y;
             newOmino[renderFunc](this.renderData.scale, new Vector(0,0), {env});
           }
         }
-      }else data.omino[renderFunc](this.renderData.scale, new Vector(0,0), {env});
+      }else omino[renderFunc](this.renderData.scale, new Vector(0,0), {env});
     }
     env.pop();
   }
@@ -213,8 +204,6 @@ class Board{
       lockedTiles:[...this.lockedTiles.vectors.map(v=>v.clone())],
       ominoes:this.ominoes,
     });
-    toReturn.renderData.highlightDupes=this.renderData.highlightDupes;
-    toReturn.renderData.highlightNotPalette=this.renderData.highlightNotPalette;
 
     return toReturn;
   }

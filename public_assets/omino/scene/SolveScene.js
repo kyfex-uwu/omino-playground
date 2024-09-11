@@ -298,10 +298,11 @@ class SolveScene extends MainScene{
         this.board.remove(omino);
 
         this.parent.mouseData.omino = omino;
-        this.parent.mouseData.offs = new Vector(p5.mouseX, p5.mouseY).sub(
-          this.parent.mouseData.omino.pos
-          .scale(this.board.renderData.scale)
-          .add(this.getAbsolutePos()));
+        this.parent.mouseData.offs = new Vector(p5.mouseX, p5.mouseY)
+          .sub(this.parent.mouseData.omino.pos
+            .scale(this.board.renderData.scale)
+            .add(this.getAbsolutePos()))
+          .add(this.dims.scale(0.5));
 
         if(omino.pos.x > x) this.parent.mouseData.offs.x += this.board.renderData.scale * this.board.width;
         if(omino.pos.y > y) this.parent.mouseData.offs.y += this.board.renderData.scale * this.board.height;
@@ -314,7 +315,8 @@ class SolveScene extends MainScene{
         let newPos;
         if(newPos=this.parent.mouseData.omino.canPlace(this.board, new Vector(p5.mouseX, p5.mouseY)
             .sub(this.parent.mouseData.offs)
-            .sub(this.pos).scale(1 / this.board.renderData.scale)
+            .sub(this.pos.sub(this.dims.scale(0.5)))
+            .scale(1 / this.board.renderData.scale)
             .round())) {
             this.parent.mouseData.omino.pos = newPos;
             this.board.add(this.parent.mouseData.omino);

@@ -21,8 +21,8 @@ class OminoPaletteSpace extends ButtonScene{
         (this.dims.x-this.omino.tiles[0].length*scale)/2,
         (this.dims.y-this.omino.tiles.length*scale)/2), 
       _=>background("ominoColors.outline"), {stroke:scale*0.1});
-    this.omino[(Data.mainBoard.renderData.highlightDupes&&
-        Data.mainBoard.ominoes.some(o=>o.equals(this.omino)))?"renderHighlighted":"render"](
+
+    this.omino[Data.mainBoard.renderType(this.omino)](
       scale, new Vector(
         (this.dims.x-this.omino.tiles[0].length*scale)/2,
         (this.dims.y-this.omino.tiles.length*scale)/2));

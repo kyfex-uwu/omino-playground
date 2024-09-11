@@ -58,18 +58,18 @@ class BoardBuildScene extends MainScene{
         if(this.state=="start") this.state="";
         else this.state="start";
       })), key:"START"},{b:this.addScene(new OneTimeButtonScene(this.drawButton(s=>{
-        if(this.state=="end") drawPencil("end");
-      },"Set End", "scenes.buildPuzz.buttons.end"),s=>{
-        if(this.state=="end") this.state="";
-        else this.state="end";
-      })), key:"END"},{b:{}},{b:{}}],
-
-      [{b:this.addScene(new OneTimeButtonScene(this.drawButton(s=>{
         if(this.state=="locked") drawPencil("locked");
       },"Draw Locked Tiles", "scenes.buildPuzz.buttons.locked"),s=>{
         if(this.state=="locked") this.state="";
         else this.state="locked";
-      })), key:"LOCK"},{b:{}},{b:{}},
+      })), key:"LOCK"},{b:{}},{b:{}}],
+
+      [{b:this.addScene(new OneTimeButtonScene(this.drawButton(s=>{
+        if(this.state=="end") drawPencil("end");
+      },"Set End", "scenes.buildPuzz.buttons.end"),s=>{
+        if(this.state=="end") this.state="";
+        else this.state="end";
+      })), key:"END"},{b:{}},{b:{}},
         {b:this.addScene(new OneTimeButtonScene(this.drawButton(s=>{
           if(s.isIn()) p5.scale(1.2);
           displayOmino.render(10, new Vector(-25,-25));

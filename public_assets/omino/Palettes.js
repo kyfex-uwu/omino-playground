@@ -6,8 +6,9 @@ const ominoIdentifier = Math.random();
 let globalOminoKey=0;
 
 class OminoPalette{
-  constructor(ominoDatas){
+  constructor(ominoDatas, size=-1){
     this.data=ominoDatas;
+    this.size=size;
 
     for(const data of Object.values(this.data)){
       data.positions = data.positions
@@ -78,14 +79,14 @@ const Pentominoes = new OminoPalette({
   X:{ color: "ominoColors.X", positions: " #/###/ #" },
   Z:{ color: "ominoColors.Z", positions: "##/ #/ ##" },
   U:{ color: "ominoColors.U", positions: "##/#/##" },
-});
+},5);
 const Tetronimoes = new OminoPalette({
   O:{ color: "ominoColors.L", positions: "##/##" },
   I:{ color: "ominoColors.N", positions: "####" },
   S:{ color: "ominoColors.Y", positions: "##/ ##" },
   T:{ color: "ominoColors.V", positions: "###/ #" },
   L:{ color: "ominoColors.F", positions: "###/#" },
-});
+},4);
 const Hexonimoes = new OminoPalette([
   "######",
   "#/#####",
@@ -122,7 +123,7 @@ const Hexonimoes = new OminoPalette([
   " #/###/##",
   "##/ ##/ ##",
   "##/ ##/  ##",
-].map(s=>{return{ positions:s };}));
+].map(s=>{return{ positions:s };}),6);
 for(const hexomino of Hexonimoes.data){
   let color = genHashColor(hexomino.positions);
   hexomino.color = color;
@@ -130,14 +131,14 @@ for(const hexomino of Hexonimoes.data){
 }
 const Monominoes = new OminoPalette({
   O:{ color: "ominoColors.I", positions: "#" }
-});
+},1);
 const Dominoes = new OminoPalette({
   I:{ color: "ominoColors.P", positions: "##" }
-});
+},2);
 const Triminoes = new OminoPalette({
   I:{ color: "ominoColors.T", positions: "###" },
   L:{ color: "ominoColors.F", positions: "##/#" },
-});
+},3);
 
 const allPalettes = [Monominoes,Dominoes,Triminoes, Tetronimoes, Pentominoes, Hexonimoes];
 const nullPalette = new OminoPalette([]);
