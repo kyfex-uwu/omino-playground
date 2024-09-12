@@ -212,7 +212,7 @@ exportMod({
 	},
 
 	bg:"default:bg",
-	font:"https://fonts.googleapis.com/css2?family=Comfortaa:wght@500&display=swap",
+	font:"",//https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@600&display=swap
 
 	ominoColors:{
 		I: colorFuncs.hexToRGB(0xff1745),
@@ -235,6 +235,8 @@ exportMod({
 		grid:colorFuncs.hexToRGB(0xBD8BAD),
 		text:colorFuncs.hexToRGB(0x000000),
 		pathColor:colorFuncs.hexToRGBA(0xffffff80),
+
+		torusIndicator:colorFuncs.withAlpha("default:bg", 100),
 
 		filled:colorFuncs.hexToRGBA(0x00000000),
 		start:colorFuncs.hexToRGB(0xafdea0),

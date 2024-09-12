@@ -13,16 +13,17 @@ class DrawingModeScene extends Scene {
     this.newTiles = [];
     this.omino = undefined;
 
-    this.confButton = this.addScene(new OneTimeButtonScene(s => {
+    const button = (s,text)=>{
       fill(s.isIn()?"scenes.drawing.button.bgHover":"scenes.drawing.button.bg");
       p5.rect(0, 0, s.dims.x, s.dims.y, s.dims.x*0.1);
       fill("scenes.drawing.button.color");
       p5.push();
       p5.textAlign(p5.CENTER, p5.CENTER);
       p5.textSize((s.dims.x + s.dims.y) * 0.17);
-      p5.text("Confirm", s.dims.x / 2, s.dims.y / 2);
+      p5.text(text, s.dims.x / 2, s.dims.y / 2);
       p5.pop();
-    }, s => {
+    }
+    this.confButton = this.addScene(new OneTimeButtonScene(s => button(s, "Confirm"), s => {
       Data.scene = this.mainScene;
       this.mainScene.hasMouseAccess=true;
       if(this.newTiles.length == 0) return;
@@ -47,6 +48,10 @@ class DrawingModeScene extends Scene {
       forBoard.pos = pos;
       Data.scene.boardScene.board.add(forBoard);
     }));
+    this.cancelButton = this.addScene(new OneTimeButtonScene(s => button(s, "Cancel"), s => {
+      Data.scene = this.mainScene;
+      this.mainScene.hasMouseAccess=true;
+    }));
 
     this.resized(new Vector(p5.width, p5.height), new Vector(p5.width, p5.height));
   }
@@ -55,22 +60,23 @@ class DrawingModeScene extends Scene {
 
     let board = this.mainScene.boardScene;
     fill("scenes.drawing.darken");
+    let pos=board.pos.sub(board.dims.scale(0.5));
     p5.beginShape();
-    p5.vertex(board.pos.x, 0);
+    p5.vertex(pos.x, 0);
     p5.vertex(p5.width, 0);
     p5.vertex(p5.width, p5.height);
     p5.vertex(0, p5.height);
     p5.vertex(0, 0);
-    p5.vertex(board.pos.x, 0);
-    p5.vertex(board.pos.x, board.pos.y + board.dims.y);
-    p5.vertex(board.pos.x + board.dims.x, board.pos.y + board.dims.y);
-    p5.vertex(board.pos.x + board.dims.x, board.pos.y);
-    p5.vertex(board.pos.x, board.pos.y);
+    p5.vertex(pos.x, 0);
+    p5.vertex(pos.x, pos.y + board.dims.y);
+    p5.vertex(pos.x + board.dims.x, pos.y + board.dims.y);
+    p5.vertex(pos.x + board.dims.x, pos.y);
+    p5.vertex(pos.x, pos.y);
     p5.endShape();
 
     p5.push();
     p5.translate(board.pos.x, board.pos.y);
-    if(this.omino) this.omino.render(board.board.renderData.scale, new Vector(0, 0));
+    if(this.omino) this.omino.render(board.board.renderData.scale, board.dims.scale(-0.5));
     p5.pop();
 
     super.render();
@@ -78,11 +84,9 @@ class DrawingModeScene extends Scene {
 
   mouseUp(x, y) {
     let board = this.mainScene.boardScene;
-    if(x > board.pos.x && y > board.pos.y && x < board.pos.x + board.dims.x && y < board.pos.y + board.dims.y) {
-      let newX = Math.floor((x - board.pos.x) / board.dims.x * board.board.width);
-      let newY = Math.floor((y - board.pos.y) / board.dims.y * board.board.height);
-
-      var newPos = new Vector(newX, newY);
+    let newPos = new Vector(x,y).sub(board.pos).add(board.dims.scale(0.5))
+      .div(board.dims).mult(new Vector(board.board.width, board.board.height)).floor();
+    if(newPos.x >=0 && newPos.y >=0 && newPos.x < board.board.width + board.dims.x && newPos.y < board.board.height) {
       if(this.newTiles.some(p => p.equals(newPos))) {
         this.newTiles.splice(this.newTiles.findIndex(p => p.equals(newPos)), 1);
       } else {
@@ -99,12 +103,16 @@ class DrawingModeScene extends Scene {
     super.mouseUp(x, y);
   }
 
-  resized(oldDims, newDims) {
+  resized(oldDims, newDims=oldDims) {
     this.mainScene.resized(oldDims, newDims);
 
     this.confButton.dims = new Vector(p5.width / 6, p5.width / 6 * 0.3);
     this.confButton.pos = new Vector(p5.width / 2 - p5.width / 6 / 2,
-      this.mainScene.boardScene.pos.y + this.mainScene.boardScene.dims.y + p5.height * 0.01);
+      this.mainScene.boardScene.pos.y + this.mainScene.boardScene.dims.y/2 + p5.height * 0.01);
+
+    this.cancelButton.dims = new Vector(p5.width / 6, p5.width / 6 * 0.3);
+    this.cancelButton.pos = new Vector(p5.width / 2 - p5.width / 6 / 2,
+      this.mainScene.boardScene.pos.y + this.mainScene.boardScene.dims.y/2 + p5.height * 0.01+this.confButton.dims.y*1.1);
 
     super.resized(oldDims, newDims);
   }

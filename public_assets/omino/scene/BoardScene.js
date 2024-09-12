@@ -1,6 +1,7 @@
 import Vector from "/assets/omino/Vector.js";
 import { DimsScene } from "/assets/omino/scene/Scene.js";
 import { LockedOmino } from "/assets/omino/Omino.js";
+import {fill} from "/assets/omino/Colors.js";
 
 class BoardScene extends DimsScene {
     constructor(board, drawMouse=true) {
@@ -40,6 +41,8 @@ class BoardScene extends DimsScene {
                     p5.push();
                     p5.translate((this.dims.x+padding)*x,(this.dims.y+padding)*y);
                     this.board.render(new Vector(0,0), {palette, mouse:false});
+                    fill("board.torusIndicator");
+                    p5.rect(0,0,this.dims.x,this.dims.y);
                     p5.pop();
                 }
             }
@@ -49,7 +52,7 @@ class BoardScene extends DimsScene {
     }
     setBounds(width, height) {
         this.board.renderData.scale = Math.min(width / this.board.width, height / this.board.height);
-        if(this.board.torusMode) this.board.renderData.scale*=0.9;
+        if(this.board.torusMode) this.board.renderData.scale*=0.7;
     }
     moveToCenter() {
         this.pos = new Vector(p5.width / 2, p5.height*2/3/2);

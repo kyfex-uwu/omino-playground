@@ -52,7 +52,7 @@ exportMod({
 	},
 
 	board:{
-		grid:colorFuncs.hexToRGB(0x888888),
+		grid:colorFuncs.hexToRGB(0xaaaaaa),
 		start:colorFuncs.hexToRGB(0x00ff00),
 		end:colorFuncs.hexToRGB(0xff0000),
 	},

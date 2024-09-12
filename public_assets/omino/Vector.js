@@ -31,6 +31,7 @@ class Vector{
   scale(amt){ return new Vector(...this._pos.map(v=>v*amt)); }
 
   round(){ return new Vector(...this._pos.map(v=>Math.round(v))); }
+  floor(){ return new Vector(...this._pos.map(v=>Math.floor(v))); }
   clone(){ return new Vector(...this._pos); }
   distTo(other){
     if(other._pos.length>this._pos.length) return other.distTo(this);

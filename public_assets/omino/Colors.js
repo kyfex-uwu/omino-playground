@@ -60,12 +60,13 @@ function loadColors(colorObj){
 		document.fonts.ready.then(fontFaceSet => {
 			const fonts = [...fontFaceSet];
 			let addedFont=fonts.filter(font=>!loadedFonts.has(font))[0];
-			addedFont.load().then(_=>{
-				setTimeout(_=>{
-					p5.textFont(addedFont.family);
-					p5.windowResized();
-				},100);
-			});
+			if(addedFont)
+				addedFont.load().then(_=>{
+					setTimeout(_=>{
+						p5.textFont(addedFont.family);
+						p5.windowResized();
+					},100);
+				});
 			for(const font of fonts) loadedFonts.add(font);
 		});
 	}
@@ -126,6 +127,8 @@ const colorFuncs = {
 
 	lighten:(color, amt)=>_=>getColor(color).slice(0,3).map(v=>255-(255-v)*(1-amt)).concat(getColor(color).slice(3)),
 	darken:(color, amt)=>_=>getColor(color).slice(0,3).map(v=>255*(1-amt)).concat(getColor(color).slice(3)),
+
+	withAlpha:(color, alpha)=>_=>getColor(color).slice(0,3).concat(alpha),
 };
 
 export {

@@ -160,6 +160,7 @@ class Board{
     background("board.pathColor");
     env.pop();
 
+    env.fill(0);
     fill("board.text",env);
     env.push();
     env.textAlign(env.CENTER,env.CENTER);

@@ -55,10 +55,7 @@ class UploadColorfile extends Scene{
                 p5.textSize(s.dims.y * 0.6);
                 p5.text(data.name, s.dims.x / 2, s.dims.y / 2);
                 p5.pop();
-            },s=>fetch("/assets/omino/colorfiles/"+data.link).then(s=>s.text()).then(script=>{
-                loadColorScript(script);
-                this.close();
-            }),s=>s.name=data.name)));
+            },s=>fetch("/assets/omino/colorfiles/"+data.link).then(s=>this.parseFile(s)),s=>s.name=data.name)));
         }
 
         this.resized(new Vector(p5.width, p5.height), new Vector(p5.width, p5.height));
