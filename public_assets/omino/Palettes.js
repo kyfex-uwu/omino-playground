@@ -31,6 +31,7 @@ class OminoPalette{
         color:omino.color,
 
         orig,
+        custom:true,
       });
     }else{
       let key=Symbol();
@@ -40,7 +41,7 @@ class OminoPalette{
         color:omino.color,
 
         orig,
-        custom:true
+        custom:true,
       };
     }
   }

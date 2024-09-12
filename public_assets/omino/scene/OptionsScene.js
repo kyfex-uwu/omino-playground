@@ -2,7 +2,8 @@ const changelog = [
 `v0.2.5 xxx
 - Highlighting ominoes not in palette now works for unfilled palettes (heptominoes, octominoes...)
 - Changed rendering on torus mode to make the board easier to visualize
-- Fixed screenshot not capturing board correctly (again)`,
+- Fixed screenshot not capturing board correctly (again)
+- Fixed links sometimes generating incorrectly`,
 `v0.2.4 9/9/24
 - Fixed the "Calculate Path" tickbox incorrectly recalculating the path when it shouldn't
 - Fixed the app crashing when trying to set a size of 0 in torus torusMode (thanks @hhhguir!)
