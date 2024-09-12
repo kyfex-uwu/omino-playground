@@ -1,9 +1,10 @@
 const changelog = [
-`v0.2.5 xxx
+`v0.2.5 9/11/24
 - Highlighting ominoes not in palette now works for unfilled palettes (heptominoes, octominoes...)
 - Changed rendering on torus mode to make the board easier to visualize
 - Fixed screenshot not capturing board correctly (again)
-- Fixed links sometimes generating incorrectly`,
+- Fixed links sometimes generating incorrectly (again) (thanks @hhhguir!)
+- Fixed changelog saying undefined at the end`,
 `v0.2.4 9/9/24
 - Fixed the "Calculate Path" tickbox incorrectly recalculating the path when it shouldn't
 - Fixed the app crashing when trying to set a size of 0 in torus torusMode (thanks @hhhguir!)
@@ -123,7 +124,10 @@ note: v0.1.10 is v0.2.0`,
 `v0.1.5 8/10/24
 - Added better omino rotation
 - Added better(?) fullscreen
-- Added changelog (+ arbitrary version number lol)`
+- Added changelog (+ arbitrary version number lol)`,
+
+`Special thanks to these users:
+- @hhhguir - for finding so many bugs thank you so much`,
 ];
 
 import {ScrollableScene, OneTimeButtonScene, Scene, DimsScene,
@@ -155,7 +159,7 @@ function smartText(text, x, y, w){
 
     let newLine=[];
     for(const section of line){
-      let toAdd=section+joiners[joinerIndex];
+      let toAdd=section+(joiners[joinerIndex]||"");
       if(p5.textWidth(newLine.join("")+toAdd||newLine.length==0)<w){
         newLine.push(toAdd);
       }else{
