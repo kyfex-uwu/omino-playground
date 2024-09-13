@@ -12,6 +12,7 @@ class DrawingModeScene extends Scene {
 
     this.newTiles = [];
     this.omino = undefined;
+    this.creating=false;
 
     const button = (s,text)=>{
       fill(s.isIn()?"scenes.drawing.button.bgHover":"scenes.drawing.button.bg");
@@ -58,6 +59,27 @@ class DrawingModeScene extends Scene {
   render() {
     this.mainScene.render();
 
+    if(p5.mouseIsPressed){
+      let board = this.mainScene.boardScene;
+      let newPos = new Vector(p5.mouseX,p5.mouseY).sub(board.pos).add(board.dims.scale(0.5))
+        .div(board.dims).mult(new Vector(board.board.width, board.board.height)).floor();
+      if(newPos.x >=0 && newPos.y >=0 && newPos.x < board.board.width + board.dims.x && newPos.y < board.board.height) {
+        if(!this.creating) {
+          if(this.newTiles.some(p => p.equals(newPos)))
+            this.newTiles.splice(this.newTiles.findIndex(p => p.equals(newPos)), 1);
+        } else {
+          if(!this.newTiles.some(p => p.equals(newPos)))
+            this.newTiles.push(newPos);
+        }
+
+        if(this.newTiles.length == 0) {
+          this.omino = undefined;
+        } else {
+          this.omino = new Omino(new Vector(0, 0), "ominoColors.new", this.newTiles);
+        }
+      }
+    }
+
     let board = this.mainScene.boardScene;
     fill("scenes.drawing.darken");
     let pos=board.pos.sub(board.dims.scale(0.5));
@@ -82,25 +104,15 @@ class DrawingModeScene extends Scene {
     super.render();
   }
 
-  mouseUp(x, y) {
+  mouseDown(x,y){
     let board = this.mainScene.boardScene;
-    let newPos = new Vector(x,y).sub(board.pos).add(board.dims.scale(0.5))
+    let newPos = new Vector(p5.mouseX,p5.mouseY).sub(board.pos).add(board.dims.scale(0.5))
       .div(board.dims).mult(new Vector(board.board.width, board.board.height)).floor();
     if(newPos.x >=0 && newPos.y >=0 && newPos.x < board.board.width + board.dims.x && newPos.y < board.board.height) {
-      if(this.newTiles.some(p => p.equals(newPos))) {
-        this.newTiles.splice(this.newTiles.findIndex(p => p.equals(newPos)), 1);
-      } else {
-        this.newTiles.push(newPos);
-      }
-
-      if(this.newTiles.length == 0) {
-        this.omino = undefined;
-      } else {
-        this.omino = new Omino(new Vector(0, 0), "ominoColors.new", this.newTiles);
-      }
+      this.creating=!this.newTiles.some(p => p.equals(newPos));
     }
 
-    super.mouseUp(x, y);
+    return super.mouseDown(x,y);
   }
 
   resized(oldDims, newDims=oldDims) {

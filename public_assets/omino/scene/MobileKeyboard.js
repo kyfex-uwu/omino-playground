@@ -22,7 +22,7 @@ class KeyScene extends ButtonScene{
 	}
 	render(){
 		fill(this.isIn()?"scenes.util.keypad.button.bgHover":"scenes.util.keypad.button.bg");
-		p5.rect(0,0,this.dims.x,this.dims.y, Math.min(this.dims.x,this.dims.y));
+		p5.rect(0,0,this.dims.x,this.dims.y, Math.max(0,Math.min(this.dims.x,this.dims.y)));
 		fill("scenes.util.keypad.button.color");
 		p5.textSize(this.dims.y*0.7);
 		p5.textAlign(p5.CENTER, p5.CENTER);
@@ -72,7 +72,7 @@ class MobileKeyboard extends DimsScene{
 	}
 
 	render(){
-		let unit=Math.min(this.dims.x,this.dims.y);
+		let unit=Math.max(0,Math.min(this.dims.x,this.dims.y));
 		fill("scenes.util.keypad.shadow");
 		p5.rect(-unit*0.02, -unit*0.02,this.dims.x+unit*0.04,this.dims.y+unit*0.04,unit*0.04);
 		fill("scenes.util.keypad.bg");
