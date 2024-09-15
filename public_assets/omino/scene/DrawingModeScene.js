@@ -63,7 +63,7 @@ class DrawingModeScene extends Scene {
       let board = this.mainScene.boardScene;
       let newPos = new Vector(p5.mouseX,p5.mouseY).sub(board.pos).add(board.dims.scale(0.5))
         .div(board.dims).mult(new Vector(board.board.width, board.board.height)).floor();
-      if(newPos.x >=0 && newPos.y >=0 && newPos.x < board.board.width + board.dims.x && newPos.y < board.board.height) {
+      if(newPos.x >=0 && newPos.y >=0 && newPos.x < board.board.width && newPos.y < board.board.height) {
         if(!this.creating) {
           if(this.newTiles.some(p => p.equals(newPos)))
             this.newTiles.splice(this.newTiles.findIndex(p => p.equals(newPos)), 1);
@@ -108,7 +108,7 @@ class DrawingModeScene extends Scene {
     let board = this.mainScene.boardScene;
     let newPos = new Vector(p5.mouseX,p5.mouseY).sub(board.pos).add(board.dims.scale(0.5))
       .div(board.dims).mult(new Vector(board.board.width, board.board.height)).floor();
-    if(newPos.x >=0 && newPos.y >=0 && newPos.x < board.board.width + board.dims.x && newPos.y < board.board.height) {
+    if(newPos.x >=0 && newPos.y >=0 && newPos.x < board.board.width && newPos.y < board.board.height) {
       this.creating=!this.newTiles.some(p => p.equals(newPos));
     }
 

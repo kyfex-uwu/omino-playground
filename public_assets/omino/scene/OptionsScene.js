@@ -1,7 +1,8 @@
 const changelog = [
-`v0.2.6 xxx
+`v0.2.6 9/14/24
 - Change omino drawing so it's click and drag
-- Fixed mobile input crashing on weird screen sizes`,
+- Fixed mobile input crashing on weird screen sizes
+- Fixed omino drawing letting you draw outside the bounds (thanks @dr.koffeeblahajedition!)`,
 `v0.2.5 9/11/24
 - Highlighting ominoes not in palette now works for unfilled palettes (heptominoes, octominoes...)
 - Changed rendering on torus mode to make the board easier to visualize

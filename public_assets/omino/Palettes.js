@@ -21,7 +21,7 @@ class OminoPalette{
       data.orig=true;
     }
   }
-  add(omino, orig=false){
+  add(omino, orig=false, custom=true){
     omino=omino.clone();
     omino.pos=new Vector(0,0);
     if(this.data instanceof Array){
@@ -31,7 +31,7 @@ class OminoPalette{
         color:omino.color,
 
         orig,
-        custom:true,
+        custom,
       });
     }else{
       let key=Symbol();
@@ -41,7 +41,7 @@ class OminoPalette{
         color:omino.color,
 
         orig,
-        custom:true,
+        custom,
       };
     }
   }
