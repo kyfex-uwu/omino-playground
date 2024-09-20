@@ -26,7 +26,7 @@ website.get("/omino-playground", (req, res) => {
 	</head>
 	<body style="height: 100vh; margin:0;">
 		<script src="https://cdn.jsdelivr.net/npm/p5@1.10.0/lib/p5.js"></script>
-		<script src="/assets/omino/Main.js" type="module"></script>
+		<script src="/assets/omino/launcher.js" type="module"></script>
 	</body>
 </html>`);
 });

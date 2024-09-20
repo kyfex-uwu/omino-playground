@@ -1,4 +1,9 @@
 const changelog = [
+`v0.2.7 9/20/24
+- Added new "safeMode" URL parameter: if the app isn't loading for whatever reason, add "?safeMode=true" or `+
+`"&safeMode=true" to the end of the URL, and the app will load without colorfiles and mods.
+- Added an events system for helping modfile developers
+- Cleaned up adding modfiles and colorfiles`,
 `v0.2.6 9/14/24
 - Change omino drawing so it's click and drag
 - Fixed mobile input crashing on weird screen sizes
