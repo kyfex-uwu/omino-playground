@@ -1,4 +1,6 @@
 const changelog = [
+`v0.2.7b 9/20/24
+- Fixed a crash hopefully`,
 `v0.2.7 9/20/24
 - Added new "safeMode" URL parameter: if the app isn't loading for whatever reason, add "?safeMode=true" or `+
 `"&safeMode=true" to the end of the URL, and the app will load without colorfiles and mods.

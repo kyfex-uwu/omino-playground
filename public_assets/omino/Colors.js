@@ -1,3 +1,5 @@
+import events from "/assets/omino/Events.js";
+
 const Colors = {};
 window.Colors=Colors;
 
@@ -62,10 +64,11 @@ function loadColors(colorObj){
 			let addedFont=fonts.filter(font=>!loadedFonts.has(font))[0];
 			if(addedFont)
 				addedFont.load().then(_=>{
-					setTimeout(_=>{
+					events.loaded.on(_=>{
+						events.loaded
 						p5.textFont(addedFont.family);
 						p5.windowResized();
-					},100);
+					});
 				});
 			for(const font of fonts) loadedFonts.add(font);
 		});

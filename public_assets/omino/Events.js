@@ -5,13 +5,16 @@ class ExternalPromise extends Promise{
 		this.resolveFunc=toCall[0];
 
 		this.callbacks=[];
+		this.resolved=false;
 	}
 	then(){}
 
 	on(callback){
-		this.callbacks.push(callback);
+		if(this.resolved) callback();
+		else this.callbacks.push(callback);
 	}
 	async resolve(){
+		this.resolved=true;
 		for(const callback of this.callbacks)
 			await callback();
 	}
