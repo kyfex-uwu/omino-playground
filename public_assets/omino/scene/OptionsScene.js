@@ -1,4 +1,6 @@
 const changelog = [
+`v0.2.7c xxx
+- Fixed the crash (part 2)`,
 `v0.2.7b 9/20/24
 - Fixed a crash hopefully`,
 `v0.2.7 9/20/24
