@@ -1,5 +1,5 @@
 const changelog = [
-`v0.2.7c xxx
+`v0.2.7c 9/21/24
 - Fixed the crash (part 2)`,
 `v0.2.7b 9/20/24
 - Fixed a crash hopefully`,
