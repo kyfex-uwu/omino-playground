@@ -80,7 +80,29 @@ class BoardBuildScene extends MainScene{
 
     this.boardScene.clickListener = (x,y)=>this.onBoardClick(x,y);
 
+    this.creating=false;
+
     this.resized(new Vector(p5.width, p5.height), new Vector(p5.width, p5.height));
+  }
+
+  render(){
+    if(p5.mouseIsPressed&&this.state=="locked"){
+      let board = this.boardScene;
+      let newPos = new Vector(p5.mouseX,p5.mouseY).sub(board.pos).add(board.dims.scale(0.5))
+        .div(board.dims).mult(new Vector(board.board.width, board.board.height)).floor();
+      if(newPos.x >=0 && newPos.y >=0 && newPos.x < board.board.width && newPos.y < board.board.height) {
+        let locked=Data.scene.boardScene.board.lockedTiles.vectors;
+        if(!this.creating) {
+          if(locked.some(p => p.equals(newPos)))
+            locked.splice(locked.findIndex(p => p.equals(newPos)), 1);
+        } else {
+          if(!locked.some(p => p.equals(newPos)))
+            locked.push(newPos);
+        }
+        Data.scene.boardScene.board.lockedTiles=new LockedOmino(locked);
+      }
+    }
+    super.render();
   }
 
   resized(oldDims, newDims=oldDims){
@@ -120,16 +142,16 @@ class BoardBuildScene extends MainScene{
       Data.mainBoard.endPoint = new Vector(x,y);
       this.settingsScene.hasEnd.value=true;
       break;
-    case "locked":
-      let newVectors = Data.scene.boardScene.board.lockedTiles.vectors;
-      let clickPos = new Vector(x,y);
-      if(newVectors.some(v=>v.equals(clickPos)))
-        Data.scene.boardScene.board.lockedTiles = new LockedOmino(newVectors.filter(v=>!v.equals(clickPos)));
-      else{
-        newVectors.push(clickPos);
-        Data.scene.boardScene.board.lockedTiles = new LockedOmino(newVectors);
-      }
-      break;
+    }
+  }
+  mouseDown(x,y){
+    super.mouseDown(x,y);
+
+    if(this.state=="locked"){
+      let board = this.boardScene;
+      this.creating=!Data.scene.boardScene.board.lockedTiles.vectors
+        .some(v=>v.equals(new Vector(x,y).sub(board.pos).add(board.dims.scale(0.5))
+        .div(board.dims).mult(new Vector(board.board.width, board.board.height)).floor()));
     }
   }
 

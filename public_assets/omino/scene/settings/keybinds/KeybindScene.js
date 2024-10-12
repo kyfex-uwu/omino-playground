@@ -1,12 +1,12 @@
 import {DimsScene} from "/assets/omino/scene/Scene.js";
-import {OneKeyScene} from "/assets/omino/scene/settings/SettingsScene.js";
-import ChangeKeysScene from "/assets/omino/scene/settings/ChangeKeysScene.js";
 import Vector from "/assets/omino/Vector.js";
 import Data from "/assets/omino/Main.js";
-import {keybindGroups} from "/assets/omino/scene/settings/SettingsScene.js";
+import {fill} from "/assets/omino/Colors.js";
+import ChangeKeysScene from "/assets/omino/scene/settings/keybinds/ChangeKeysScene.js";
+import {OneKeyScene, keybindGroups} from "/assets/omino/scene/settings/keybinds/KeybindsScene.js";
 
 class KeybindScene extends DimsScene{
-    constructor(text, keybind){
+    constructor(text, keybind, keybindHolder){
         super();
         this.text=text;
         this.keybind=keybind;
@@ -19,9 +19,9 @@ class KeybindScene extends DimsScene{
             this.addScene(new OneKeyScene(key));
     }
     render(){
-        p5.fill(this.isIn()?100:80);
+        fill(this.isIn()?"scenes.settings.buttons.dark.bgHover":"scenes.settings.buttons.dark.bg");
         p5.rect(0,0,this.dims.x,this.dims.y);
-        p5.fill(255);
+        fill("scenes.settings.buttons.dark.text");
         p5.textAlign(p5.LEFT, p5.CENTER);
         p5.textSize(this.dims.y*0.5);
         p5.text(this.text, this.dims.y*0.1,this.dims.y/2);
@@ -41,7 +41,7 @@ class KeybindScene extends DimsScene{
     mouseUp(x, y){
         if(!this.isIn()) return false;
 
-        Data.scene = new ChangeKeysScene(Data.scene, this.keybind);
+        Data.scene = new ChangeKeysScene(Data.scene, this);
 
         return true;
     }

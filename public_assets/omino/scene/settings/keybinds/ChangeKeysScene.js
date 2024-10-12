@@ -1,12 +1,13 @@
 import {Scene, OneTimeButtonScene} from "/assets/omino/scene/Scene.js";
 import Vector from "/assets/omino/Vector.js";
-import {keybindGroups, PressKeyScene} from "/assets/omino/scene/settings/SettingsScene.js";
+import {keybindGroups, PressKeyScene} from "/assets/omino/scene/settings/keybinds/KeybindsScene.js";
 import Data from "/assets/omino/Main.js";
+import {fill} from "/assets/omino/Colors.js";
 
 let keybindNames;
 
 class ChangeKeysScene extends Scene{
-    constructor(backScreen, keybind){
+    constructor(backScreen, keybindScene){
         if(!keybindNames){
             keybindNames={};
             for(const group of keybindGroups)
@@ -16,16 +17,16 @@ class ChangeKeysScene extends Scene{
 
         super();
         this.backScreen=backScreen;
-        this.keybind=keybind;
+        this.keybind=keybindScene.keybind;
         this.rawKeys=[];
 
         this.backScreen.hasMouseAccess=false;
 
         const button = (s, text)=>{
-            p5.fill(s.isIn()?255:200);
+            fill(s.isIn()?"scenes.settings.buttons.light.bgHover":"scenes.settings.buttons.light.bg");
             p5.rect(0,0,s.dims.x,s.dims.y);
             p5.textAlign(p5.CENTER,p5.CENTER);
-            p5.fill(0);
+            fill("scenes.settings.buttons.light.text");
             p5.textSize(s.dims.y*0.9);
             p5.text(text, s.dims.x/2,s.dims.y/2);
         };
@@ -34,8 +35,7 @@ class ChangeKeysScene extends Scene{
         },s=>{
             Data.scene = this.backScreen;
             this.backScreen.hasMouseAccess=true;
-            for(const scene of this.backScreen.keybindScenes)
-                scene.reload();
+            keybindScene.reload();
             this.backScreen.resized(new Vector(p5.width, p5.height));
         }));
         this.addButton = this.addScene(new OneTimeButtonScene(s=>{
@@ -51,10 +51,10 @@ class ChangeKeysScene extends Scene{
             this.subScenes.splice(this.subScenes.indexOf(scene), 1);
 
         const button = (s, text)=>{
-            p5.fill(s.isIn()?255:200);
+            fill(s.isIn()?"scenes.settings.buttons.light.bgHover":"scenes.settings.buttons.light.bg");
             p5.rect(0,0,s.dims.x,s.dims.y);
             p5.textAlign(p5.CENTER,p5.CENTER);
-            p5.fill(0);
+            fill("scenes.settings.buttons.light.text");
             p5.textSize(s.dims.y*0.9);
             p5.text(text, s.dims.x/2,s.dims.y/2);
         };
@@ -105,10 +105,10 @@ class ChangeKeysScene extends Scene{
         p5.background(0,100);
 
         p5.textSize(p5.height*0.07);
-        p5.fill(80);
+        fill("scenes.settings.modal.bg");
         let w=p5.textWidth(keybindNames[this.keybind.name]+"m");
         p5.rect((p5.width-w)/2,p5.height/3-p5.textSize()*1.1, w, p5.textSize()*1.2);
-        p5.fill(255);
+        fill("scenes.settings.modal.text");
         p5.textAlign(p5.CENTER,p5.BOTTOM);
         p5.text(keybindNames[this.keybind.name], p5.width/2,p5.height/3);
 

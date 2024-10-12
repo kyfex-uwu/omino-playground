@@ -1,103 +1,56 @@
-import {Scene, DimsScene, OneTimeButtonScene, ScrollableScene, hover} from "/assets/omino/scene/Scene.js";
+import {Scene, OneTimeButtonScene, DimsScene, hover} from "/assets/omino/scene/Scene.js";
 import Vector from "/assets/omino/Vector.js";
 import Data from "/assets/omino/Main.js";
-import {Keybinds} from "/assets/omino/Keybinds.js";
-import {loadColors, loadColorScript, fill, background} from "/assets/omino/Colors.js";
-import KeybindScene from "/assets/omino/scene/settings/KeybindScene.js";
+import {fill, background, stroke} from "/assets/omino/Colors.js";
 import UploadColorfile from "/assets/omino/scene/settings/UploadColorfile.js";
 
-const keybindGroups = [
-    ["Solving",{
-        CCW:"Rotate Counterclockwise",
-        CW:"Rotate Clockwise",
-        MH:"Mirror Horizontally",
-        MV:"Mirror Vertically",
-        DEL:"Delete Omino",
-    }],
-    ["Building",{
-        START:"Place Start Position",
-        END:"Place End Position",
-        LOCK:"Place Locked Tiles",
-    }],
-];
+import KeybindsScene from "/assets/omino/scene/settings/keybinds/KeybindsScene.js";
+import ChangelogScene from "/assets/omino/scene/settings/ChangelogScene.js";
 
-class PressKeyScene extends Scene{
-    constructor(backScreen, renderScreen, keybind){
+class ClippedContainer extends DimsScene{
+    constructor(scene){
         super();
-        this.backScreen=backScreen;
-        this.renderScreen = renderScreen;
-        this.keybind=keybind;
-    }
-    resized(oldDims, newDims=oldDims){
-        this.backScreen.resized(oldDims, newDims);
-        super.resized(oldDims, newDims);
+        this.addScene(scene);
+        this.inner=scene;
     }
     render(){
-        this.renderScreen.render();
-        p5.background(0,100);
-        p5.fill(255);
-        p5.textAlign(p5.CENTER,p5.CENTER);
-        p5.textSize(p5.height*0.1);
-        p5.text("Press a key", p5.width/2,p5.height/2);
-
-        super.render();
-    }
-    keyPressed(key){
-        this.keybind.add(key);
-        Data.scene = this.backScreen;
-        this.backScreen.reload();
-    }
-}
-
-class OneKeyScene extends DimsScene{
-    constructor(key){
-        super();
-        this.key=key;
-    }
-    render(){
-        p5.fill(200);
+        p5.push();
+        p5.fill(0);
+        p5.beginClip();
         p5.rect(0,0,this.dims.x,this.dims.y);
-        p5.fill(40);
-        p5.textAlign(p5.CENTER, p5.CENTER);
-        p5.textSize(this.dims.y*0.9);
-        p5.text(this.key, this.dims.x/2, this.dims.y/2);
-    }
-    setDims(height){
-        p5.textSize(height*0.9);
-        this.dims = new Vector(p5.textWidth(this.key+"m"), height);
-    }
-}
-
-class Divider extends DimsScene{
-    constructor(label){
-        super();
-        this.label=label;
-    }
-    render(){
-        p5.fill(255);
-        p5.textAlign(p5.LEFT, p5.BOTTOM);
-        p5.textSize(this.dims.y*0.7);
-        p5.text(this.label, this.dims.y*0.1,this.dims.y);
-
+        p5.endClip();
         super.render();
+        p5.pop();
     }
-    reload(){}
+    resized(oldDims,newDims=oldDims){
+        this.dims=newDims;
+        let unit=Math.min(newDims.x/16,newDims.y/9);
+
+        this.pos=new Vector(unit/2, unit*2.2);
+        this.dims=newDims.sub(new Vector(unit,this.pos.y));
+
+        this.inner.resized(this.dims,this.dims);
+    }
 }
 
-class SettingsScene extends ScrollableScene{
+class SettingsContainerScene extends Scene{
     constructor(mainScene){
         super();
 
         this.mainScene = mainScene;
 
-        this.backButton = this.addScene(new OneTimeButtonScene(s=>{
-            p5.fill(255,s.isIn()?150:100);
+        const buttonFrame = s=>{
+            fill(s.isIn()?"scenes.settings.buttons.dark.bgHover":"scenes.settings.buttons.dark.bg");
             p5.rect(0,0,s.dims.x,s.dims.y, Math.min(s.dims.x,s.dims.y)*0.1);
+            fill("scenes.settings.buttons.dark.text");
+        }
+
+        this.backButton = this.addScene(new OneTimeButtonScene(s=>{
+            buttonFrame(s);
 
             p5.push();
             p5.translate(s.dims.x*0.47,s.dims.y*0.55);
             p5.scale(s.dims.x/100);
-            p5.fill(255);
             p5.beginShape();
 
             p5.vertex(-15,3);
@@ -121,13 +74,11 @@ class SettingsScene extends ScrollableScene{
         }));
 
         this.bugreport = this.addScene(new OneTimeButtonScene(s=>{
-            p5.fill(255,s.isIn()?150:100);
-            p5.rect(0,0,s.dims.x,s.dims.y, Math.min(s.dims.x,s.dims.y)*0.1);
+            buttonFrame(s);
 
             p5.push();
             p5.translate(s.dims.x*0.5,s.dims.y*0.5);
             p5.scale(s.dims.x/100);
-            p5.fill(255);
 
             p5.beginShape();
             p5.vertex(-2,-10);
@@ -146,7 +97,7 @@ class SettingsScene extends ScrollableScene{
             p5.endShape();
 
             p5.strokeWeight(5);
-            p5.stroke(255);
+            stroke("scenes.settings.buttons.dark.text");
             p5.noFill();
             p5.bezier(-10,-20, -12, -30, -13, -36,-20,-40);
             p5.bezier(10,-20, 12, -30, 13, -36,20,-40);
@@ -171,14 +122,12 @@ class SettingsScene extends ScrollableScene{
         }));
 
         this.colorfile = this.addScene(new OneTimeButtonScene(s=>{
-            p5.fill(255,s.isIn()?150:100);
-            p5.rect(0,0,s.dims.x,s.dims.y, Math.min(s.dims.x,s.dims.y)*0.1);
+            buttonFrame(s);
 
             p5.push();
             p5.translate(s.dims.x*0.5,s.dims.y*0.5);
             p5.scale(s.dims.x/100);
             p5.translate(0,-3);
-            p5.fill(255);
 
             p5.beginShape();
             p5.vertex(-3,-0);
@@ -211,12 +160,30 @@ class SettingsScene extends ScrollableScene{
             Data.scene = new UploadColorfile(this);
         }));
 
-        this.keybindScenes=[];
-        for(const group of keybindGroups){
-            this.keybindScenes.push(this.addScene(new Divider(group[0])));
-            for(const [name, text] of Object.entries(group[1]))
-                this.keybindScenes.push(this.addScene(new KeybindScene(text, Keybinds[name])));
-        }
+        this.tabButtons=[
+            {name:"Keybinds", scene:new KeybindsScene()},
+            {name:"Changelog", scene:new ChangelogScene()},
+        ].map(data=>{
+            data.scene = new ClippedContainer(data.scene);
+
+            return this.addScene(new OneTimeButtonScene(s=>{
+                fill(s.isIn()?"scenes.settings.buttons.dark.bgHover":"scenes.settings.buttons.dark.bg");
+                p5.rect(0,0,s.dims.x,s.dims.y);
+                fill("scenes.settings.buttons.dark.text");
+                p5.textSize(s.dims.y*0.8);
+                p5.textAlign(p5.CENTER,p5.CENTER);
+                p5.text(data.name,s.dims.x/2,s.dims.y/2);
+            },s=>{
+                this.activeTab.scene.remove();
+                this.activeTab=data;
+                this.addScene(this.activeTab.scene);
+                if(this.dims) this.activeTab.scene.resized(this.dims,this.dims);
+            }));
+        });
+        this.activeTab={scene:{remove:_=>0}};
+        this.tabButtons[0].click();
+
+        this.bgOffs=0;
 
         this.resized(new Vector(p5.width, p5.height),new Vector(p5.width, p5.height));
     }
@@ -231,48 +198,40 @@ class SettingsScene extends ScrollableScene{
         this.colorfile.pos = new Vector(this.dims.x-unit*1.4, unit*0.2);
         this.colorfile.dims = new Vector(unit*1.2, unit*1.2);
 
-        let currPos = unit*2;
-        for(let i=0;i<this.keybindScenes.length;i++){
-            let scene = this.keybindScenes[i];
-            if(scene instanceof KeybindScene)
-                scene.dims = new Vector(newDims.x-unit, unit);
-            else if(scene instanceof Divider)
-                scene.dims = new Vector(newDims.x-unit*2, unit*0.7);
-            scene.pos = new Vector((newDims.x-scene.dims.x)/2, currPos);
-
-            currPos+=scene.dims.y+unit*0.2;
+        let unit2=(newDims.x-newDims.y*0.01)/this.tabButtons.length;
+        for(let i=0;i<this.tabButtons.length;i++){
+            let tabButton=this.tabButtons[i];
+            tabButton.pos = new Vector(newDims.y*0.01+unit2*i, unit*1.6);
+            tabButton.dims = new Vector(unit2-newDims.y*0.01, unit*0.5);
         }
 
         super.resized(oldDims, newDims);
     }
     render(){
-        p5.background(50);
+        background("scenes.settings.bg.0");
+        fill("scenes.settings.bg.1");
+        this.bgOffs=(this.bgOffs+0.2)%100;
+        p5.push();
+        p5.translate(this.bgOffs-50,this.bgOffs);
+        for(let y=-1;y<p5.height/100;y++){
+            for(let x=-1;x<p5.width/100;x++){
+                if((x+1)%2==(y+1)%2) continue;
+                p5.push();
+                p5.translate(x*100,y*100);
+                p5.beginShape();
+                p5.vertex(50,10);
+                p5.vertex(90,50);
+                p5.vertex(50,90);
+                p5.vertex(10,50);
+                p5.endShape();
+                p5.pop();
+            }
+        }
+        p5.pop();
 
         super.render();
         hover.draw();
     }
-
-  scrolled(x,y,delta){
-    delta*=this.dims.x*0.0007;
-
-    let oldOffs=this.offs;
-    if(!super.scrolled(x,y,delta)) return false;
-    if(this.offs<0){
-      for(const child of this.subScenes) child.pos.y+=oldOffs;
-      this.offs=0;
-      return true;
-    }
-
-    for(const child of this.subScenes) child.pos.y-=delta;
-
-    return true;
-  }
 }
 
-export default SettingsScene;
-export {
-    SettingsScene,
-    OneKeyScene,
-    PressKeyScene,
-    keybindGroups,
-};
+export default SettingsContainerScene;

@@ -19,43 +19,26 @@ class UploadColorfile extends Scene{
         this.newTiles = [];
         this.omino = undefined;
 
-        this.cancelButton = this.addScene(new OneTimeButtonScene(s => {
-            fill(s.isIn()?"scenes.settings.button.bgHover":"scenes.settings.button.bg");
-            p5.rect(0, 0, s.dims.x, s.dims.y, s.dims.y*0.3);
-            fill("scenes.settings.button.color");
-            p5.push();
-            p5.textAlign(p5.CENTER, p5.CENTER);
-            p5.textSize((s.dims.x + s.dims.y) * 0.17);
-            p5.text("Close", s.dims.x / 2, s.dims.y / 2);
-            p5.pop();
-        }, s => {
+        const button = (s, text, mult=0.9)=>{
+            fill(s.isIn()?"scenes.settings.buttons.light.bgHover":"scenes.settings.buttons.light.bg");
+            p5.rect(0,0,s.dims.x,s.dims.y, s.dims.y*0.3);
+            fill("scenes.settings.buttons.light.text");
+            p5.textAlign(p5.CENTER,p5.CENTER);
+            p5.textSize(s.dims.y*mult);
+            p5.text(text, s.dims.x/2,s.dims.y/2);
+        };
+
+        this.cancelButton = this.addScene(new OneTimeButtonScene(s => button(s,"Close"), s => {
             this.close();
         }));
-        this.resetButton = this.addScene(new OneTimeButtonScene(s => {
-            fill(s.isIn()?"scenes.settings.button.bgHover":"scenes.settings.button.bg");
-            p5.rect(0, 0, s.dims.x, s.dims.y, s.dims.y*0.3);
-            fill("scenes.settings.button.color");
-            p5.push();
-            p5.textAlign(p5.CENTER, p5.CENTER);
-            p5.textSize((s.dims.x + s.dims.y) * 0.17);
-            p5.text("Reset", s.dims.x / 2, s.dims.y / 2);
-            p5.pop();
-        }, s => {
+        this.resetButton = this.addScene(new OneTimeButtonScene(s => button(s,"Reset"), s => {
             localStorage.removeItem("Colorfile");
             loadColors({});
         }));
         this.builtinButtons = [];
         for(const data of builtins){
-            this.builtinButtons.push(this.addScene(new OneTimeButtonScene(s=>{
-                fill(s.isIn()?"scenes.settings.button.bgHover":"scenes.settings.button.bg");
-                p5.rect(0, 0, s.dims.x, s.dims.y, s.dims.y*0.3);
-                fill("scenes.settings.button.color");
-                p5.push();
-                p5.textAlign(p5.CENTER, p5.CENTER);
-                p5.textSize(s.dims.y * 0.6);
-                p5.text(data.name, s.dims.x / 2, s.dims.y / 2);
-                p5.pop();
-            },s=>fetch("/assets/omino/colorfiles/"+data.link).then(s=>this.parseFile(s)),s=>s.name=data.name)));
+            this.builtinButtons.push(this.addScene(new OneTimeButtonScene(s=>button(s,data.name,0.6),
+                s=>fetch("/assets/omino/colorfiles/"+data.link).then(s=>this.parseFile(s)),s=>s.name=data.name)));
         }
 
         this.resized(new Vector(p5.width, p5.height), new Vector(p5.width, p5.height));
@@ -88,12 +71,12 @@ class UploadColorfile extends Scene{
     render() {
         this.mainScene.render();
         background(this.hasFile?"scenes.settings.hasFile":"scenes.settings.darken");
-        fill("scenes.settings.bg");
+        fill("scenes.settings.modal.bg");
         p5.textSize(p5.width*0.03);
         let message="Drag and drop the colorfile, or\nclick to open your file explorer";
         let width=p5.textWidth(message);
         p5.rect((p5.width-width*1.1)/2,p5.height/2-p5.textSize()*4,width*1.1,p5.textSize()*3);
-        fill("scenes.settings.text");
+        fill("scenes.settings.modal.text");
         p5.textAlign(p5.CENTER,p5.BOTTOM);
         p5.text(message,p5.width/2,p5.height/2-p5.width*0.04);
         super.render();

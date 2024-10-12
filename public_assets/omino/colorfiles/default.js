@@ -177,12 +177,23 @@ exportMod({
 		settings:{
 			darken:"default:util.darken",
 			hasFile:colorFuncs.hexToRGBA(0x2f658b6f),
-			bg:colorFuncs.hexToRGB(0x606060),
+			bg:[colorFuncs.hexToRGB(0x101010), colorFuncs.hexToRGB(0x191919)],
 			text:colorFuncs.hexToRGB(0xffffff),
-			button:{
-				bg:"default:util.button.bg",
-				bgHover:"default:util.button.bgHover",
-				color:"default:util.button.color",
+			modal:{
+				bg:"default:buttons.dark.bg",
+				text:"default:buttons.dark.icon",
+			},
+			buttons:{
+				dark:{
+					bg:"default:buttons.dark.bg",
+					bgHover:"default:buttons.dark.bgHover",
+					text:"default:buttons.dark.icon",
+				},
+				light:{
+					bg:colorFuncs.hexToRGB(0xc8c8c8),
+					bgHover:colorFuncs.hexToRGB(0xffffff),
+					text:colorFuncs.hexToRGB(0x000000),
+				},
 			},
 		},
 		buildPuzz:{
