@@ -109,6 +109,7 @@ class KeybindsScene extends ScrollableScene{
                 scene.dims = new Vector(newDims.x, unit*0.7);
                 scene.pos = new Vector(unit/2, currPos);
             }
+            scene.pos.y-=this.offs;
 
             currPos+=scene.dims.y+unit*0.2;
         }
