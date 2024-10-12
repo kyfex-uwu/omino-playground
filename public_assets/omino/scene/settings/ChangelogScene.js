@@ -177,6 +177,7 @@ function smartText(text, x, y, w){
   }
 
   p5.text(toRender.map(l=>l.join("")).join("\n"), x,y);
+  return toRender;
 }
 
 //--
@@ -186,45 +187,39 @@ import {fill} from "/assets/omino/Colors.js";
 
 class ChangelogScene extends ScrollableScene{
 	constructor(){
-        super();
-    }
-    resized(oldDims, newDims=oldDims){
-        this.dims = newDims;
+    super(0);
+  }
+  resized(oldDims, newDims=oldDims){
+    this.dims = newDims;
 
-        super.resized(oldDims, newDims);
-    }
-    scrolled(x,y,delta){
-        delta*=this.dims.x*0.0007;
+    let scale = this.dims.y*0.01;
+    p5.textSize(4.5);
+    this.scrollLimits.max=(smartText(changelog.join("\n\n"), 0,0, 1/scale*this.dims.x).length+2)*
+      p5.textLeading()*scale-this.dims.y;
 
-        let oldOffs=this.offs;
-        if(!super.scrolled(x,y,delta)) return false;
-        if(this.offs<0){
-          for(const child of this.subScenes) child.pos.y+=oldOffs;
-          this.offs=0;
-          return true;
-        }
+    super.resized(oldDims, newDims);
+  }
+  scrolled(x,y,delta){
+    delta*=this.dims.x*0.0007;
+    return super.scrolled(x,y,delta);
+  }
 
-        for(const child of this.subScenes) child.pos.y-=delta;
+  render(){
+    p5.push();
+    p5.translate(0,-this.offs);
+    let scale = this.dims.y*0.01;
+    p5.scale(scale);
 
-        return true;
-    }
+    p5.textSize(4.5);
+    fill("scenes.settings.text");
+    p5.textAlign(p5.LEFT, p5.TOP);
 
-    render(){
-	    p5.push();
-	    p5.translate(0,-this.offs);
-	    let scale = this.dims.y*0.01;
-	    p5.scale(scale);
+    smartText(changelog.join("\n\n"), 0,0, 1/scale*this.dims.x);
 
-	    p5.textSize(4.5);
-	    fill("scenes.settings.text");
-	    p5.textAlign(p5.LEFT, p5.TOP);
+    p5.pop();
 
-	    smartText(changelog.join("\n\n"), 0,0, 1/scale*this.dims.x);
-
-	    p5.pop();
-
-	    super.render();
-    }
+    super.render();
+  }
 }
 
 export default ChangelogScene;

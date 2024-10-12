@@ -108,16 +108,6 @@ class PaletteScene extends ScrollableScene{
 
     super.render();
   }
-  scrolled(x,y,delta){
-    if(!super.scrolled(x,y,delta)) return false;
-
-    let oldOffs=this.offs;
-    this.offs = Math.max(Math.min(this.spaces[this.spaces.length-1].pos.y-this.spaces[0].pos.y,this.offs),0);
-    for(const space of this.spaces)
-      space.recalc(this);
-
-    return true;;
-  }
 }
 
 export default PaletteScene;
