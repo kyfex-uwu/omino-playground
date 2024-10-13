@@ -4,7 +4,8 @@ const changelog = [
 - Updated the default colorfile
 - Moved the changelog into settings
 - Changed the locking tiles mechanic to allow for click and dragging (it now works `+
-`just like drawing a custom omino`,
+`just like drawing a custom omino
+- Improved scrolling everywhere (and reworked a lot behind the scenes)`,
 `v0.2.7c 9/21/24
 - Fixed the crash (part 2)`,
 `v0.2.7b 9/20/24
@@ -187,7 +188,7 @@ import {fill} from "/assets/omino/Colors.js";
 
 class ChangelogScene extends ScrollableScene{
 	constructor(){
-    super(0);
+    super({min:0});
   }
   resized(oldDims, newDims=oldDims){
     this.dims = newDims;
@@ -195,7 +196,7 @@ class ChangelogScene extends ScrollableScene{
     let scale = this.dims.y*0.01;
     p5.textSize(4.5);
     this.scrollLimits.max=(smartText(changelog.join("\n\n"), 0,0, 1/scale*this.dims.x).length+2)*
-      p5.textLeading()*scale-this.dims.y;
+      p5.textLeading()*scale-this.dims.y+this.offs;
 
     super.resized(oldDims, newDims);
   }

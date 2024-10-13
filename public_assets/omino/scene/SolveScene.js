@@ -11,6 +11,7 @@ import BoardBuildScene from "/assets/omino/scene/BoardBuildScene.js";
 import PaletteScene from "/assets/omino/scene/PaletteScene.js";
 import {LockedOmino} from "/assets/omino/Omino.js";
 import {fill, stroke} from "/assets/omino/Colors.js";
+import TickboxScene from "/assets/omino/scene/TickboxScene.js";
 
 class SolveScene extends MainScene{
   constructor(){
@@ -20,6 +21,47 @@ class SolveScene extends MainScene{
     	},
       drawMouse:true,
     });
+
+    let highlights={
+      dupes:false,
+      nonPalettes:false,
+    };
+    Data.mainBoard.renderData.highlightFunc=(omino, ominoes, palette)=>{
+      if(highlights.dupes&&ominoes.some(o=>o!=omino&&o.equals(omino))) return "renderHighlighted";
+      if(highlights.nonPalettes&&
+          (palette.size==-1?(omino.vectors.length!=this.optionsScene.palette.oldValue):omino.vectors.length!=palette.size)&&
+          !Object.values(palette.data).some(o=>o.orig&&o.omino.equals(omino))) 
+        return "renderHighlighted";
+
+      return "render";
+    };
+
+    this.calcPathBox = new TickboxScene(true,s=>{
+      Data.mainBoard.shouldRecalcPath=s.value;
+      
+      if(s.value) Data.mainBoard.recalcPath();
+      else Data.mainBoard.path=[];
+    })
+    this.preventDupesBox = new TickboxScene(false,s=>{
+      highlights.dupes=s.value;
+    });
+    this.keepInPaletteBox = new TickboxScene(false,s=>{
+      highlights.nonPalettes=s.value;
+    });
+    this.optionsScene.options.addScene(this.optionsScene.withLabel("Calculate path",this.calcPathBox,
+      (s,w,h)=>s.element.dims = new Vector(h,h)));
+    this.optionsScene.options.addScene(this.optionsScene.withLabel("Highlight duplicates",this.preventDupesBox,
+      (s,w,h)=>s.element.dims = new Vector(h,h)));
+    this.optionsScene.options.addScene(this.optionsScene.withLabel("Highlight non-palette",this.keepInPaletteBox,
+      (s,w,h)=>s.element.dims = new Vector(h,h)));
+
+    this.subScenes=this.subScenes.sort((s1,s2)=>{
+      if(s1==this.calcPathBox||s1==this.preventDupesBox||s1==this.keepInPaletteBox) return -1;
+      if(s2==this.calcPathBox||s2==this.preventDupesBox||s2==this.keepInPaletteBox) return 1;
+      return 0;
+    });
+
+    this.resized(new Vector(p5.width, p5.height));
 
     this.paletteScene = this.addScene(new PaletteScene({palette:pageData.palette}));
 
@@ -271,8 +313,6 @@ class SolveScene extends MainScene{
   resized(oldDims, newDims=oldDims){
     let oldScale=this.boardScene.board.renderData.scale;
     super.resized(oldDims, newDims);
-
-    if(this.paletteScene) this.paletteScene.setXAndWidth(newDims.x*3/4,newDims.x/4);
 
     if(this.mouseData&&this.mouseData.omino){
       this.mouseData.offs=this.mouseData.offs.scale(this.boardScene.board.renderData.scale/oldScale);

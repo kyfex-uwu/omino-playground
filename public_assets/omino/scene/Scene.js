@@ -130,7 +130,7 @@ class OneTimeButtonScene extends ButtonScene{
 const maxClickDist=5;
 //todo: add options for max and min on scrollable
 class ScrollableScene extends DimsScene{
-  constructor(min=-Infinity, max=Infinity){
+  constructor({min=-Infinity, max=Infinity}={}){
     super();
     this.offs=0;
     this.scrollLimits={min,max};

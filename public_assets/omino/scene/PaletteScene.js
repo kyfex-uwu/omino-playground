@@ -42,12 +42,29 @@ class OminoPaletteSpace extends ButtonScene{
     this.dims = new Vector(scale, scale);
   }
 }
-class PaletteScene extends ScrollableScene{
+
+class PieceHolder extends ScrollableScene{
+  constructor(){ super({min:0}); }
+  resized(oldDims, newDims=oldDims){
+    const unit = this.dims.x/3;
+    for(let i=0;i<this.subScenes.length;i++){
+      const child = this.subScenes[i];
+      child.pos = new Vector(i%3*unit, Math.floor(i/3)*unit);
+      child.dims = new Vector(unit,unit);
+    }
+
+    this.scrollLimits.max=Math.ceil((this.subScenes.length-1)/3)*unit-this.dims.y;
+
+    return super.resized(oldDims, newDims);
+  }
+}
+
+class PaletteScene extends DimsScene{
   constructor(data){
     super();
     this.palette=data.palette;
 
-    this.piecesHolder = new DimsScene();
+    this.piecesHolder = new PieceHolder();
     this.drawButton = {};
 
     this.spaces=[];
@@ -79,14 +96,9 @@ class PaletteScene extends ScrollableScene{
       this.parent.enterDrawingMode();
     }));
   }
-  setXAndWidth(x,width){
-    this.pos.x=x;
-    this.dims.y=p5.height;
-    this.dims.x=width;
-    
-    for(const space of this.spaces){
-      space.recalc(this);
-    }
+  resized(oldDims, newDims=oldDims){
+    this.pos.x = newDims.x*3/4;
+    this.dims = new Vector(newDims.x/4, newDims.y);
 
     let scale = this.dims.x/100;
     let sbSize = Math.min(this.dims.x/3, scale*30);
@@ -95,7 +107,10 @@ class PaletteScene extends ScrollableScene{
     this.drawButton.pos = new Vector((this.dims.x-sbSize*0.9)/2,this.dims.y-sbSize*0.9);
 
     this.piecesHolder.dims = new Vector(this.dims.x,this.dims.y-sbSize);
+
+    super.resized(oldDims, newDims);
   }
+
   addOmino(newOmino){
     let space = this.piecesHolder.addScene(new OminoPaletteSpace(newOmino, this.spaces.length));
     this.spaces.push(space);

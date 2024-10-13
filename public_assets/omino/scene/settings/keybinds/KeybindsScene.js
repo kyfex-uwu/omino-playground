@@ -86,7 +86,7 @@ class Divider extends DimsScene{
 
 class KeybindsScene extends ScrollableScene{
     constructor(){
-        super();
+        super({min:0});
 
         this.keybindScenes=[];
         for(const group of keybindGroups){
@@ -114,23 +114,15 @@ class KeybindsScene extends ScrollableScene{
             currPos+=scene.dims.y+unit*0.2;
         }
 
+        this.scrollLimits.max=Math.max.apply(null, this.subScenes.map(s=>s.pos.y+(s.dims?s.dims.y:0)))
+            -this.dims.y*0.9+this.offs;
+
         super.resized(oldDims, newDims);
     }
 
     scrolled(x,y,delta){
         delta*=this.dims.x*0.0007;
-
-        let oldOffs=this.offs;
-        if(!super.scrolled(x,y,delta)) return false;
-        if(this.offs<0){
-          for(const child of this.subScenes) child.pos.y+=oldOffs;
-          this.offs=0;
-          return true;
-        }
-
-        for(const child of this.subScenes) child.pos.y-=delta;
-
-        return true;
+        return super.scrolled(x,y,delta);
     }
 }
 
