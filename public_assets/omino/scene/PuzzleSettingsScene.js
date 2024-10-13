@@ -1,20 +1,26 @@
-import {ScrollableScene, OneTimeButtonScene} from "/assets/omino/scene/Scene.js";
+import {ScrollableScene, DimsScene, OneTimeButtonScene, isKindaMobile} from "/assets/omino/scene/Scene.js";
 import {Counter, CustomTextInputScene} from "/assets/omino/scene/OptionsScene.js";
 import TickboxScene from "/assets/omino/scene/TickboxScene.js";
 import Vector from "/assets/omino/Vector.js";
 import Data from "/assets/omino/Main.js";
 import {fill} from "/assets/omino/Colors.js";
+import {OptionsElement} from "/assets/omino/scene/OptionsHolder.js";
+import {CustomOptionsHolder, withLabel} from "/assets/omino/scene/OptionsScene.js";
 
-class PuzzleSettingsScene extends ScrollableScene{
+class PuzzleSettingsScene extends DimsScene{
 	constructor(){
 		super();
 
-		this.hasStart = this.addScene(new TickboxScene(Data.mainBoard.startPoint!==undefined, s=>{
+		this.options = this.addScene(new CustomOptionsHolder());
+
+		this.hasStart = new TickboxScene(Data.mainBoard.startPoint!==undefined, s=>{
 			Data.mainBoard.startPoint = s.value?new Vector(0,0):undefined;
-		}));
-		this.hasEnd = this.addScene(new TickboxScene(Data.mainBoard.endPoint!==undefined, s=>{
+		});
+		this.hasEnd = new TickboxScene(Data.mainBoard.endPoint!==undefined, s=>{
 			Data.mainBoard.endPoint = s.value?new Vector(Data.mainBoard.width-1, Data.mainBoard.height-1):undefined;
-		}));
+		});
+		this.options.addScene(withLabel("Has start:", this.hasStart, (s,w,h)=>s.element.dims = new Vector(h,h)));
+		this.options.addScene(withLabel("Has end:", this.hasEnd, (s,w,h)=>s.element.dims = new Vector(h,h)));
 
 		// this.hasLimitedPieces = this.addScene(new TickboxScene(false,s=>{
 		// 	this.pieceEditor.isActive=s.value;
@@ -35,71 +41,31 @@ class PuzzleSettingsScene extends ScrollableScene{
 		// },s=>{
 		// 	s.isActive=this.hasLimitedPieces.value;
 		// }));
-
-		this.dontScroll=[];
 	}
+	getScale(){
+		let scale = this.dims.x/100;
+		if(isKindaMobile) scale*=1.5;
+		return scale;
+	}
+
 	render(){
 	    fill("scenes.sidebar.bg");
 	    p5.rect(0,0,this.dims.x,p5.height);
-
-	    let sc = this.dims.x/100;
-
-	    fill("scenes.sidebar.text");
-	    p5.textSize(6*sc);
-	    p5.textAlign(p5.LEFT, p5.TOP);
-	    p5.text("Has start: ", 2, this.hasStart.getAbsolutePos().y);
-	    p5.text("Has end: ", 2, this.hasEnd.getAbsolutePos().y);
-	    p5.text("If you need/want the ability to make puzzles with "+
-	    	"a limited/custom palette, pls dm me because otherwise "+
-	    	"i have lost the motivation to work on it lol "+
-	    	"(if you dm me i will make it)", 2, this.hasEnd.getAbsolutePos().y*1.8, this.dims.x);
+	    // p5.text("If you need/want the ability to make puzzles with "+
+	    // 	"a limited/custom palette, pls dm me because otherwise "+
+	    // 	"i have lost the motivation to work on it lol "+
+	    // 	"(if you dm me i will make it)", 2, this.hasEnd.getAbsolutePos().y*1.8, this.dims.x);
 	    //p5.text("Has limited pieces: ", 2, this.hasLimitedPieces.getAbsolutePos().y);
 
 	    super.render();
 	}
-	scrolled(x,y,delta){
-		delta*=this.dims.x/100*0.3;
-
-		let oldOffs=this.offs;
-		if(!super.scrolled(x,y,delta)) return false;
-		if(this.offs<0){
-		for(const child of this.subScenes) if(!this.dontScroll.includes(child)) child.pos.y+=oldOffs;
-			this.offs=0;
-			return true;
-		}
-
-		for(const child of this.subScenes) if(!this.dontScroll.includes(child)) child.pos.y-=delta;
-
-		return true;
-	}
-	setXAndWidth(x,width){
-		this.pos.x=x;
-		this.dims.y=p5.height;
-		this.dims.x=width;
-	}
 	resized(old,n){
-		this.dims.y=p5.height;
-		this.dims.x=p5.width/4;
+		this.dims.y=n.y;
+		this.dims.x=n.x/4;
+		this.pos.x=n.x*3/4;
 
-		let scale = this.dims.x/100;
-    	const padding=scale*3;
-		let currY=padding;
-
-		this.hasStart.dims = new Vector(p5.textSize()*1.3, p5.textSize()*1.3);
-	    this.hasStart.pos = new Vector(p5.textWidth("nHas start:")+padding, 2*scale+currY-this.offs);
-	    currY+=2*scale+this.hasStart.dims.y;
-
-		this.hasEnd.dims = new Vector(p5.textSize()*1.3, p5.textSize()*1.3);
-	    this.hasEnd.pos = new Vector(p5.textWidth("nHas end:")+padding, 2*scale+currY-this.offs);
-	    currY+=2*scale+this.hasEnd.dims.y;
-
-		// this.hasLimitedPieces.dims = new Vector(p5.textSize()*1.3, p5.textSize()*1.3);
-	    // this.hasLimitedPieces.pos = new Vector(p5.textWidth("nHas limited pieces:")+padding, 2*scale+currY-this.offs);
-	    // currY+=2*scale+this.hasLimitedPieces.dims.y;
-
-	    // this.pieceEditor.dims = new Vector(p5.textWidth("mmEdit Pieces"), p5.textSize()*1.3);
-	    // this.pieceEditor.pos = new Vector(padding, 2*scale+currY-this.offs);
-	    // currY+=2*scale+this.pieceEditor.dims.y;
+		this.options.pos = new Vector(0,n.x*0.01);
+		this.options.dims = this.dims.sub(this.options.pos.scale(2));
 
 		super.resized(old,n);
 	}

@@ -14,6 +14,7 @@ import {LockedOmino} from "/assets/omino/Omino.js";
 import SolveScene from "/assets/omino/scene/SolveScene.js";
 import MobileKeyboard from "/assets/omino/scene/MobileKeyboard.js";
 import {fill, stroke, background} from "/assets/omino/Colors.js";
+import {OptionsHolder, OptionsElement} from "/assets/omino/scene/OptionsHolder.js";
 
 //--
 
@@ -265,24 +266,7 @@ class Bar extends DimsScene{
   }
 }
 
-class OptionsElement extends DimsScene{
-  constructor(init, resize, render=_=>0){
-    super();
-    init(this);
-    this.renderFunc=render;
-    this.resizeFunc=resize;
-  }
-  optionsResize(x, y, width, scale){
-    this.resizeFunc(this, x,y,width,scale);
-  }
-  render(){
-    this.renderFunc(this);
-    super.render();
-  }
-}
-
-class OptionsHolder extends ScrollableScene{
-  constructor(){ super({min:0}); }
+class CustomOptionsHolder extends OptionsHolder{
   resized(oldDims, newDims=oldDims){
     const scale = this.parent.getScale();
     const padding=scale*3;
@@ -294,11 +278,27 @@ class OptionsHolder extends ScrollableScene{
       currY+=child.dims.y+scale*5;
     }
 
-    this.scrollLimits.max=Math.max.apply(null, this.subScenes.map(s=>s.pos.y+(s.dims?s.dims.y:0)))
-      -this.dims.y*0.9+this.offs;
-
     return super.resized(oldDims, newDims);
   }
+}
+
+function withLabel(label, element, setDims=(s,w,h)=>s.element.dims = new Vector(w,h)){
+  return new OptionsElement(s=>{
+    s.element = s.addScene(element);
+  },(s,x,y,w,h)=>{
+    s.pos = new Vector(x,y);
+
+    p5.textSize(h*0.9);
+    s.element.pos = new Vector(p5.textWidth(label+"m"),0);
+    setDims(s,w-s.element.pos.x,h);
+
+    s.dims = new Vector(w,h);
+  },s=>{
+    p5.textSize(s.dims.y*0.9);
+    fill("scenes.util.text");
+    p5.textAlign(p5.LEFT,p5.CENTER);
+    p5.text(label, 0, s.dims.y/2);
+  });
 }
 
 class OptionsScene extends DimsScene{
@@ -306,7 +306,7 @@ class OptionsScene extends DimsScene{
     super();
     this.pos.z=10;
 
-    this.options = this.addScene(new OptionsHolder());
+    this.options = this.addScene(new CustomOptionsHolder());
 
     const submit = _=>Data.scene.optionsScene.applyButton.click(0,0);
 
@@ -378,9 +378,9 @@ class OptionsScene extends DimsScene{
       Data.mainBoard.recalcPath();
     });
 
-    this.options.addScene(this.withLabel("Dimensions:",this.boardDims));
-    this.options.addScene(this.withLabel("Palette:",this.palette));
-    this.options.addScene(this.withLabel("Torus mode:",this.torusBox, (s,w,h)=>s.element.dims = new Vector(h,h)));
+    this.options.addScene(withLabel("Dimensions:",this.boardDims));
+    this.options.addScene(withLabel("Palette:",this.palette));
+    this.options.addScene(withLabel("Torus mode:",this.torusBox, (s,w,h)=>s.element.dims = new Vector(h,h)));
     this.options.addScene(new OptionsElement(s=>{
       s.element = s.addScene(this.applyButton);
     },(s,x,y,w,h)=>{
@@ -541,24 +541,6 @@ class OptionsScene extends DimsScene{
     if(isKindaMobile) scale*=1.5;
     return scale;
   }
-  withLabel(label, element, setDims=(s,w,h)=>s.element.dims = new Vector(w,h)){
-    return new OptionsElement(s=>{
-      s.element = s.addScene(element);
-    },(s,x,y,w,h)=>{
-      s.pos = new Vector(x,y);
-
-      p5.textSize(h*0.9);
-      s.element.pos = new Vector(p5.textWidth(label+"m"),0);
-      setDims(s,w-s.element.pos.x,h);
-
-      s.dims = new Vector(w,h);
-    },s=>{
-      p5.textSize(s.dims.y*0.9);
-      fill("scenes.util.text");
-      p5.textAlign(p5.LEFT,p5.CENTER);
-      p5.text(label, 0, s.dims.y/2);
-    });
-  }
 
   resized(old,n=old){
     this.dims.y=p5.height;
@@ -605,4 +587,6 @@ export {
   Counter,
   CustomTextInputScene,
   CustomTickboxScene,
+  CustomOptionsHolder,
+  withLabel
 }

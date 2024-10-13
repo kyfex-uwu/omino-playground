@@ -105,12 +105,6 @@ class BoardBuildScene extends MainScene{
     super.render();
   }
 
-  resized(oldDims, newDims=oldDims){
-    if(this.settingsScene) this.settingsScene.setXAndWidth(newDims.x*3/4,newDims.x/4);
-
-    super.resized(oldDims, newDims);
-  }
-
   drawButton(clickFunc, hoverText, color="scenes.buildPuzz.buttons.default"){
     return s=>{
       let padding = Math.min(s.dims.x,s.dims.y)*0.1;

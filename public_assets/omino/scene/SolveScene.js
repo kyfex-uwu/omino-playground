@@ -12,6 +12,7 @@ import PaletteScene from "/assets/omino/scene/PaletteScene.js";
 import {LockedOmino} from "/assets/omino/Omino.js";
 import {fill, stroke} from "/assets/omino/Colors.js";
 import TickboxScene from "/assets/omino/scene/TickboxScene.js";
+import {withLabel} from "/assets/omino/scene/OptionsScene.js";
 
 class SolveScene extends MainScene{
   constructor(){
@@ -48,11 +49,11 @@ class SolveScene extends MainScene{
     this.keepInPaletteBox = new TickboxScene(false,s=>{
       highlights.nonPalettes=s.value;
     });
-    this.optionsScene.options.addScene(this.optionsScene.withLabel("Calculate path",this.calcPathBox,
+    this.optionsScene.options.addScene(withLabel("Calculate path",this.calcPathBox,
       (s,w,h)=>s.element.dims = new Vector(h,h)));
-    this.optionsScene.options.addScene(this.optionsScene.withLabel("Highlight duplicates",this.preventDupesBox,
+    this.optionsScene.options.addScene(withLabel("Highlight duplicates",this.preventDupesBox,
       (s,w,h)=>s.element.dims = new Vector(h,h)));
-    this.optionsScene.options.addScene(this.optionsScene.withLabel("Highlight non-palette",this.keepInPaletteBox,
+    this.optionsScene.options.addScene(withLabel("Highlight non-palette",this.keepInPaletteBox,
       (s,w,h)=>s.element.dims = new Vector(h,h)));
 
     this.subScenes=this.subScenes.sort((s1,s2)=>{
