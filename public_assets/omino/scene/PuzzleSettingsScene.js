@@ -21,6 +21,7 @@ class PuzzleSettingsScene extends DimsScene{
 		});
 		this.options.addScene(withLabel("Has start:", this.hasStart, (s,w,h)=>s.element.dims = new Vector(h,h)));
 		this.options.addScene(withLabel("Has end:", this.hasEnd, (s,w,h)=>s.element.dims = new Vector(h,h)));
+		this.options.addScene(withLabel("Under construction", new DimsScene()));
 
 		// this.hasLimitedPieces = this.addScene(new TickboxScene(false,s=>{
 		// 	this.pieceEditor.isActive=s.value;

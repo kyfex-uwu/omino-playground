@@ -4,6 +4,8 @@ import Data from "/assets/omino/Main.js";
 import {Omino} from "/assets/omino/Omino.js";
 import {fill, stroke, background, getColor} from "/assets/omino/Colors.js";
 
+//todo: prevent ominoes that are disconnected (OR find some way to connect them?)
+
 class DrawingModeScene extends Scene {
   constructor(mainScene) {
     super();

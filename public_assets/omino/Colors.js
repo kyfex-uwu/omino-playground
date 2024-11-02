@@ -113,6 +113,7 @@ function getColor(path, {colorEnv=Colors, force=true}={}){
 		return force?errorColor:undefined;
 	}
 }
+//todo: css patterns
 function fill(path, env=p5){
 	env.fill.apply(env, getColor(path));
 }

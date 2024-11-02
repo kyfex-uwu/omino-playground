@@ -4,7 +4,12 @@ import {allPalettes, nullPalette} from "/assets/omino/Palettes.js";
 import {pageData} from "/assets/omino/Options.js";
 import Data from "/assets/omino/Main.js";
 import {fill, background} from "/assets/omino/Colors.js";
-import * as FakeWebWorker from "/assets/omino/BoardLengthCalculator.js";
+import Element from "/assets/omino/pathfinding/Element.js";
+import RectOrientation from "/assets/omino/pathfinding/orientation/RectOrientation.js";
+import RectBoardEl from "/assets/omino/pathfinding/boards/RectBoardEl.js";
+import CubeSurfaceEl from "/assets/omino/pathfinding/boards/CubeSurfaceEl.js";
+import OminoEl from "/assets/omino/pathfinding/OminoEl.js";
+import * as FakeWebWorker from "/assets/omino/pathfinding/Pathfinder.js";
 
 const tileSpacing=0.07;
 const tileRadius = 0.2;
@@ -69,20 +74,10 @@ class Board{
     if(!this.shouldRecalcPath) return;
     this.path=[];
 
-    let thisAsBoolArr=[];
-    for(let y=0;y<this.height;y++){
-      thisAsBoolArr[y]=[];
-      for(let x=0;x<this.width;x++){
-        thisAsBoolArr[y][x]=!!this.get(new Vector(x,y));
-      }
-    }
-
-    //--
-
     let lengthWorker;
     this.lengthWorker=lengthWorker;
     try{
-      lengthWorker = new Worker("/assets/omino/BoardLengthCalculator.js", { type: "module" });
+      lengthWorker = new Worker("/assets/omino/pathfinding/Pathfinder.js", { type: "module" });
     }catch(e){
       const fakePostMessage = data=>lengthWorker.onmessage({data});
       FakeWebWorker.fake(fakePostMessage);
@@ -93,8 +88,47 @@ class Board{
       };
     }
 
+    const nodes = [...Element.apply(
+      new RectBoardEl(this.width,this.height),
+      ...this.ominoes.map(omino=>nodes=>omino.getEl(nodes))
+    )];
+    let currNodeId=0;
+    for(const node of nodes) node.id=currNodeId++;
+
+    {
+      const lengthWorker2 = new Worker("/assets/omino/pathfinding/Pathfinder.js", { type: "module" });
+
+      const nodes2 = [...Element.apply(
+        new CubeSurfaceEl(3),
+      )];
+      let currNodeId=0;
+      for(const node of nodes2) node.id=currNodeId++;
+
+      lengthWorker2.onmessage = e => {
+        console.log(e.data.map(id=>nodes2.find(n=>n.id==id).custom));
+        console.log(e.data);
+        lengthWorker.terminate();
+      };
+
+      lengthWorker2.postMessage({
+        nodes:nodes2.map(n=>[n.id, Object.values(n.connections).map(c=>c.node.id)]),
+      });
+    }
+    
+    if(false){
+      let toPrint=[];
+      for(const node of nodes){
+        for(let i=0;i<=node.custom.pos.y;i++) if(!toPrint[i])
+          toPrint[i]=[];
+        for(let i=0;i<=node.custom.pos.x;i++) if(!toPrint[node.custom.pos.y][i])
+          toPrint[node.custom.pos.y][i]=".";
+        toPrint[node.custom.pos.y][node.custom.pos.x]="#";
+      }
+      console.log(toPrint.map(r=>r.join("")).join("\n"))
+    }
+
     lengthWorker.onmessage = e => {
-      this.path=e.data.map(p=>new Vector(...p));
+      this.path=e.data.map(id=>nodes.find(n=>n.id==id).custom.pos);
       if(this.path[0]&&this.path[0].equals(this.endPoint)||
         this.path[this.path.length-1]&&this.path[this.path.length-1].equals(this.startPoint))
         this.path.reverse();
@@ -102,11 +136,11 @@ class Board{
     };
 
     lengthWorker.postMessage({
-      board:thisAsBoolArr, 
-      torusMode:this.torusMode,
-      
-      startPoint:this.startPoint,
-      endPoint:this.endPoint,
+      startPoint:this.startPoint?nodes.find(n=>n.custom.pos.equals(this.startPoint)).id:undefined,
+      endPoint:this.endPoint?nodes.find(n=>n.custom.pos.equals(this.endPoint)).id:undefined,
+
+      nodes:nodes.map(n=>[n.id, Object.values(n.connections).map(c=>c.node.id)]), 
+      //torusMode:this.torusMode,
     });
   }
   

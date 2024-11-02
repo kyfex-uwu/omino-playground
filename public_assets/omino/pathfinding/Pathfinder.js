@@ -3,17 +3,6 @@
  * hopefully it's commented well enough 
  */
 
-import Vector from "/assets/omino/Vector.js";
-
-import SquareEuclidean from "/assets/omino/pathfinding/SquareEuclidean.js";
-import SquareTorus from "/assets/omino/pathfinding/SquareTorus.js";
-import TriangleEuclidean from "/assets/omino/pathfinding/TriangleEuclidean.js";
-const methods={
-	SquareEuclidean,
-	SquareTorus,
-	TriangleEuclidean
-};
-
 //recursive function that returns all tiles that are all connected
 //to this one orthoganally
 function getConnected(tile, tiles=[]){
@@ -35,14 +24,13 @@ function propagateDist(tile, dist=0, tilesToProcess){
 		//controller
 		tile.dist=0;
 		propagateDist(tile, 0, tilesToProcess);
-		let counter=500;
 		do{
 			for(const subTile of tilesToProcess){
 				subTile.dist = Math.min.apply(null, subTile.connections.map(t=>t.dist).filter(d=>d!==undefined))+1;
 				propagateDist(subTile, subTile.dist, tilesToProcess);
 				tilesToProcess.delete(subTile);
 			}
-		}while(tilesToProcess.size>0&&counter-->0);
+		}while(tilesToProcess.size>0);
 	}else{
 		for(const connectedTile of tile.connections)
 			if(connectedTile.dist===undefined) tilesToProcess.add(connectedTile);
@@ -106,15 +94,33 @@ function findLongestShortest(currPoint, pool, maybePaths, data={}){
   return maybePath;
 }
 
+//the main function
+/** data param format: one object with these properties
+ * ? suffix means optional
+ * 
+ * startPoint?: a node identifier
+ * endPoint?: a node identifier
+ * nodes: an array of arrays:
+ *   identifier, [connected, connected, ...]
+ */
 async function calcLength(data){
-	if(data.startPoint) data.startPoint=new Vector(...data.startPoint._pos);
-	if(data.endPoint) data.endPoint=new Vector(...data.endPoint._pos);
-	const method=methods[data.method];
+	let namedTiles={};
+	for(const nodeData of data.nodes){
+		namedTiles[nodeData[0]] = {connections:nodeData[1], name:nodeData[0]};
+	}
+	for(const node of Object.values(namedTiles)){
+		node.connections = node.connections.map(id=>namedTiles[id]);
+	}
+
+	if(data.startPoint) data.startPoint=namedTiles[data.startPoint];
+	if(data.endPoint) data.endPoint=namedTiles[data.endPoint];
+
+
+	let remainingTiles=new Set(Object.values(namedTiles));
 
 	//split tiles into pools
 	//a pool is just an area of connected tiles. on most boards there is only 1 pool but
 	//we need to run the pathfinding algorithm on each pool just in case
-	let remainingTiles=new Set(Object.values(method.getAllTiles(data.board)));
 	let pools=[];
 	for(;;){
 		if(remainingTiles.size==0) break;
@@ -127,14 +133,12 @@ async function calcLength(data){
 	//removing pools that dont have the start or end point (if there is one)
 	if(data.startPoint){
 		for(const pool of pools){
-			if(!pool.some(p=>p.pos.equals(data.startPoint)))
-				pool.length=0;
+			if(!pool.some(p=>p==data.startPoint)) pool.length=0;
 		}
 	}
 	if(data.endPoint){
 		for(const pool of pools){
-			if(!pool.some(p=>p.pos.equals(data.endPoint)))
-				pool.length=0;
+			if(!pool.some(p=>p==data.endPoint)) pool.length=0;
 		}
 	}
 
@@ -146,13 +150,11 @@ async function calcLength(data){
 		//if only start or end are specified
 		if((data.startPoint||data.endPoint)&&!(data.startPoint&&data.endPoint)){
 			let start=data.startPoint||data.endPoint;
-			start=pool.find(p=>p.pos.equals(start));
 			findLongestShortest(start, pool, maybePaths, {startFixed:true});
 
 		//if both are specified
 		}else if(data.startPoint&&data.endPoint){
-			findLongestShortest(pool.find(p=>p.pos.equals(data.startPoint)), 
-				pool, maybePaths, {startFixed:true, end:pool.find(p=>p.pos.equals(data.endPoint))});
+			findLongestShortest(data.startPoint, pool, maybePaths, {startFixed:true, end:data.endPoint});
 
 		//if neither are specified (raagh)
 		}else{
@@ -161,10 +163,10 @@ async function calcLength(data){
 				//do some checking, more can be done
 
 				//check if tile is on a wall
-				if(!method.isTileOnWall(tile)) continue;
+				//if(!method.isTileOnWall(tile)) continue;
 
 				didCheck=true;
-				findLongestShortest(pool.find(p=>p.pos.equals(tile.pos)), pool, maybePaths, {startFixed:true});
+				findLongestShortest(tile, pool, maybePaths, {startFixed:true});
 			}
 
 			if(!didCheck) findLongestShortest(pool[0], pool, maybePaths);
@@ -172,7 +174,7 @@ async function calcLength(data){
 	}
 
 	if(maybePaths.length==0) return [];
-	else return maybePaths.sort((p1,p2)=>p2.length-p1.length)[0].map(p=>p.pos._pos);
+	else return maybePaths.sort((p1,p2)=>p2.length-p1.length)[0].map(p=>p.name);
 }
 
 //-- unnecessary communication stuff below here

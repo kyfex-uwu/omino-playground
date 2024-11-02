@@ -1,6 +1,8 @@
 /** Board Length Calculator
  * This file calculates the longest optimal length for any board,
  * hopefully it's commented well enough 
+ * 
+ * deprecated with the new board system coming soon
  */
 
 //just a datatype with an X and a Y property

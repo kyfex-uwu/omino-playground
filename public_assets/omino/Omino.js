@@ -1,14 +1,37 @@
 import Vector from "/assets/omino/Vector.js";
 import {Colors, background, getColor, fill} from "/assets/omino/Colors.js";
+import OminoEl from "/assets/omino/pathfinding/OminoEl.js";
+import RectOrientation from "/assets/omino/pathfinding/orientation/RectOrientation.js";
 
 const ominoSpacing=0.05;
 const ominoRadius = 0.15;
+
+function toTree(vectors, currVector){
+  let toReturn={};
+
+  for(const [index, dir] of [
+    [0,"up"],
+    [1,"right"],
+    [2,"down"],
+    [3,"left"]
+  ]){
+    let next;
+    if(next = vectors.find(v=>!v.parsed&&v[dir]().equals(currVector))){
+      next.parsed=true;
+      toReturn[index]=toTree(vectors, next);
+    }
+  }
+
+  return toReturn;
+}
 
 class Omino{
   constructor(pos, color, vectors){
     this.pos=pos;
     this.color=color;
     this.vectors = vectors;
+
+    this.elementFactory = OminoEl.factory(toTree(vectors, vectors[0]));
     
     this.tiles = [];
     let maxWidth=0;
@@ -166,7 +189,9 @@ class Omino{
   }
   
   clone(){
-    return new Omino(this.pos,this.color,this.vectors);
+    let toReturn = new Omino(this.pos,this.color,this.vectors);
+    toReturn.elementFactory = this.elementFactory;
+    return toReturn;
   }
   rotatedCCW(){
     return new Omino(this.pos,this.color,this.vectors.map(v=>
@@ -187,6 +212,11 @@ class Omino{
   mirroredH(){
     return new Omino(this.pos,this.color,this.vectors.map(v=>
       new Vector(this.tiles[0].length-v.x-1,v.y)));
+  }
+
+  getEl(nodes){
+    return this.elementFactory([...nodes].find(node=>
+      node.custom.pos.equals(this.vectors[0].add(this.pos))), RectOrientation.default);
   }
 
   equals(other){
