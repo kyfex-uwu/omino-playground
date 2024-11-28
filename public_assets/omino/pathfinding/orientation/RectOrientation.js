@@ -5,13 +5,22 @@ class RectOrientation extends Orientation{
 		super();
 		this.orientation=orientation;
 	}
-	// if direc is the side that this node is connecting with,
-	// the return value is the side that the other node is connecting with
-	apply(other,direc){
-		if(other instanceof RectOrientation)
-			return (this.orientation+direc+2-other.orientation+4)%4;
+	apply(direc){
+		return (direc+this.orientation)%4;
 	}
-	clone(){ return new RectOrientation(this.orientation); }
+
+	getOtherOrientation(thisDirec, otherDirec, otherClass){
+		switch(otherClass){
+		case RectOrientation:
+			// if(thisDirec==(otherDirec+2)%4) return new RectOrientation(this.orientation);
+			// else if (thisDirec==(otherDirec+3)%4) return new RectOrientation((this.orientation+1)%4);
+			// else if (thisDirec==(otherDirec)%4) return new RectOrientation((this.orientation+2)%4);
+			// else if (thisDirec==(otherDirec+1)%4) return new RectOrientation((this.orientation+3)%4);
+
+			return new RectOrientation((this.orientation+(thisDirec-otherDirec+2 +4))%4);
+		}
+		throw Orientation.otherClassNotImpl(RectOrientation, otherClass);	
+	}
 }
 RectOrientation.default = new RectOrientation(0);
 

@@ -31,19 +31,18 @@ class OminoEl extends Element{
 	}
 	apply(nodes){
 		let removed = new Set();
-		this.disableNodes(this.root, this.connTree, removed,nodes);
+		this.disableNodes(this.root.getView(), this.connTree, removed, nodes);
 		return new ApplyData({removed});
 	}
-	disableNodes(currNode, connTree, removedSet,nodes){
-		removedSet.add(currNode);
+	disableNodes(currNodeView, connTree, removedSet, nodes){
+		removedSet.add(currNodeView.node);
 
 		for(const [key,val] of Object.entries(connTree)){
-			this.disableNodes(
-				currNode.getNode(this.orientation.apply(currNode.orientation, parseInt(key))),
-				val, removedSet,nodes);
+			//TODO: this just assumes the next node is the same type as this one
+			this.disableNodes(currNodeView.get(parseInt(key)), val, removedSet, nodes);
 		}
 
-		currNode.detach();
+		currNodeView.detach();
 	}
 }
 OminoEl.factory = connTree=>(root, orientation)=>new OminoEl(connTree, root, orientation);

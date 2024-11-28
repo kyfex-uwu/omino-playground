@@ -18,24 +18,24 @@ export default class RectBoardEl extends Element{
 
 		let currRowNode;
 		for(let y=0;y<this.height;y++){
-			let leftNode;
+			let leftView;
 			for(let x=0;x<this.width;x++){
-				let node = new Node(RectOrientation.default.clone());
+				let node = new Node(RectOrientation.default);
 				node.custom.pos=new Vector(x,y);
 				toReturn.add(node);
 
+				let nodeView = node.getView(RectOrientation.default);
 				if(x!=0){
-					node.connect(3,1,leftNode);
+					nodeView.connectNode(3,1,leftView.node);
 
 					if(y!=0){
-						let upNode = leftNode.getNode(0).getNode(1);
-						node.connect(0,2,upNode);
+						nodeView.connectNode(0,2,leftView.get(0).get(1).node);
 					}
 				}else if(y!=0){
-					node.connect(0,2,currRowNode);
+					nodeView.connectNode(0,2,currRowNode);
 				}
 				if(x==0) currRowNode=node;
-				leftNode=node;
+				leftView=nodeView;
 			}
 		}
 

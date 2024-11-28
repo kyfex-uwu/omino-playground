@@ -55,6 +55,9 @@ class Vector{
   toURLStr(){
     return this._pos.map(v=>v.toString(36)).join(".");
   }
+  toString(){
+    return "Vector("+this._pos.join(", ")+")";
+  }
 }
 
 Vector.dirs="left,right,up,down".split(",");

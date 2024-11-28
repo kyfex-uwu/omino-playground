@@ -7,17 +7,17 @@ const ominoSpacing=0.05;
 const ominoRadius = 0.15;
 
 function toTree(vectors, currVector){
+  if(currVector) currVector.parsed=true;
   let toReturn={};
 
   for(const [index, dir] of [
-    [0,"up"],
-    [1,"right"],
-    [2,"down"],
-    [3,"left"]
+    [2,"up"],
+    [3,"right"],
+    [0,"down"],
+    [1,"left"]
   ]){
     let next;
     if(next = vectors.find(v=>!v.parsed&&v[dir]().equals(currVector))){
-      next.parsed=true;
       toReturn[index]=toTree(vectors, next);
     }
   }

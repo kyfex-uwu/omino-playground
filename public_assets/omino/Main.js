@@ -19,9 +19,9 @@ const data = {
 
 let scrollScale=0.5;
 
+p5.disableFriendlyErrors = true;
 new p5(p5=>{
   window.p5=p5;
-  p5.disableFriendlyErrors = true;
 
   let loaded;
   p5.setup = async function() {

@@ -94,26 +94,6 @@ class Board{
     )];
     let currNodeId=0;
     for(const node of nodes) node.id=currNodeId++;
-
-    {
-      const lengthWorker2 = new Worker("/assets/omino/pathfinding/Pathfinder.js", { type: "module" });
-
-      const nodes2 = [...Element.apply(
-        new CubeSurfaceEl(3),
-      )];
-      let currNodeId=0;
-      for(const node of nodes2) node.id=currNodeId++;
-
-      lengthWorker2.onmessage = e => {
-        console.log(e.data.map(id=>nodes2.find(n=>n.id==id).custom));
-        console.log(e.data);
-        lengthWorker.terminate();
-      };
-
-      lengthWorker2.postMessage({
-        nodes:nodes2.map(n=>[n.id, Object.values(n.connections).map(c=>c.node.id)]),
-      });
-    }
     
     if(false){
       let toPrint=[];
