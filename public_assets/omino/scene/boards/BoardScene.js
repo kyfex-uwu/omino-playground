@@ -1,10 +1,10 @@
 import { DimsScene } from "/assets/omino/scene/Scene.js";
+import Element from "/assets/omino/pathfinding/elements/Element.js";
 
 class BoardScene extends DimsScene {
-    constructor(board, drawMouse=true) {
+    constructor(board) {
         super();
         this.board=board;
-        this.drawMouse=drawMouse;
     }
     render() {
         p5.push();
@@ -14,21 +14,10 @@ class BoardScene extends DimsScene {
         p5.rect(0,0,this.dims.x,this.dims.y);
         p5.endClip();
 
-        p5.translate(-this.dims.x/2,-this.dims.y/2);
-
-        let palette=(this.parent.paletteScene||{}).palette;
-        this.drawBoard({palette});
+        Element.render(this,this.board.elements);
         
         p5.pop();
     }
-    drawBoard({palette}){}
-
-    mouseUp(x, y){}
-    clickNode(node){
-        //grab omino
-    }
-    clickEdge(/**/){}
-    clickCorner(/**/){}
 }
 
 export default BoardScene;

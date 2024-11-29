@@ -4,11 +4,9 @@ import {allPalettes, nullPalette} from "/assets/omino/Palettes.js";
 import {pageData} from "/assets/omino/Options.js";
 import Data from "/assets/omino/Main.js";
 import {fill, background} from "/assets/omino/Colors.js";
-import Element from "/assets/omino/pathfinding/Element.js";
-import RectOrientation from "/assets/omino/pathfinding/orientation/RectOrientation.js";
+import Element from "/assets/omino/pathfinding/elements/Element.js";
 import RectBoardEl from "/assets/omino/pathfinding/boards/RectBoardEl.js";
-import CubeSurfaceEl from "/assets/omino/pathfinding/boards/CubeSurfaceEl.js";
-import OminoEl from "/assets/omino/pathfinding/OminoEl.js";
+import OminoEl from "/assets/omino/pathfinding/elements/OminoEl.js";
 import * as FakeWebWorker from "/assets/omino/pathfinding/Pathfinder.js";
 
 const tileSpacing=0.07;

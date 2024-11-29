@@ -1,6 +1,6 @@
 import Vector from "/assets/omino/Vector.js";
 import {Colors, background, getColor, fill} from "/assets/omino/Colors.js";
-import OminoEl from "/assets/omino/pathfinding/OminoEl.js";
+import OminoEl from "/assets/omino/pathfinding/elements/OminoEl.js";
 import RectOrientation from "/assets/omino/pathfinding/orientation/RectOrientation.js";
 
 const ominoSpacing=0.05;

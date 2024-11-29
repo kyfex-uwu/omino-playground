@@ -1,6 +1,10 @@
 class Element{
 	constructor(){}
 	apply(nodes){}
+
+	addSetting(setting){}
+	prerender(nodes,env){}
+	render(nodes, env){}
 }
 Element.apply = (...elements)=>{
 	let nodes = new Set();
@@ -13,27 +17,15 @@ Element.apply = (...elements)=>{
 	}
 	return nodes;
 }
+Element.render = (container, ...elements)=>{
+	const nodes = Element.apply(...elements);
 
-//not working. do i even need
-class ElementGroup extends Element{
-	constructor(elements){
-		super();
-		this.elements=elements;
-	}
-	apply(nodes){
-		let added=new Set();
-		let removed=new Set();
-		for(let element of this.elements){
-			if(!(element instanceof Element)) element=element(nodes);
+	const env={container};
 
-			let data = element.apply(nodes);
-			nodes=nodes.union(data.added).difference(data.removed);
-
-			added=added.add(data.added).difference(data.removed);
-			removed=removed.add(data.removed).difference(data.added);
-		}
-		return new ApplyData(added, removed);
-	}
+	for(let element of elements)
+		element.prerender(nodes,env);
+	for(let element of elements)
+		element.render(nodes,env);
 }
 
 class ApplyData{

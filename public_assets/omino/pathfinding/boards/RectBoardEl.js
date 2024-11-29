@@ -1,4 +1,4 @@
-import {Element, ApplyData} from "/assets/omino/pathfinding/Element.js";
+import {Element, ApplyData} from "/assets/omino/pathfinding/elements/Element.js";
 import Node from "/assets/omino/pathfinding/Node.js";
 import RectOrientation from "/assets/omino/pathfinding/orientation/RectOrientation.js";
 import Vector from "/assets/omino/Vector.js";
