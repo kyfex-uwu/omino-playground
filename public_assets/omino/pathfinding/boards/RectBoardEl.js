@@ -29,7 +29,7 @@ export default class RectBoardEl extends Element{
 					nodeView.connectNode(3,1,leftView.node);
 
 					if(y!=0){
-						nodeView.connectNode(0,2,leftView.get(0).get(1).node);
+						nodeView.connectNode(0,2,leftView.get(0).getNode(1));
 					}
 				}else if(y!=0){
 					nodeView.connectNode(0,2,currRowNode);

@@ -10,6 +10,7 @@ class Orientation{
 	//otherClass: the type of orientation that this function should return
 	//	(also the orientation that otherDirec is attached to)
 	getOtherOrientation(thisDirec, otherDirec, otherClass){}
+	toString(){ return "Orientation{}"; }
 }
 Orientation.otherClassNotImpl = (thisClass,otherClass)=>
 	`Orientation [${thisClass}] doesn't know how to get the correct orientation of orientation [${otherClass}]`;

@@ -8,16 +8,14 @@ class RectOrientation extends Orientation{
 	apply(direc){
 		return (direc+this.orientation)%4;
 	}
+	toString(){ return `RectOrientation{${this.orientation}}`;}
 
 	getOtherOrientation(thisDirec, otherDirec, otherClass){
 		switch(otherClass){
 		case RectOrientation:
-			// if(thisDirec==(otherDirec+2)%4) return new RectOrientation(this.orientation);
-			// else if (thisDirec==(otherDirec+3)%4) return new RectOrientation((this.orientation+1)%4);
-			// else if (thisDirec==(otherDirec)%4) return new RectOrientation((this.orientation+2)%4);
-			// else if (thisDirec==(otherDirec+1)%4) return new RectOrientation((this.orientation+3)%4);
+			return new RectOrientation((otherDirec-thisDirec+2+this.orientation +8)%4)
 
-			return new RectOrientation((this.orientation+(thisDirec-otherDirec+2 +4))%4);
+			//return new RectOrientation((this.orientation+(thisDirec-otherDirec+2) +8)%4);
 		}
 		throw Orientation.otherClassNotImpl(RectOrientation, otherClass);	
 	}

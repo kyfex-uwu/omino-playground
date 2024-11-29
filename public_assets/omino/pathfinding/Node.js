@@ -64,6 +64,9 @@ class NodeView{
 		new Connection(this.node, thisDirec,
 			destNode, destDirec);
 	}
+	connectNodeFromView(thisDirec, destDirec, destView){
+		return this.connectNode(thisDirec,destDirec,destView.node);
+	}
 	//whichDirec is relative
 	disconnect(whichDirec){
 		this.node.connections[this.orientation.apply(whichDirec)].connection.disconnect();
