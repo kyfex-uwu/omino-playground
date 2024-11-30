@@ -7,7 +7,6 @@ import {OneTimeButtonScene} from "/assets/omino/scene/Scene.js";
 import {pageData} from "/assets/omino/Options.js";
 import Data from "/assets/omino/Main.js";
 import {getKeybinds} from "/assets/omino/Keybinds.js";
-import BoardBuildScene from "/assets/omino/scene/BoardBuildScene.js";
 import PaletteScene from "/assets/omino/scene/PaletteScene.js";
 import {LockedOmino} from "/assets/omino/Omino.js";
 import {fill, stroke} from "/assets/omino/Colors.js";
@@ -268,7 +267,7 @@ class SolveScene extends MainScene{
           }
         }, "Board Data"),s=>{
           //Data.mainBoard.ominoes=Data.mainBoard.ominoes.filter(o=>o instanceof LockedOmino);
-        	Data.scene = new BoardBuildScene();
+        	//Data.scene = new BoardBuildScene();
         }))},
       ],
     ];

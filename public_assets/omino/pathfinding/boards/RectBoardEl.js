@@ -39,6 +39,22 @@ export default class RectBoardEl extends Element{
 			}
 		}
 
+	    let currNodeId=0;
+	    for(const node of toReturn.added) node.id=currNodeId++;
+
 		return toReturn;
+	}
+
+	prerender(nodes, env){
+
+	}
+	render(nodes, env){
+		p5.fill(255);
+		let scale = Math.min(env.container.dims.x/this.width,env.container.dims.y/this.height);
+		for(let y=0;y<this.width;y++){
+			for(let x=0;x<this.width;x++){
+				p5.rect((x+0.1)*scale, (y+0.1)*scale, scale*0.8, scale*0.8);
+			}
+		}
 	}
 }

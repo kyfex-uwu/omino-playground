@@ -1,10 +1,12 @@
 class Element{
-	constructor(){}
+	constructor(){
+		this.renderOrder=0;
+	}
 	apply(nodes){}
 
 	addSetting(setting){}
-	prerender(nodes,env){}
-	render(nodes, env){}
+	prerender(nodes, env){}
+	render(nodes, env){} 
 }
 Element.apply = (...elements)=>{
 	let nodes = new Set();
@@ -17,11 +19,10 @@ Element.apply = (...elements)=>{
 	}
 	return nodes;
 }
-Element.render = (container, ...elements)=>{
+Element.render = (env, ...elements)=>{
 	const nodes = Element.apply(...elements);
 
-	const env={container};
-
+	elements.sort((e1,e2)=>e1.renderOrder-e2.renderOrder);
 	for(let element of elements)
 		element.prerender(nodes,env);
 	for(let element of elements)

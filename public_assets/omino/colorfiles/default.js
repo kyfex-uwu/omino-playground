@@ -102,13 +102,13 @@ exportMod({
 				color:"default:util.field.color",
 				invalid:"default:options.invalid",
 			},
-			counter:{
+			textInput:{
 				bg:"default:util.field.bg",
 				bgUnsaved:"default:options.unsaved",
 				color:"default:util.field.color",
 				invalid:"default:options.invalid",
 			},
-			textInput:{
+			dropdown:{
 				bg:"default:util.field.bg",
 				bgUnsaved:"default:options.unsaved",
 				color:"default:util.field.color",

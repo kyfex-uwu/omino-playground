@@ -1,5 +1,5 @@
 import Vector from "/assets/omino/Vector.js";
-import SolveScene from "/assets/omino/scene/SolveScene.js";
+import MainScene from "/assets/omino/scene/MainScene.js";
 import {pageData} from "/assets/omino/Options.js";
 import {rawKeys, createKey} from "/assets/omino/Keybinds.js";
 import Board from "/assets/omino/Board.js";
@@ -7,14 +7,14 @@ import {isKindaMobile} from "/assets/omino/scene/Scene.js";
 
 import events from "/assets/omino/Events.js";
 
+import CubeSurfaceEl from "/assets/omino/pathfinding/boards/CubeSurfaceEl.js";
+
 //--
 
 const data = {
   scene:undefined,
   isFullscreened:false,
   canvElt:undefined,
-
-  mainBoard:undefined,
 };
 
 let scrollScale=0.5;
@@ -35,16 +35,11 @@ new p5(p5=>{
     data.canvElt.addEventListener("touchmove", e=>e.preventDefault());
     data.canvElt.style["z-index"]=999;
 
-    data.mainBoard = new Board(pageData.dims[0], pageData.dims[1], {
-      torusMode:pageData.torus,
-      ominoes:pageData.boardData.ominoes,
-      lockedTiles:pageData.locked,
-      calcPath:true,
-
-      startPoint:pageData.pathType[0],
-      endPoint:pageData.pathType[1],
-    });
-    data.scene = new SolveScene();
+    data.scene = new MainScene({board:new Board({
+      elements:[
+        new CubeSurfaceEl(7)
+      ]
+    })});
     data.isFullscreened=pageData.fullscreen;
 
     loaded=true;

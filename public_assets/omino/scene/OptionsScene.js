@@ -1,18 +1,12 @@
 import {ScrollableScene, OneTimeButtonScene, Scene, DimsScene,
   focus, hover, isKindaMobile} from "/assets/omino/scene/Scene.js";
-import Board from "/assets/omino/Board.js";
-import BoardScene from "/assets/omino/scene/BoardScene.js";
-import PaletteScene from "/assets/omino/scene/PaletteScene.js";
-import TextInputScene from "/assets/omino/scene/TextInputScene.js";
-import TickboxScene from "/assets/omino/scene/TickboxScene.js";
+import TextInputScene from "/assets/omino/scene/utils/TextInputScene.js";
+import TickboxScene from "/assets/omino/scene/utils/TickboxScene.js";
 import SettingsContainerScene from "/assets/omino/scene/settings/SettingsContainerScene.js";
 import Vector from "/assets/omino/Vector.js";
 import Data from "/assets/omino/Main.js";
 import {pageData, toLink} from "/assets/omino/Options.js";
-import {allPalettes, nullPalette} from "/assets/omino/Palettes.js";
-import {LockedOmino} from "/assets/omino/Omino.js";
-import SolveScene from "/assets/omino/scene/SolveScene.js";
-import MobileKeyboard from "/assets/omino/scene/MobileKeyboard.js";
+import MobileKeyboard from "/assets/omino/scene/utils/MobileKeyboard.js";
 import {fill, stroke, background} from "/assets/omino/Colors.js";
 import {OptionsHolder, OptionsElement} from "/assets/omino/scene/OptionsHolder.js";
 
@@ -158,100 +152,6 @@ class Counter extends DimsScene{
     return super.keyPressed(key);
   }
 }
-class CustomTextInputScene extends TextInputScene{
-  constructor(validator, value, submit=_=>0){
-    super();
-
-    this.value=value;
-    this.validator=validator;
-    this.oldValue=this.value;
-    this.submit=submit;
-  }
-  mouseUp(x,y){
-    if(DimsScene.prototype.mouseUp.call(this, x,y)){
-      this.value=this.keyboard.value;
-      return true;
-    }
-
-    if(this.isIn()){
-      focus(this);
-
-      if(isKindaMobile&&!this.keyboard){
-        this.keyboard=this.addScene(new MobileKeyboard([
-          [1,2,3],[4,5,6],[7,8,9],[",",0,"Backspace"]
-        ]));
-        this.keyboard.value=this.value;
-        this.recalc();
-      }
-
-      return true;
-    }else if(this.keyboard){
-      if(this.keyboard) this.keyboard.remove();
-      this.keyboard=undefined;
-      return true;
-    }
-  }
-  recalc(){
-    if(!this.keyboard) return;
-    this.keyboard.changePosAndDims(new Vector(p5.width/2+p5.height*0.1,p5.height*0.1).sub(this.getAbsolutePos().trimTo(2)), 
-      new Vector(p5.width/2-p5.height*0.2,p5.height*0.8));
-    this.keyboard.recalculate();
-  }
-
-  render(){
-    if(this.isIn()) p5.cursor(p5.TEXT);
-
-    if(!this.validator.test(this.value)) fill("scenes.util.textInput.invalid");
-    else if(this.value==this.oldValue) fill("scenes.util.textInput.bg");
-    else fill("scenes.util.textInput.bgUnsaved");
-
-    p5.rect(0,0,this.dims.x,this.dims.y);
-    fill("scenes.util.textInput.color");
-    p5.textSize(this.dims.y*0.8);
-    p5.textAlign(p5.LEFT, p5.TOP);
-    p5.text(this.value, 2, 2);
-    if(this.focused&&p5.frameCount*0.015%1>0.5) p5.rect(p5.textWidth(this.value)+2, 2, this.dims.y*0.05, this.dims.y-4);
-
-    Scene.renderChildren(this);
-  }
-
-  valid(){ return this.validator.test(this.value); }
-  keyPressed(key){
-    if(this.focused&&this.valid()&&key=="Enter"){
-      this.submit();
-      return true;
-    }
-    return super.keyPressed(key);
-  }
-
-  setCorrectVal(newVal){
-    this.value=newVal;
-    this.oldValue=newVal;
-  }
-}
-class CustomTickboxScene extends TickboxScene{
-  constructor(value){
-    super();
-
-    this.value=value;
-    this.oldValue=this.value;
-  }
-
-  render(){
-    if(this.value==this.oldValue) fill("scenes.util.tickbox.bg");
-    else fill("scenes.util.tickbox.bgUnsaved");
-
-    p5.rect(0,0,this.dims.x,this.dims.y);
-    if(this.value){
-      stroke("scenes.util.tickbox.color");
-      p5.scale((this.dims.x+this.dims.y)*0.05);
-      p5.strokeWeight(2);
-      p5.line(2,2,8,8);
-      p5.line(2,8,8,2);
-      p5.noStroke();
-    }
-  }
-}
 
 class Bar extends DimsScene{
   constructor(...subScenes){
@@ -301,6 +201,10 @@ function withLabel(label, element, setDims=(s,w,h)=>s.element.dims = new Vector(
   });
 }
 
+const barButtonWrapper = s=>{
+  fill(s.isIn()?"scenes.buttons.dark.bgHover":"scenes.buttons.dark.bg");
+  p5.rect(0,0,s.dims.x,s.dims.y,(s.dims.x+s.dims.y)*0.1);
+};
 class OptionsScene extends DimsScene{
   constructor(){
     super();
@@ -310,10 +214,6 @@ class OptionsScene extends DimsScene{
 
     const submit = _=>Data.scene.optionsScene.applyButton.click(0,0);
 
-    this.boardDims = new CustomTextInputScene(/^[1-9]\d*,[1-9]\d*$/,
-      Data.mainBoard.width+","+Data.mainBoard.height, submit);
-    this.palette = new Counter(allPalettes.indexOf(pageData.palette)+1, {min:0, submit});
-    this.torusBox = new CustomTickboxScene(Data.mainBoard.torusMode);
     this.applyButton = new OneTimeButtonScene(s=>{
       fill(s.isIn()?"scenes.util.button.bgHover":"scenes.util.button.bg");
       p5.rect(0,0,s.dims.x,s.dims.y);
@@ -378,35 +278,9 @@ class OptionsScene extends DimsScene{
       Data.mainBoard.recalcPath();
     });
 
-    this.options.addScene(withLabel("Dimensions:",this.boardDims));
-    this.options.addScene(withLabel("Palette:",this.palette));
-    this.options.addScene(withLabel("Torus mode:",this.torusBox, (s,w,h)=>s.element.dims = new Vector(h,h)));
-    this.options.addScene(new OptionsElement(s=>{
-      s.element = s.addScene(this.applyButton);
-    },(s,x,y,w,h)=>{
-      s.pos = new Vector(x,y);
-
-      p5.textSize(h*1.2*0.9);
-      s.element.dims = new Vector(p5.textWidth("Apply")+h*3,h*1.2);
-      s.element.pos = new Vector(w/2-s.element.dims.x/2,0);
-
-      s.dims = new Vector(w,h*1.2);
-    }));
-    this.options.addScene(new OptionsElement(s=>{
-      s.element = s.addScene(this.clearButton);
-    },(s,x,y,w,h)=>{
-      s.pos = new Vector(x,y);
-
-      p5.textSize(h*1.2*0.9);
-      s.element.dims = new Vector(p5.textWidth("Clear Board")+h*3,h*1.2);
-      s.element.pos = new Vector(w/2-s.element.dims.x/2,0);
-
-      s.dims = new Vector(w,h*1.2);
-    }));
-
     this.bottomBar = this.addScene(new Bar(
       new OneTimeButtonScene(s=>{
-        buttonWrapper(s);
+        barButtonWrapper(s);
 
         let arrOffs=s.isIn()?5:0;
         fill("scenes.buttons.dark.icon");
@@ -426,7 +300,7 @@ class OptionsScene extends DimsScene{
         Data.scene = new ShareImageScene(Data.scene);
       }),//share image
       new OneTimeButtonScene(s=>{
-        buttonWrapper(s);
+        barButtonWrapper(s);
 
         stroke("scenes.buttons.dark.icon");
         p5.strokeWeight(6);
@@ -466,7 +340,7 @@ class OptionsScene extends DimsScene{
 
     this.settingsBar = this.addScene(new Bar(
       new OneTimeButtonScene(s=>{
-        buttonWrapper(s);
+        barButtonWrapper(s);
         if(s.isIn()) hover.set("Settings", s);
 
         p5.translate(s.dims.x*0.5,s.dims.y*0.5);
@@ -497,7 +371,7 @@ class OptionsScene extends DimsScene{
       new OneTimeButtonScene(s=>{
         if(s.isIn()) hover.set("Toggle Fullscreen", s);
 
-        buttonWrapper(s);
+        barButtonWrapper(s);
         p5.translate(s.dims.x*0.5,s.dims.y*0.5);
         p5.scale(s.dims.x/50);
 
@@ -530,11 +404,6 @@ class OptionsScene extends DimsScene{
           (p5.windowHeight-p5.height)/2, behavior:"instant"});
       })
     ));
-
-    const buttonWrapper = s=>{
-      fill(s.isIn()?"scenes.buttons.dark.bgHover":"scenes.buttons.dark.bg");
-      p5.rect(0,0,s.dims.x,s.dims.y,(s.dims.x+s.dims.y)*0.1);
-    };
   }
   getScale(){
     let scale = this.dims.x/100;
@@ -543,8 +412,8 @@ class OptionsScene extends DimsScene{
   }
 
   resized(old,n=old){
-    this.dims.y=p5.height;
-    this.dims.x=p5.width/4;
+    this.dims.y=n.y;
+    this.dims.x=n.x/4;
 
     this.offs-=this.settingsBar.dims.y;
     this.offs*=n.x/old.x;
@@ -585,8 +454,6 @@ export default OptionsScene;
 export {
   OptionsScene,
   Counter,
-  CustomTextInputScene,
-  CustomTickboxScene,
   CustomOptionsHolder,
   withLabel
 }

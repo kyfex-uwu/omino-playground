@@ -9,7 +9,10 @@ class KeyScene extends ButtonScene{
 		this.key=key;
 		this.orderPos=pos;
 		this.orderDims=dims;
+
+		this.listeners=[];
 	}
+	addListener(listener){ this.listeners.push(listener); return this; }
 	click(){
 		switch(this.key){
 		case "Backspace":
@@ -19,6 +22,8 @@ class KeyScene extends ButtonScene{
 			this.parent.value+=this.key;
 			break;
 		}
+
+		for(const listener of this.listeners) listener(this.key);
 	}
 	render(){
 		fill(this.isIn()?"scenes.util.keypad.button.bgHover":"scenes.util.keypad.button.bg");
