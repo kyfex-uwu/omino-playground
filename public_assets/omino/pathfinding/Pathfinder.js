@@ -115,7 +115,6 @@ async function calcLength(data){
 	if(data.startPoint) data.startPoint=namedTiles[data.startPoint];
 	if(data.endPoint) data.endPoint=namedTiles[data.endPoint];
 
-
 	let remainingTiles=new Set(Object.values(namedTiles));
 
 	//split tiles into pools
@@ -147,14 +146,14 @@ async function calcLength(data){
 	for(const pool of pools){
 		if(pool.length==0) continue;
 
-		//if only start or end are specified
-		if((data.startPoint||data.endPoint)&&!(data.startPoint&&data.endPoint)){
+		//if both start and end are specified
+		if(data.startPoint&&data.endPoint){
+			findLongestShortest(data.startPoint, pool, maybePaths, {startFixed:true, end:data.endPoint});
+
+		//if only one is specified
+		}else if(data.startPoint||data.endPoint){
 			let start=data.startPoint||data.endPoint;
 			findLongestShortest(start, pool, maybePaths, {startFixed:true});
-
-		//if both are specified
-		}else if(data.startPoint&&data.endPoint){
-			findLongestShortest(data.startPoint, pool, maybePaths, {startFixed:true, end:data.endPoint});
 
 		//if neither are specified (raagh)
 		}else{

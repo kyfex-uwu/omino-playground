@@ -9,18 +9,39 @@ class BoardContainer extends DimsScene{
   constructor(parent){
     super();
     this.parent=parent;
+
+    this.dragging=false;
+    this.listeners={
+      drag:[],
+    };
   }
   resized(oldDims,newDims=oldDims){
     let size=Math.min(newDims.x/2,newDims.y);
     this.dims = new Vector(size,size);
     this.pos = new Vector((newDims.x-size)/2,0);
   }
+  mouseUp(x,y){
+    this.dragging=false;
+  }
+  mouseDown(x,y){
+    if(!this.isIn()) return false;
+    this.dragging=new Vector(x,y);
+    return true;
+  }
   render(){
+    if(this.dragging){
+      let pos=new Vector(p5.mouseX,p5.mouseY).sub(this.pos);
+      for(const listener of this.listeners.drag)
+        listener(this.dragging, pos);
+    }
+
     Element.render({
       container:this,
       board:this.parent.board,
     }, ...this.parent.board.elements);
   }
+
+  addListener
 }
 
 class MainScene extends Scene{

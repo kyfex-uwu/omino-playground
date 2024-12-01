@@ -5,24 +5,37 @@ import Vector from "/assets/omino/Vector.js";
 import events from "/assets/omino/Events.js";
 import {background} from "/assets/omino/Colors.js";
 
+import * as THREE from "three";
+import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
+const threeScene = new THREE.Scene();
+const threeCamera = new THREE.PerspectiveCamera(75, 1/1, 0.1, 1000);
+const threeRenderer = new THREE.WebGLRenderer({ alpha:true });
+threeRenderer.setSize( 600,600 );
+
 let canv3d;
 let cubeNet;
-let cubeModel;
+let cubeMaterial;
 events.loaded.on(_=>{
-	canv3d=p5.createGraphics(400,400, p5.WEBGL);
-	canv3d.noStroke();
 	cubeNet=p5.createGraphics(400,600);
 	cubeNet.noStroke();
-	cubeModel = p5.loadModel("/assets/omino/resources/cube.obj");
+
+	const cubeTexture = new THREE.CanvasTexture(cubeNet.elt)
+	cubeMaterial = new THREE.MeshBasicMaterial({ map:cubeTexture });
+	new OBJLoader().load("/assets/omino/resources/cube.obj",
+		scene=>{
+			threeScene.add(new THREE.Mesh(scene.children[0].geometry, cubeMaterial));
+		});
+
+	canv3d = p5.createGraphics(600,600,p5.WEBGL, threeRenderer.domElement);
 });
 
 const faceOffsets=[
-	[0,0],
-	[0,1],
-	[0,2],
 	[1,0],
 	[1,1],
-	[1,2]
+	[1,2],
+	[0,1],
+	[0,2],
+	[0,0]
 ];
 export default class CubeSurfaceEl extends Element{
 	constructor(size){
@@ -89,15 +102,13 @@ export default class CubeSurfaceEl extends Element{
 	}
 
 	prerender(nodes, env){
-		canv3d.width=env.container.dims.x;
-		canv3d.height=env.container.dims.y;
-
 		let unit=Math.min(env.container.dims.x,env.container.dims.y);
 		//cubeNet = p5.createGraphics(unit*2,unit*3);
 	}
 	render(nodes, env){
 		let scale2=cubeNet.width/this.size/2;
-		background("bg",cubeNet)
+		background("bg",cubeNet);
+		cubeMaterial.map.needsUpdate=true;
 		for(let i=0;i<faceOffsets.length;i++){
 			cubeNet.push();
 			cubeNet.textSize(scale2*0.8/2);
@@ -115,17 +126,11 @@ export default class CubeSurfaceEl extends Element{
 			}
 			cubeNet.pop();
 		}
-		canv3d.texture(cubeNet);
-
-		let scale = Math.sqrt(Math.min(env.container.dims.x/this.size,env.container.dims.y/this.size)**2/3);
-
-		canv3d.clear();
-		canv3d.push();
-		canv3d.rotateX(p5.frameCount*0.01);
-		canv3d.rotateZ(p5.frameCount*0.01);
-		canv3d.scale(100)
-		canv3d.model(cubeModel);
-		canv3d.pop();
+		
+		let angle=p5.frameCount;
+		threeCamera.position.fromArray([Math.sin(angle/180*Math.PI)*5,0,Math.cos(angle/180*Math.PI)*5]);
+		threeCamera.lookAt(0,0,0);
+		threeRenderer.render( threeScene, threeCamera );
 
 		p5.image(canv3d, 0,0);
 	}
