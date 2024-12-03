@@ -139,7 +139,7 @@ export default class CubeSurfaceEl extends Element{
 	getNodePos(node){
 		return faceOffsets[node.custom.face].scale(this.size).add(node.custom.pos).scale(this.scale);
 	}
-	clickPos()//todo
+	clickPos(){}//todo
 
 	prerender(nodes, env){
 		if(env.dragging){
@@ -190,7 +190,7 @@ export default class CubeSurfaceEl extends Element{
 		const hit = raycaster.intersectObjects(this.threeScene.children)[0];
 		if(hit){
 			const posData=getOffs(hit.normal,hit.point);
-			let pos = faceOffsets[posData[0]].add(posData[1]).scale(this.size).floor();
+			let pos = faceOffsets[posData[0]].add(posData[1]).scale(this.size);//.floor();
 			this.cubeNet.fill(0,255,0);
 			this.cubeNet.rect(pos.x*this.scale,pos.y*this.scale,this.scale,this.scale);
 		}
