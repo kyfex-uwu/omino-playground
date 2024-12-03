@@ -9,12 +9,13 @@ class Element{
 	render(nodes, env){} 
 }
 Element.apply = (...elements)=>{
+	const env={};
 	let nodes = new Set();
 	for(let element of elements){
 		if(!(element instanceof Element)) element=element(nodes);
 		//it can either be an element or a callable
 
-		let data = element.apply(nodes);
+		let data = element.apply(nodes, env);
 		nodes=nodes.union(data.added).difference(data.removed);
 	}
 	return nodes;

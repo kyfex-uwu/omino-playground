@@ -20,6 +20,17 @@ import Node from "/assets/omino/pathfinding/Node.js";
  * 
  */
 
+function getNodes(currNodeView, connTree, nodes, toReturn=new Set()){
+	toReturn.add(currNodeView.node);
+
+	for(const [key,val] of Object.entries(connTree)){
+		//TODO: this just assumes the next node is the same type as this one
+		getNodes(currNodeView.get(parseInt(key)), val, nodes, toReturn);
+	}
+
+	return toReturn;
+}
+
 class OminoEl extends Element{
 	constructor(connTree, root, orientation){
 		super();
@@ -27,23 +38,31 @@ class OminoEl extends Element{
 		this.root=root;
 		this.orientation=orientation;
 
+		this.positions=[];
+
 		//note: this assumes the omino is in a valid spot!! it will not check if it can it just does
 	}
-	apply(nodes){
-		let removed = new Set();
-		this.disableNodes(this.root.getView(), this.connTree, removed, nodes);
-		return new ApplyData({removed});
+	getRoot(nodes){
+		return [...nodes].find(n=>n.id==this.root);
 	}
-	disableNodes(currNodeView, connTree, removedSet, nodes){
-		removedSet.add(currNodeView.node);
-
-		for(const [key,val] of Object.entries(connTree)){
-			//TODO: this just assumes the next node is the same type as this one
-			this.disableNodes(currNodeView.get(parseInt(key)), val, removedSet, nodes);
+	apply(nodes, env){
+		let allNodes=getNodes(this.getRoot(nodes).getView(this.orientation),this.connTree,nodes);
+		this.positions=[];
+		for(const node of allNodes){
+			this.positions.push(env.drawData.getNodePos(node));
+			node.detach();
 		}
-
-		currNodeView.detach();
+		return new ApplyData({removed:allNodes});
 	}
+	prerender(nodes, env){}
+	render(nodes,env){
+		for(const pos of this.positions){
+			env.drawData.canvas.fill(255,0,0);
+			env.drawData.canvas.rect(pos.x,pos.y,env.drawData.scale,env.drawData.scale);
+		}
+		env.drawData.notifyTexture();
+	}
+	
 }
 OminoEl.factory = connTree=>(root, orientation)=>new OminoEl(connTree, root, orientation);
 

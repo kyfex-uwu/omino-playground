@@ -72,8 +72,7 @@ class NodeView{
 		this.node.connections[this.orientation.apply(whichDirec)].connection.disconnect();
 	}
 	detach(){
-		for(const connWrapper of Object.values(this.node.connections))
-			connWrapper.connection.disconnect();
+		this.node.detach();
 	}
 }
 
@@ -87,5 +86,9 @@ export default class Node{
 
 	getView(orientation=this.defaultOrientation){
 		return new NodeView(this, orientation);
+	}
+	detach(){
+		for(const connWrapper of Object.values(this.connections))
+			connWrapper.connection.disconnect();
 	}
 }

@@ -8,6 +8,8 @@ import {isKindaMobile} from "/assets/omino/scene/Scene.js";
 import events from "/assets/omino/Events.js";
 
 import CubeSurfaceEl from "/assets/omino/pathfinding/boards/CubeSurfaceEl.js";
+import OminoEl from "/assets/omino/pathfinding/elements/OminoEl.js";
+import RectOrientation from "/assets/omino/pathfinding/orientation/RectOrientation.js";
 
 //--
 
@@ -37,7 +39,24 @@ new p5(p5=>{
 
     data.scene = new MainScene({board:new Board({
       elements:[
-        new CubeSurfaceEl(7)
+        new CubeSurfaceEl(7),
+        new OminoEl(
+        {
+          0:{
+            0:{
+              1:{}
+            }, 
+            3:{}
+          }
+        },6,new RectOrientation(1)),
+        new OminoEl(
+        {
+          0:{}, 1:{}, 2:{}, 3:{}
+        },24,new RectOrientation(2)),
+        new OminoEl(
+        {
+          1:{1:{0:{1:{}}}}
+        },26,new RectOrientation(0)),
       ]
     })});
     data.isFullscreened=pageData.fullscreen;

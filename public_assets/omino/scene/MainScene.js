@@ -11,9 +11,7 @@ class BoardContainer extends DimsScene{
     this.parent=parent;
 
     this.dragging=false;
-    this.listeners={
-      drag:[],
-    };
+    this.lastPos=false;
   }
   resized(oldDims,newDims=oldDims){
     let size=Math.min(newDims.x/2,newDims.y);
@@ -22,26 +20,32 @@ class BoardContainer extends DimsScene{
   }
   mouseUp(x,y){
     this.dragging=false;
+    this.clicked=true;
   }
   mouseDown(x,y){
     if(!this.isIn()) return false;
-    this.dragging=new Vector(x,y);
+    this.dragging={
+      orig:new Vector(x,y), 
+      curr:new Vector(x,y),
+      delta:new Vector(0,0),
+    };
     return true;
   }
   render(){
     if(this.dragging){
       let pos=new Vector(p5.mouseX,p5.mouseY).sub(this.pos);
-      for(const listener of this.listeners.drag)
-        listener(this.dragging, pos);
+      this.dragging.delta=pos.sub(this.dragging.curr);
+      this.dragging.curr=pos;
     }
 
     Element.render({
       container:this,
       board:this.parent.board,
+      dragging:this.dragging,
+      clicked:this.clicked,
     }, ...this.parent.board.elements);
+    this.clicked=false;
   }
-
-  addListener
 }
 
 class MainScene extends Scene{
@@ -52,6 +56,10 @@ class MainScene extends Scene{
 
     this.optionsScene = this.addScene(new OptionsScene());
     this.boardContainer = this.addScene(new BoardContainer(this));
+
+    this.cursor={
+      heldOmino:undefined
+    };
   }
   // drawButton(clickFunc, hoverText){
   //   return s=>{
