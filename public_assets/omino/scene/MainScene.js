@@ -19,8 +19,8 @@ class BoardContainer extends DimsScene{
     this.pos = new Vector((newDims.x-size)/2,0);
   }
   mouseUp(x,y){
+    this.clicked=this.dragging?this.dragging.orig.distTo(this.dragging.curr)<0.1:true;
     this.dragging=false;
-    this.clicked=true;
   }
   mouseDown(x,y){
     if(!this.isIn()) return false;
@@ -43,6 +43,8 @@ class BoardContainer extends DimsScene{
       board:this.parent.board,
       dragging:this.dragging,
       clicked:this.clicked,
+      cursor:this.parent.cursor,
+      elements:this.parent.board.elements,
     }, ...this.parent.board.elements);
     this.clicked=false;
   }
@@ -58,7 +60,7 @@ class MainScene extends Scene{
     this.boardContainer = this.addScene(new BoardContainer(this));
 
     this.cursor={
-      heldOmino:undefined
+      heldElement:undefined,
     };
   }
   // drawButton(clickFunc, hoverText){

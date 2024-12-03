@@ -8,6 +8,8 @@ import {fill, background} from "/assets/omino/Colors.js";
 import * as THREE from "three";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 
+import OminoEl from "/assets/omino/pathfinding/elements/OminoEl.js";
+
 const raycaster = new THREE.Raycaster();
 
 const dist=4;
@@ -22,15 +24,15 @@ const faceOffsets=[
 ];
 function getOffs(normal,point){
 	let toReturn;
-	if(normal.z==-1){
+	if(Math.round(normal.z)==-1){
 		toReturn= [5,new Vector(point.y,-point.x)];
-	}else if(normal.z==1){
+	}else if(Math.round(normal.z)==1){
 		toReturn= [4,new Vector(-point.y,-point.x)];
-	}else if(normal.y==-1){
+	}else if(Math.round(normal.y)==-1){
 		toReturn= [2,new Vector(-point.z,-point.x)];
-	}else if(normal.y==1){
+	}else if(Math.round(normal.y)==1){
 		toReturn= [0,new Vector(-point.z,point.x)];
-	}else if(normal.x==-1){
+	}else if(Math.round(normal.x)==-1){
 		toReturn= [3,new Vector(-point.z,point.y)];
 	}else{
 		toReturn= [1,new Vector(-point.z,-point.y)];
@@ -188,11 +190,31 @@ export default class CubeSurfaceEl extends Element{
 				-(p5.mouseY-absolutePos.y)/this.threeRenderer.domElement.height*2+1
 			), this.threeCamera);
 		const hit = raycaster.intersectObjects(this.threeScene.children)[0];
-		if(hit){
-			const posData=getOffs(hit.normal,hit.point);
-			let pos = faceOffsets[posData[0]].add(posData[1]).scale(this.size);//.floor();
-			this.cubeNet.fill(0,255,0);
-			this.cubeNet.rect(pos.x*this.scale,pos.y*this.scale,this.scale,this.scale);
+		if(env.clicked){
+			if(hit){
+				const posData=getOffs(hit.normal,hit.point);
+				posData[1]=posData[1].scale(this.size).floor();
+				let node = posData[0]*this.size*this.size+posData[1].y*this.size+posData[1].x;
+				
+				if(env.cursor.heldElement){
+					if(env.cursor.heldElement instanceof OminoEl && env.cursor.heldElement.checkValid(node, nodes)){
+						env.cursor.heldElement.root = node;
+						env.board.add(env.cursor.heldElement);
+						env.cursor.heldElement=undefined;
+					}
+				}else{
+					for(const element of env.elements){
+						if(element instanceof OminoEl && element.isMyNode(node)){
+							env.cursor.heldElement = element;
+							env.board.remove(element);
+						}
+					}
+				}
+			}
+		}
+
+		if(env.cursor.heldElement){
+
 		}
 
 		this.threeRenderer.render(this.threeScene, this.threeCamera);

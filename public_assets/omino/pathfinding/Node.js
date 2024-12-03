@@ -46,17 +46,18 @@ class NodeView{
 	}
 
 	get(whichDirec){
-		return new NodeView(this.getNode(whichDirec),
-			this.getConn(whichDirec).calcOtherOrientation(this.node,this.orientation));
+		let orientation = this.getConn(whichDirec)?.calcOtherOrientation(this.node,this.orientation);
+		if(!orientation) return undefined;
+		return new NodeView(this.getNode(whichDirec), orientation);
 	}
 	getConnWrapper(whichDirec){
 		return this.node.connections[this.orientation.apply(whichDirec)];
 	}
 	getConn(whichDirec){
-		return this.getConnWrapper(whichDirec).connection;
+		return this.getConnWrapper(whichDirec)?.connection;
 	}
 	getNode(whichDirec){
-		return this.getConnWrapper(whichDirec).node;
+		return this.getConnWrapper(whichDirec)?.node;
 	}
 
 	//thisDirec and destDirec are both absolute
@@ -69,7 +70,7 @@ class NodeView{
 	}
 	//whichDirec is relative
 	disconnect(whichDirec){
-		this.node.connections[this.orientation.apply(whichDirec)].connection.disconnect();
+		this.node.connections[this.orientation.apply(whichDirec)]?.connection.disconnect();
 	}
 	detach(){
 		this.node.detach();
