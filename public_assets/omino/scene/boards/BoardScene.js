@@ -14,7 +14,7 @@ class BoardScene extends DimsScene {
         p5.rect(0,0,this.dims.x,this.dims.y);
         p5.endClip();
 
-        Element.render(this,this.board.elements);
+        Element.render({scene:this},this.board.elements);
         
         p5.pop();
     }

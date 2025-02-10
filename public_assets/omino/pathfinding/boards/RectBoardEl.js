@@ -42,6 +42,15 @@ export default class RectBoardEl extends Element{
 	    let currNodeId=0;
 	    for(const node of toReturn.added) node.id=currNodeId++;
 
+	    this.drawData={
+			getNodePos:n=>this.getNodePos(n),
+			canvas:this.cubeNet,
+			scale:this.scale,
+			notifyTexture:_=>{
+				this.material.map.needsUpdate=true;
+			},
+		};
+
 		return toReturn;
 	}
 

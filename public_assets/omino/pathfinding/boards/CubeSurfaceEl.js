@@ -10,6 +10,8 @@ import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 
 import OminoEl from "/assets/omino/pathfinding/elements/OminoEl.js";
 
+//-- probably not working
+
 const raycaster = new THREE.Raycaster();
 
 const dist=4;

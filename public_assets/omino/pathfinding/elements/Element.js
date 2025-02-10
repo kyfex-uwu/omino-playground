@@ -1,33 +1,59 @@
+import Vector from "/assets/omino/Vector.js";
+
+class Pass{
+	constructor(order,func){
+		this.func=func;
+		this.order=order;
+	}
+}
+
 class Element{
 	constructor(){
-		this.renderOrder=0;
+		this.applyPasses=[];
+		this.renderPasses=[];
 	}
-	apply(nodes){}
+	addSetting(){
 
-	addSetting(setting){}
-	prerender(nodes, env){}
-	render(nodes, env){} 
+	}
 }
 Element.apply = (...elements)=>{
 	const env={};
-	let nodes = new Set();
-	for(let element of elements){
-		if(!(element instanceof Element)) element=element(nodes);
-		//it can either be an element or a callable
 
-		let data = element.apply(nodes, env);
+	let nodes = new Set();
+
+	let passes=elements.map(e=>e.applyPasses.map(p=>{return{pass:p,el:e}})).flat();
+	passes.sort((p1,p2)=>p1.pass.order-p2.pass.order);
+
+	for(let pass of passes){
+		// if(!(element instanceof Element)) element=element(nodes);
+		// //it can either be an element or a callable
+
+		let data = pass.func(nodes, env);
 		nodes=nodes.union(data.added).difference(data.removed);
 	}
 	return nodes;
 }
 Element.render = (env, ...elements)=>{
-	const nodes = Element.apply(...elements);
+	const env={
+		drawData:{
+			nodeToTexPos: n=>new Vector(0,0),
+			canvas: p5.canvas,
+			nodeSize: 0,
+			notifyTexture: _=>{},
+		}
+	};
 
-	elements.sort((e1,e2)=>e1.renderOrder-e2.renderOrder);
-	for(let element of elements)
-		element.prerender(nodes,env);
-	for(let element of elements)
-		element.render(nodes,env);
+	let nodes = new Set();
+
+	let passes=elements.map(e=>e.renderPasses.map(p=>{return{pass:p,el:e}})).flat();
+	passes.sort((p1,p2)=>p1.pass.order-p2.pass.order);
+
+	for(let pass of passes){
+		// if(!(element instanceof Element)) element=element(nodes);
+		// //it can either be an element or a callable
+
+		pass.func(nodes, env);
+	}
 }
 
 class ApplyData{
@@ -46,4 +72,4 @@ class ApplyData{
 }
 
 export default Element;
-export {Element, ApplyData};
+export {Element, Pass, ApplyData};
