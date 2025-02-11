@@ -36,7 +36,7 @@ class Board{
   }
   
   getNodes(){
-    return Element.apply(...this.elements);
+    return Element.apply(this.elements);
   }
   recalcPath(){
     try{this.lengthWorker.terminate();}catch(e){}

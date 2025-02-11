@@ -16,13 +16,12 @@ class Element{
 
 	}
 }
-Element.apply = (...elements)=>{
+Element.apply = (elements)=>{
 	const env={};
 
 	let nodes = new Set();
 
-	let passes=elements.map(e=>e.applyPasses.map(p=>{return{pass:p,el:e}})).flat();
-	passes.sort((p1,p2)=>p1.pass.order-p2.pass.order);
+	let passes=elements.map(e=>e.applyPasses).flat().toSorted((p1,p2)=>p1.order-p2.order);
 
 	for(let pass of passes){
 		// if(!(element instanceof Element)) element=element(nodes);
@@ -33,20 +32,18 @@ Element.apply = (...elements)=>{
 	}
 	return nodes;
 }
-Element.render = (env, ...elements)=>{
-	const env={
+Element.render = (env={}, elements, nodes)=>{
+	Object.assign(env,{
 		drawData:{
 			nodeToTexPos: n=>new Vector(0,0),
 			canvas: p5.canvas,
 			nodeSize: 0,
 			notifyTexture: _=>{},
-		}
-	};
+		},
+		elements:elements,
+	});
 
-	let nodes = new Set();
-
-	let passes=elements.map(e=>e.renderPasses.map(p=>{return{pass:p,el:e}})).flat();
-	passes.sort((p1,p2)=>p1.pass.order-p2.pass.order);
+	let passes=elements.map(e=>e.renderPasses).flat().toSorted((p1,p2)=>p1.order-p2.order);
 
 	for(let pass of passes){
 		// if(!(element instanceof Element)) element=element(nodes);
@@ -54,6 +51,9 @@ Element.render = (env, ...elements)=>{
 
 		pass.func(nodes, env);
 	}
+}
+Element.applyAndRender = (env={},elements) => {
+	Element.render(env,elements,Element.apply(elements));
 }
 
 class ApplyData{
