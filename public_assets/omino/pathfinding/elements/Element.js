@@ -23,6 +23,9 @@ class SelectableElement extends Element{
 	tryPlace(nodes,env,historicalNodes){
 		return false;
 	}
+	drawAtMouse(nodes,env,historicalNodes){
+		
+	}
 }
 
 Element.apply = (elements, env={}, historicalNodes={})=>{
@@ -65,7 +68,9 @@ Element.render = (elements, nodes, historicalNodes, env={})=>{
 }
 Element.applyAndRender = (elements, applyEnv, renderEnv=applyEnv) => {
 	const historicalNodes = {};
-	Element.render(elements, Element.apply(elements, applyEnv, historicalNodes), historicalNodes, renderEnv);
+	let nodes=Element.apply(elements, applyEnv, historicalNodes);
+	Element.render(elements, nodes, historicalNodes, renderEnv);
+	return {nodes,historicalNodes};
 }
 
 class ApplyData{

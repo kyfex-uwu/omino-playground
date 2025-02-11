@@ -1,6 +1,7 @@
 import {SelectableElement, ApplyData, Pass} from "/assets/omino/pathfinding/elements/Element.js";
 import Node from "/assets/omino/pathfinding/Node.js";
-import {stroke} from "/assets/omino/Colors.js";
+import {stroke,fill} from "/assets/omino/Colors.js";
+import Vector from "/assets/omino/Vector.js";
 
 /**
  *  ##
@@ -41,6 +42,8 @@ class OminoEl extends SelectableElement{
 		this.root=root;
 		this.orientation=orientation;
 
+		this.onMouse=false;
+
 		this.nodes=[];
 
 		//note: this assumes the omino is in a valid spot!! it will not check if it can it just does
@@ -55,29 +58,57 @@ class OminoEl extends SelectableElement{
 			}
 			return new ApplyData({removed:allNodes});
 		})];
-		this.renderPasses=[new Pass(0,(nodes,env)=>{
-			let size=env.drawData.nodeSize;
+		this.renderPasses=[new Pass(0,(...args)=>this.draw(...args))];
+	}
+	draw(nodes,env, historicalNodes){
+		let size=env.drawData.nodeSize;
 
-			env.drawData.context.push();
+		env.drawData.context.push();
+		fill("ominoColors.I", env.drawData.context);
+		env.drawData.context.strokeWeight(size*0.88);
+		for(const node of this.nodes){
+			let pos = this.getNodePos(node,env,historicalNodes);
+
+			this.drawNode(env,pos);
+
 			stroke("ominoColors.I", env.drawData.context);
-			env.drawData.context.strokeWeight(size*0.8);
-			for(const node of this.nodes){
-				let pos = env.drawData.nodeToTexPos(node);
-
-				for(const connected of Object.values(node.historicalConnections)){
-					if(this.nodes.some(n=>n.id==connected.node.id) && connected.node.id>node.id){
-						let otherPos=env.drawData.nodeToTexPos(connected.node);
-						env.drawData.context.line(
-							(pos.x/size+0.5)*size, (pos.y/size+0.5)*size,
-							(otherPos.x/size+0.5)*size, (otherPos.y/size+0.5)*size);
-					}
+			for(const connected of Object.values(node.historicalConnections)){
+				if(this.nodes.some(n=>n.id==connected.node.id) && connected.node.id>node.id){
+					let otherPos=this.getNodePos(connected.node,env,historicalNodes);
+					env.drawData.context.line(
+						(pos.x/size+0.5)*size, (pos.y/size+0.5)*size,
+						(otherPos.x/size+0.5)*size, (otherPos.y/size+0.5)*size);
 				}
 			}
-			env.drawData.context.pop();
-			env.drawData.notifyTexture();
-		})]
+		}
+		env.drawData.context.pop();
+		env.drawData.notifyTexture();
 	}
-	getRoot(nodes){
+	drawNode(env,pos){
+		env.drawData.context.noStroke();
+		env.drawData.context.rect(
+			(pos.x/env.drawData.nodeSize+0.06)*env.drawData.nodeSize,
+			(pos.y/env.drawData.nodeSize+0.06)*env.drawData.nodeSize,
+			env.drawData.nodeSize*0.88,
+			env.drawData.nodeSize*0.88,
+			env.drawData.nodeSize*0.2);
+		//circle
+		// env.drawData.context.ellipse(
+		// 	(pos.x/env.drawData.nodeSize+0.5)*env.drawData.nodeSize, 
+		// 	(pos.y/env.drawData.nodeSize+0.5)*env.drawData.nodeSize,
+		//  env.drawData.nodeSize*0.88);
+	}
+	getNodePos(node, env, historicalNodes){
+		if(this.onMouse){
+			return env.mouse.pos.sub(env.container.getAbsolutePos())
+				.sub(env.drawData.nodeToTexPos(this.getRoot(historicalNodes)))
+				.sub(env.drawData.nodeSize/2,env.drawData.nodeSize/2)
+				.sub(this.onMouse||new Vector(0,0))
+				.add(node.custom.pos.scale(env.drawData.nodeSize));
+		}
+		return env.drawData.nodeToTexPos(node);
+	}
+	getRoot(nodes){//check if you need historicalNodes if youre running into a problem here
 		return nodes[this.root];
 	}
 	
@@ -96,20 +127,35 @@ class OminoEl extends SelectableElement{
 				.scale(1/env.drawData.nodeSize)
 
 			let node = Object.values(historicalNodes).find(n=>n.custom.pos.equals(cellPos.floor()));
-	    	if(node&&this.nodes.some(n=>n.id==node.id)) return true;
+	    	if(node&&this.nodes.some(n=>n.id==node.id)){
+	    		this.onMouse=env.mouse.pos.sub(this.getNodePos(
+	    			this.getRoot(historicalNodes),env,historicalNodes))
+	    		.sub(env.drawData.nodeSize/2,env.drawData.nodeSize/2)
+	    		.sub(env.container.getAbsolutePos());
+	    		return true;
+	    	}
 	    }
 	    return false;
 	}
 	tryPlace(nodes,env){
 		if(env.mouse.clicked){
 			let cellPos = env.mouse.pos.sub(env.container.getAbsolutePos())
-				.scale(1/env.drawData.nodeSize).floor();
+				.sub(this.onMouse||new Vector(0,0)).scale(1/env.drawData.nodeSize).floor();
+				console.log(cellPos.toString());
 
-			this.root = Object.values(nodes).find(n=>n.custom.pos.equals(cellPos)).id;
+			let newRoot = Object.values(nodes).find(n=>n.custom.pos.equals(cellPos));
+			newRoot=newRoot.id;
 
-			if(this.root!=undefined&&this.checkValid(this.root,nodes)) return true;
+			if(this.checkValid(newRoot,nodes)){
+				this.root=newRoot;
+				this.onMouse=false;
+				return true;
+			}
 		}
 		return false;
+	}
+	drawAtMouse(_,env, historicalNodes){
+		this.draw(_,env, historicalNodes);
 	}
 }
 OminoEl.factory = connTree=>(root, orientation)=>new OminoEl(connTree, root, orientation);

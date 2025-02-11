@@ -12,6 +12,7 @@ class BoardContainer extends DimsScene{
 
     this.dragging=false;
     this.lastPos=false;
+    this.shouldUnhold=false;
   }
   resized(oldDims,newDims=oldDims){
     let size=Math.min(newDims.x/2,newDims.y);
@@ -31,6 +32,9 @@ class BoardContainer extends DimsScene{
     };
     return true;
   }
+  unHold(){
+    this.shouldUnhold=true;
+  }
   render(){
     if(this.dragging){
       let pos=new Vector(p5.mouseX,p5.mouseY).sub(this.pos);
@@ -38,7 +42,7 @@ class BoardContainer extends DimsScene{
       this.dragging.curr=pos;
     }
 
-    Element.applyAndRender(this.parent.board.elements, {
+    let env={
       container:this,
       board:this.parent.board,
       mouse:{
@@ -47,7 +51,16 @@ class BoardContainer extends DimsScene{
         pos:new Vector(p5.mouseX, p5.mouseY),
       },
       cursor:this.parent.cursor
-    });
+    };
+    let {nodes, historicalNodes} = Element.applyAndRender(this.parent.board.elements, env);
+
+    if(this.parent.cursor.heldElement) 
+      this.parent.cursor.heldElement.drawAtMouse(nodes, env, historicalNodes);
+    if(this.shouldUnhold){
+      this.parent.cursor.heldElement=undefined;
+      this.shouldUnhold=false;
+    }
+
     this.clicked=false;
   }
 }

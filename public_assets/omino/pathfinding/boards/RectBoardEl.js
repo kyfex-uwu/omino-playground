@@ -139,7 +139,7 @@ export default class RectBoardEl extends Element{
 				}else{
 					if(env.cursor.heldElement.tryPlace(nodes,env,historicalNodes)){
 						env.board.add(env.cursor.heldElement);
-						env.cursor.heldElement=undefined;
+						env.container.unHold();
 					}
 				}
 			}),
