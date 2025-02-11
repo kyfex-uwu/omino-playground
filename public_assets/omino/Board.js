@@ -36,7 +36,9 @@ class Board{
   }
   
   getNodes(){
-    return Element.apply(this.elements);
+    return Element.apply(this.elements,{ 
+      board:this
+    });
   }
   recalcPath(){
     try{this.lengthWorker.terminate();}catch(e){}
@@ -70,7 +72,7 @@ class Board{
     lengthWorker.postMessage({
       startPoint:this.startPoint,
       endPoint:this.endPoint,
-      nodes:[...nodes].map(n=>[n.id, Object.values(n.connections).map(c=>c.node.id)]),
+      nodes:Object.values(nodes).map(n=>[n.id, Object.values(n.connections).map(c=>c.node.id)]),
     });
   }
 

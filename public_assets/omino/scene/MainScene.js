@@ -38,12 +38,16 @@ class BoardContainer extends DimsScene{
       this.dragging.curr=pos;
     }
 
-    Element.applyAndRender({
+    Element.applyAndRender(this.parent.board.elements, {
       container:this,
-      dragging:this.dragging,
-      clicked:this.clicked,
+      board:this.parent.board,
+      mouse:{
+        dragging:this.dragging,
+        clicked:this.clicked,
+        pos:new Vector(p5.mouseX, p5.mouseY),
+      },
       cursor:this.parent.cursor
-    }, this.parent.board.elements);
+    });
     this.clicked=false;
   }
 }

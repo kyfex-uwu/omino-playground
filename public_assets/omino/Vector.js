@@ -12,19 +12,31 @@ class Vector{
   set z(v){ return this.set(2, v); }
   trimTo(place){ return new Vector(...this._pos.slice(0,place)); }
   
-  add(other){
+  add(...other){
+    if(other[0] instanceof Vector) other=other[0];
+    else other = new Vector(...other);
+
     if(other._pos.length>this._pos.length) return other.add(this);
     return new Vector(...this._pos.map((v,i)=>v+other.get(i)));
   }
-  sub(other){
+  sub(...other){
+    if(other[0] instanceof Vector) other=other[0];
+    else other = new Vector(...other);
+    
     if(other._pos.length>this._pos.length) return other.sub(this);
     return new Vector(...this._pos.map((v,i)=>v-other.get(i)));
   }
-  mult(other){
+  mult(...other){
+    if(other[0] instanceof Vector) other=other[0];
+    else other = new Vector(...other);
+    
     if(other._pos.length>this._pos.length) return other.mult(this);
     return new Vector(...this._pos.map((v,i)=>v*other.get(i)));
   }
-  div(other){
+  div(...other){
+    if(other[0] instanceof Vector) other=other[0];
+    else other = new Vector(...other);
+    
     if(other._pos.length>this._pos.length) return other.div(this);
     return new Vector(...this._pos.map((v,i)=>v/other.get(i)));
   }
@@ -33,7 +45,10 @@ class Vector{
   round(){ return new Vector(...this._pos.map(v=>Math.round(v))); }
   floor(){ return new Vector(...this._pos.map(v=>Math.floor(v))); }
   clone(){ return new Vector(...this._pos); }
-  distTo(other){
+  distTo(...other){
+    if(other[0] instanceof Vector) other=other[0];
+    else other = new Vector(...other);
+    
     if(other._pos.length>this._pos.length) return other.distTo(this);
     return Math.sqrt(this._pos.map((v,i)=>(v-other.get(i))**2).reduce((a,c)=>a+c,0));
   }
@@ -43,8 +58,10 @@ class Vector{
   up(){ return new Vector(this.x,this.y-1); }
   down(){ return new Vector(this.x,this.y+1); }
   
-  equals(other){
-    if(!(other instanceof Vector)) return false;
+  equals(...other){
+    if(other[0] instanceof Vector) other=other[0];
+    else other = new Vector(...other);
+    
     if(other._pos.length>this._pos.length) return other.equals(this);
 
     for(let i=0;i<this._pos.length;i++)

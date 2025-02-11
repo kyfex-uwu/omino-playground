@@ -1,9 +1,21 @@
+
+/**
+ * Wrapper for a connection and the "other" node
+ * 
+ * This is meant to be attached to a Node, and the "node" field
+ * of this object is the other node in the connection between
+ * the two nodes
+ */
 class ConnWrapper{
 	constructor(connection, node){
 		this.connection=connection;
 		this.node=node;
 	}
 }
+
+/**
+ * A connection with baked in orientation.
+ */
 class Connection{
 	//these directions are absolute
 	constructor(node1,direc1, node2,direc2){
@@ -20,11 +32,19 @@ class Connection{
 		this.o1from2 = (node2Orientation, otherOClass)=>
 			node2Orientation.getOtherOrientation(this.direc2, this.direc1, otherOClass);
 
-		if(node1.connections[direc1]) node1.connections[direc1].connection.disconnect();
-		if(node2.connections[direc2]) node2.connections[direc2].connection.disconnect();
+		if(node1.connections[direc1]) 
+			node1.connections[direc1].connection.disconnect();
+		if(node2.connections[direc2]) 
+			node2.connections[direc2].connection.disconnect();
+		if(node1.historicalConnections[direc1]) 
+			node1.historicalConnections[direc1].connection.disconnect();
+		if(node2.historicalConnections[direc2]) 
+			node2.historicalConnections[direc2].connection.disconnect();
 
 		node1.connections[direc1]=this.wrapper1;
 		node2.connections[direc2]=this.wrapper2;
+		node1.historicalConnections[direc1]=this.wrapper1;
+		node2.historicalConnections[direc2]=this.wrapper2;
 	}
 
 	disconnect(){
@@ -39,6 +59,9 @@ class Connection{
 	}
 }
 
+/**
+ * A node viewed from ma certain orientation
+ */
 class NodeView{
 	constructor(node, orientation){
 		this.node=node;
@@ -72,15 +95,22 @@ class NodeView{
 	disconnect(whichDirec){
 		this.node.connections[this.orientation.apply(whichDirec)]?.connection.disconnect();
 	}
+	disconnectHistorical(whichDirec){
+		this.disconnect(whichDirec);
+		this.node.historicalConnections[this.orientation.apply(whichDirec)]?.connection.disconnect();
+	}
 	detach(){
 		this.node.detach();
 	}
 }
 
-//see nodeview for the useful stuff
+/**
+ * A node with no orientation
+ */
 export default class Node{
 	constructor(defaultOrientation){
 		this.connections={};
+		this.historicalConnections={};
 		this.custom={};
 		this.defaultOrientation = defaultOrientation;
 	}

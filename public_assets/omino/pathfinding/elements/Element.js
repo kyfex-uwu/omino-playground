@@ -16,10 +16,18 @@ class Element{
 
 	}
 }
-Element.apply = (elements)=>{
-	const env={};
+class SelectableElement extends Element{
+	isSelected(nodes,env,historicalNodes){
+		return false;
+	}
+	tryPlace(nodes,env,historicalNodes){
+		return false;
+	}
+}
 
-	let nodes = new Set();
+Element.apply = (elements, env={}, historicalNodes={})=>{
+	env.elements=elements;
+	let nodes = {};
 
 	let passes=elements.map(e=>e.applyPasses).flat().toSorted((p1,p2)=>p1.order-p2.order);
 
@@ -28,15 +36,21 @@ Element.apply = (elements)=>{
 		// //it can either be an element or a callable
 
 		let data = pass.func(nodes, env);
-		nodes=nodes.union(data.added).difference(data.removed);
+		if(data){
+			for(const node of Object.values(data.added)){
+				nodes[node.id]=node;
+				historicalNodes[node.id]=node;
+			}
+			for(const id of Object.keys(data.removed)) delete nodes[id];
+		}
 	}
 	return nodes;
 }
-Element.render = (env={}, elements, nodes)=>{
+Element.render = (elements, nodes, historicalNodes, env={})=>{
 	Object.assign(env,{
 		drawData:{
 			nodeToTexPos: n=>new Vector(0,0),
-			canvas: p5.canvas,
+			context: p5,
 			nodeSize: 0,
 			notifyTexture: _=>{},
 		},
@@ -46,30 +60,31 @@ Element.render = (env={}, elements, nodes)=>{
 	let passes=elements.map(e=>e.renderPasses).flat().toSorted((p1,p2)=>p1.order-p2.order);
 
 	for(let pass of passes){
-		// if(!(element instanceof Element)) element=element(nodes);
-		// //it can either be an element or a callable
-
-		pass.func(nodes, env);
+		pass.func(nodes, env, historicalNodes);
 	}
 }
-Element.applyAndRender = (env={},elements) => {
-	Element.render(env,elements,Element.apply(elements));
+Element.applyAndRender = (elements, applyEnv, renderEnv=applyEnv) => {
+	const historicalNodes = {};
+	Element.render(elements, Element.apply(elements, applyEnv, historicalNodes), historicalNodes, renderEnv);
 }
 
 class ApplyData{
 	constructor({added=[],removed=[]}={}){
-		this.added=new Set(added);
-		this.removed=new Set(removed);
+		this.added={};
+		for(const node of added) this.added[node.id]=node;
+		this.removed={};
+		for(const node of removed) this.removed[node.id]=node;
 	}
 	add(node){
-		this.added.add(node);
+		this.added[node.id]=node;
 		return this;
 	}
 	remove(node){
-		this.removed.add(node);
+		this.removed[node.id]=node;
 		return this;
 	}
 }
 
 export default Element;
-export {Element, Pass, ApplyData};
+export {Element, Pass, ApplyData,
+	SelectableElement};

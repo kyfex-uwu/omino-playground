@@ -48,7 +48,7 @@ new p5(p5=>{
             }, 
             3:{}
           }
-        },9,new RectOrientation(1)),
+        },2,new RectOrientation(2)),
       ]
     })});
     data.isFullscreened=pageData.fullscreen;
