@@ -1,6 +1,6 @@
 /** Board Length Calculator
  * This file calculates the longest optimal length for any board,
- * hopefully it's commented well enough 
+ * hopefully it's commented well enough
  */
 
 //recursive function that returns all tiles that are all connected
@@ -38,7 +38,7 @@ function propagateDist(tile, dist=0, tilesToProcess){
 }
 
 /** back and forth algorithm
- * 
+ *
  * 1. pick any tile in a group of connected tiles, this is the current tile
  * 2. define some tile that DOES NOT EXIST (for now, you'll see why later), this is the previous tile
  * 3. get the farthest points away from the current tile, this is list F (farthest)
@@ -97,7 +97,7 @@ function findLongestShortest(currPoint, pool, maybePaths, data={}){
 //the main function
 /** data param format: one object with these properties
  * ? suffix means optional
- * 
+ *
  * startPoint?: a node identifier
  * endPoint?: a node identifier
  * nodes: an array of arrays:

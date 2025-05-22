@@ -32,7 +32,7 @@ class BoardContainer extends DimsScene{
   mouseDown(x,y){
     if(!this.isIn()) return false;
     this.dragging={
-      orig:new Vector(x,y), 
+      orig:new Vector(x,y),
       curr:new Vector(x,y),
       delta:new Vector(0,0),
     };
@@ -58,7 +58,7 @@ class BoardContainer extends DimsScene{
   }
   apply(){
     this.applyData.historicalNodes = {};
-    this.applyData.nodes = Element.apply(this.parent.board.elements, 
+    this.applyData.nodes = Element.apply(this.parent.board.elements,
       this.env, this.applyData.historicalNodes);
   }
   render(){
@@ -69,7 +69,6 @@ class BoardContainer extends DimsScene{
     }
 
     this.setEnv();
-    console.log(Object.keys(this.applyData.nodes).length)
     Element.render(this.parent.board.elements,this.applyData.nodes,this.applyData.historicalNodes,this.env);
 
     if(this.parent.cursor.heldElement){

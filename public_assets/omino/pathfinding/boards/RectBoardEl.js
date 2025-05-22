@@ -49,6 +49,7 @@ export default class RectBoardEl extends Element{
 				return toReturn;
 			}),
 			new Pass(1020, (nodes,env)=>{//recalc board if changed
+				//not sure what this even does
 
 				let newPrev = [...env.board.elements];
 
@@ -86,7 +87,7 @@ export default class RectBoardEl extends Element{
 
 				for(const node of Object.values(nodes)){
 					let pos = env.drawData.nodeToTexPos(node);
-					env.drawData.context.rect((pos.x/size+0.1)*size, (pos.y/size+0.1)*size, 
+					env.drawData.context.rect((pos.x/size+0.1)*size, (pos.y/size+0.1)*size,
 						size*0.8, size*0.8,size*0.1);
 				}
 			}),
@@ -114,7 +115,7 @@ export default class RectBoardEl extends Element{
 					env.drawData.context.pop();
 				}
 				env.drawData.context.endClip();
-				background("board.pathColor", env.drawData.context);	
+				background("board.pathColor", env.drawData.context);
 				env.drawData.context.pop();
 
 				fill("board.text", env.drawData.context);

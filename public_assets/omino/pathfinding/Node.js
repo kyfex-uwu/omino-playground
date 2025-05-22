@@ -1,7 +1,7 @@
 
 /**
  * Wrapper for a connection and the "other" node
- * 
+ *
  * This is meant to be attached to a Node, and the "node" field
  * of this object is the other node in the connection between
  * the two nodes
@@ -32,13 +32,13 @@ class Connection{
 		this.o1from2 = (node2Orientation, otherOClass)=>
 			node2Orientation.getOtherOrientation(this.direc2, this.direc1, otherOClass);
 
-		if(node1.connections[direc1]) 
+		if(node1.connections[direc1])
 			node1.connections[direc1].connection.disconnect();
-		if(node2.connections[direc2]) 
+		if(node2.connections[direc2])
 			node2.connections[direc2].connection.disconnect();
-		if(node1.historicalConnections[direc1]) 
+		if(node1.historicalConnections[direc1])
 			node1.historicalConnections[direc1].connection.disconnect();
-		if(node2.historicalConnections[direc2]) 
+		if(node2.historicalConnections[direc2])
 			node2.historicalConnections[direc2].connection.disconnect();
 
 		node1.connections[direc1]=this.wrapper1;
@@ -52,9 +52,9 @@ class Connection{
 		delete this.node2.connections[this.direc2];
 	}
 	calcOtherOrientation(node, orientation){
-		if(node==this.node1) return this.o2from1(orientation, 
+		if(node===this.node1) return this.o2from1(orientation,
 			this.node2.defaultOrientation.constructor);
-		if(node==this.node2) return this.o1from2(orientation, 
+		if(node===this.node2) return this.o1from2(orientation,
 			this.node1.defaultOrientation.constructor);
 	}
 }
