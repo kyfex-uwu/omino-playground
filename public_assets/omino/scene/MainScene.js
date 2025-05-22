@@ -1,127 +1,136 @@
 import Vector from "/assets/omino/Vector.js";
-import {Scene, DimsScene, focus, hover} from "/assets/omino/scene/Scene.js";
+import {DimsScene, focus, hover, Scene} from "/assets/omino/scene/Scene.js";
 import OptionsScene from "/assets/omino/scene/OptionsScene.js";
-import Data from "/assets/omino/Main.js";
-import {fill, stroke, background, getColor} from "/assets/omino/Colors.js";
+import {background} from "/assets/omino/Colors.js";
 import Element from "/assets/omino/pathfinding/elements/Element.js";
 
-class BoardContainer extends DimsScene{
-  constructor(parent){
-    super();
-    this.parent=parent;
-    this.parent.board.elementsListeners.push(_=>this.onElementsChange());
+class BoardContainer extends DimsScene {
+    constructor(parent) {
+        super();
+        this.parent = parent;
+        this.parent.board.elementsListeners.push(_ => this.onElementsChange());
 
-    this.dragging=false;
-    this.lastPos=false;
-    this.shouldUnhold=false;
+        this.dragging = false;
+        this.lastPos = false;
+        this.shouldUnhold = false;
 
-    this.env={};
-    this.setEnv();
-    this.applyData={};
-    this.apply();
-  }
-  resized(oldDims,newDims=oldDims){
-    let size=Math.min(newDims.x/2,newDims.y);
-    this.dims = new Vector(size,size);
-    this.pos = new Vector((newDims.x-size)/2,0);
-  }
-  mouseUp(x,y){
-    this.clicked=this.dragging?this.dragging.orig.distTo(this.dragging.curr)<0.1:true;
-    this.dragging=false;
-  }
-  mouseDown(x,y){
-    if(!this.isIn()) return false;
-    this.dragging={
-      orig:new Vector(x,y),
-      curr:new Vector(x,y),
-      delta:new Vector(0,0),
-    };
-    return true;
-  }
-
-  onElementsChange(){ this.apply(); }
-  setEnv(){
-    let newEnv = {
-      container:this,
-      board:this.parent.board,
-      mouse:{
-        dragging:this.dragging,
-        clicked:this.clicked,
-        pos:new Vector(p5.mouseX, p5.mouseY),
-      },
-      cursor:this.parent.cursor
-    };
-    Object.assign(this.env,newEnv);
-  }
-  unHold(){
-    this.shouldUnhold=true;
-  }
-  apply(){
-    this.applyData.historicalNodes = {};
-    this.applyData.nodes = Element.apply(this.parent.board.elements,
-      this.env, this.applyData.historicalNodes);
-  }
-  render(){
-    if(this.dragging){
-      let pos=new Vector(p5.mouseX,p5.mouseY).sub(this.pos);
-      this.dragging.delta=pos.sub(this.dragging.curr);
-      this.dragging.curr=pos;
+        this.env = {};
+        this.setEnv();
+        this.applyData = {};
+        this.apply();
     }
 
-    this.setEnv();
-    Element.render(this.parent.board.elements,this.applyData.nodes,this.applyData.historicalNodes,this.env);
-
-    if(this.parent.cursor.heldElement){
-      this.parent.cursor.heldElement.drawAtMouse(this.applyData.nodes, this.env, this.applyData.historicalNodes);
-    }
-    if(this.shouldUnhold){
-      this.parent.cursor.heldElement=undefined;
-      this.shouldUnhold=false;
+    resized(oldDims, newDims = oldDims) {
+        let size = Math.min(newDims.x / 2, newDims.y);
+        this.dims = new Vector(size, size);
+        this.pos = new Vector((newDims.x - size) / 2, 0);
     }
 
-    this.clicked=false;
-  }
+    mouseUp(x, y) {
+        this.clicked = this.dragging ? this.dragging.orig.distTo(this.dragging.curr) < 0.1 : true;
+        this.dragging = false;
+    }
+
+    mouseDown(x, y) {
+        if (!this.isIn()) return false;
+        this.dragging = {
+            orig: new Vector(x, y),
+            curr: new Vector(x, y),
+            delta: new Vector(0, 0),
+        };
+        return true;
+    }
+
+    onElementsChange() {
+        this.apply();
+    }
+
+    setEnv() {
+        let newEnv = {
+            container: this,
+            board: this.parent.board,
+            mouse: {
+                dragging: this.dragging,
+                clicked: this.clicked,
+                pos: new Vector(p5.mouseX, p5.mouseY),
+            },
+            cursor: this.parent.cursor
+        };
+        Object.assign(this.env, newEnv);
+    }
+
+    unHold() {
+        this.shouldUnhold = true;
+    }
+
+    apply() {
+        this.applyData.historicalNodes = {};
+        this.applyData.nodes = Element.apply(this.parent.board.elements,
+            this.env, this.applyData.historicalNodes);
+    }
+
+    render() {
+        if (this.dragging) {
+            let pos = new Vector(p5.mouseX, p5.mouseY).sub(this.pos);
+            this.dragging.delta = pos.sub(this.dragging.curr);
+            this.dragging.curr = pos;
+        }
+
+        this.setEnv();
+        Element.render(this.parent.board.elements, this.applyData.nodes, this.applyData.historicalNodes, this.env);
+
+        if (this.parent.cursor.heldElement) {
+            this.parent.cursor.heldElement.drawAtMouse(this.applyData.nodes, this.env, this.applyData.historicalNodes);
+        }
+        if (this.shouldUnhold) {
+            this.parent.cursor.heldElement = undefined;
+            this.shouldUnhold = false;
+        }
+
+        this.clicked = false;
+    }
 }
 
-class MainScene extends Scene{
-  constructor({board}={}){
-    super();
+class MainScene extends Scene {
+    constructor({board} = {}) {
+        super();
 
-    this.board=board;
+        this.board = board;
 
-    this.cursor={
-      heldElement:undefined,
-    };
+        this.cursor = {
+            heldElement: undefined,
+        };
 
-    this.optionsScene = this.addScene(new OptionsScene());
-    this.boardContainer = this.addScene(new BoardContainer(this));
-  }
-  // drawButton(clickFunc, hoverText){
-  //   return s=>{
-  //     fill(s.isIn()?"scenes.buttons.light.bgHover":"scenes.buttons.light.bg");
-  //     p5.rect(0,0,s.dims.x,s.dims.y, Math.min(s.dims.x,s.dims.y)*0.1);
+        this.optionsScene = this.addScene(new OptionsScene());
+        this.boardContainer = this.addScene(new BoardContainer(this));
+    }
 
-  //     p5.push();
-  //     p5.translate(s.dims.x/2,s.dims.y/2);
-  //     p5.scale((s.dims.x+s.dims.y)*0.01);
-  //     clickFunc(s);
-  //     p5.pop();
+    // drawButton(clickFunc, hoverText){
+    //   return s=>{
+    //     fill(s.isIn()?"scenes.buttons.light.bgHover":"scenes.buttons.light.bg");
+    //     p5.rect(0,0,s.dims.x,s.dims.y, Math.min(s.dims.x,s.dims.y)*0.1);
 
-  //     if(hoverText&&s.isIn()) hover.set(hoverText, s);
-  //   };
-  // }
+    //     p5.push();
+    //     p5.translate(s.dims.x/2,s.dims.y/2);
+    //     p5.scale((s.dims.x+s.dims.y)*0.01);
+    //     clickFunc(s);
+    //     p5.pop();
 
-  render(){
-    background("bg");
-    super.render();
-    hover.draw();
-  }
+    //     if(hoverText&&s.isIn()) hover.set(hoverText, s);
+    //   };
+    // }
 
-  mouseUp(x, y){
-    focus(this);
+    render() {
+        background("bg");
+        super.render();
+        hover.draw();
+    }
 
-    return super.mouseUp(x, y);
-  }
+    mouseUp(x, y) {
+        focus(this);
+
+        return super.mouseUp(x, y);
+    }
 }
 
 export default MainScene;
