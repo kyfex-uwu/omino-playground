@@ -23,16 +23,21 @@ class Board{
     this.path = filledInOptions.path;//list of ids
     this.shouldRecalcPath=filledInOptions.calcPath;
     this.recalcPath();
+
+    this.elementsListeners=[];
   }
   
   add(element){
     this.elements.push(element);
+    for(const l of this.elementsListeners) l(this);
     this.recalcPath();
   }
   remove(element){
-    if(this.elements.includes(element))
+    if(this.elements.includes(element)){
+      for(const l of this.elementsListeners) l(this);
       this.elements.splice(this.elements.indexOf(element),1);
-    this.recalcPath();
+      this.recalcPath();
+    }
   }
   
   getNodes(){

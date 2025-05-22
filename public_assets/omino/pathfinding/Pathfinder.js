@@ -158,14 +158,13 @@ async function calcLength(data){
 		//if neither are specified (raagh)
 		}else{
 			let didCheck=false;
+			let bottleneckSize = Math.min.apply(null,pool.map(n=>n.connections.length).filter(s=>s>0));
 			for(const tile of pool){
-				//do some checking, more can be done
-
-				//check if tile is on a wall
-				//if(!method.isTileOnWall(tile)) continue;
+				//check if tile is at the bottleneck size
+				if(tile.connections.length!=bottleneckSize) continue;
 
 				didCheck=true;
-				findLongestShortest(tile, pool, maybePaths, {startFixed:true});
+				findLongestShortest(tile, pool, maybePaths);
 			}
 
 			if(!didCheck) findLongestShortest(pool[0], pool, maybePaths);
@@ -176,7 +175,7 @@ async function calcLength(data){
 	else return maybePaths.sort((p1,p2)=>p2.length-p1.length)[0].map(p=>p.name);
 }
 
-//-- unnecessary communication stuff below here
+//-- communication stuff below here
 
 let safePostMessage = postMessage;
 function fake(newPostMessage){

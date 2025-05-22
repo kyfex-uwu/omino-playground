@@ -12,12 +12,13 @@ class RectOrientation extends Orientation{
 
 	getOtherOrientation(thisDirec, otherDirec, otherClass){
 		switch(otherClass){
-		case RectOrientation:
-			return new RectOrientation((otherDirec-thisDirec+2+this.orientation +8)%4)
-
-			//return new RectOrientation((this.orientation+(thisDirec-otherDirec+2) +8)%4);
+		case RectOrientation:{
+			if(Number.isInteger(otherDirec))
+				return new RectOrientation((otherDirec-thisDirec+2+this.orientation +8)%4);
+			break;
+			}
 		}
-		throw Orientation.otherClassNotImpl(RectOrientation, otherClass);	
+		return super.getOtherOrientation(thisDirec,otherDirec,otherClass);
 	}
 }
 RectOrientation.default = new RectOrientation(0);

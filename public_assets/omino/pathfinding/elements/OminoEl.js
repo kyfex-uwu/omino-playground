@@ -42,8 +42,6 @@ class OminoEl extends SelectableElement{
 		this.root=root;
 		this.orientation=orientation;
 
-		this.onMouse=false;
-
 		this.nodes=[];
 
 		//note: this assumes the omino is in a valid spot!! it will not check if it can it just does
@@ -141,9 +139,9 @@ class OminoEl extends SelectableElement{
 		if(env.mouse.clicked){
 			let cellPos = env.mouse.pos.sub(env.container.getAbsolutePos())
 				.sub(this.onMouse||new Vector(0,0)).scale(1/env.drawData.nodeSize).floor();
-				console.log(cellPos.toString());
 
 			let newRoot = Object.values(nodes).find(n=>n.custom.pos.equals(cellPos));
+			if(newRoot==undefined) return false;
 			newRoot=newRoot.id;
 
 			if(this.checkValid(newRoot,nodes)){

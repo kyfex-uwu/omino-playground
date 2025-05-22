@@ -1,14 +1,10 @@
 import {ScrollableScene, OneTimeButtonScene, Scene, DimsScene,
   focus, hover, isKindaMobile} from "/assets/omino/scene/Scene.js";
-import TextInputScene from "/assets/omino/scene/utils/TextInputScene.js";
-import TickboxScene from "/assets/omino/scene/utils/TickboxScene.js";
 import SettingsContainerScene from "/assets/omino/scene/settings/SettingsContainerScene.js";
 import Vector from "/assets/omino/Vector.js";
 import Data from "/assets/omino/Main.js";
 import {pageData, toLink} from "/assets/omino/Options.js";
-import MobileKeyboard from "/assets/omino/scene/utils/MobileKeyboard.js";
 import {fill, stroke, background} from "/assets/omino/Colors.js";
-import {OptionsHolder, OptionsElement} from "/assets/omino/scene/OptionsHolder.js";
 
 //--
 
@@ -91,68 +87,11 @@ class ShareImageScene extends Scene{
     this.mainScene.resized(oldDims, newDims);
   }
 }
-class Counter extends DimsScene{
-  constructor(val, {min=-Infinity,max=Infinity,inc=1, submit=_=>0}){
-    super();
 
-    this.min=min;
-    this.max=max;
-    this.inc=inc;
-
-    this.value=val;
-    this.oldValue=val;
-
-    this.submit = submit;
-  }
-  render(){
-    if(this.value==this.oldValue) fill("scenes.util.counter.bg");
-    else fill("scenes.util.counter.bgUnsaved");
-
-    p5.rect(0,0,this.dims.x-this.dims.y*2,this.dims.y);
-    fill("scenes.util.counter.bg");
-    p5.rect(this.dims.x-this.dims.y*1.9, this.dims.y*0.1, this.dims.y*0.8, this.dims.y*0.8);
-    p5.rect(this.dims.x-this.dims.y*0.9, this.dims.y*0.1, this.dims.y*0.8, this.dims.y*0.8);
-    fill("scenes.util.counter.color");
-    p5.textSize(this.dims.y*0.9);
-    p5.textAlign(p5.LEFT, p5.TOP);
-    p5.text(this.value, this.dims.y*0.1,this.dims.y*0.05);
-
-    p5.push();
-    stroke("scenes.util.counter.color");
-    p5.strokeWeight(this.dims.y*0.04);
-    p5.translate(this.dims.x-this.dims.y*2, 0);
-    p5.scale(this.dims.y/10);
-    p5.line(3,7,5,3);
-    p5.line(7,7,5,3);
-    p5.translate(10, 0);
-    p5.line(3,3,5,7);
-    p5.line(7,3,5,7);
-
-    p5.pop();
-  }
-
-  mouseUp(x, y){
-    if(!this.isIn()) return super.mouseUp(x,y);
-
-    if(x>this.dims.x-this.dims.y) this.value-=this.inc;
-    else if(x>this.dims.x-this.dims.y*2) this.value+=this.inc;
-
-    this.value=Math.min(Math.max(this.value, this.min), this.max);
-
-    focus(this);
-
-    return true;
-  }
-
-  keyPressed(key){
-    if(this.focused&&key=="Enter"){
-      this.submit();
-      return true;
-    }
-    return super.keyPressed(key);
-  }
-}
-
+const barButtonWrapper = s=>{
+  fill(s.isIn()?"scenes.buttons.dark.bgHover":"scenes.buttons.dark.bg");
+  p5.rect(0,0,s.dims.x,s.dims.y,(s.dims.x+s.dims.y)*0.1);
+};
 class Bar extends DimsScene{
   constructor(...subScenes){
     super();
@@ -166,118 +105,38 @@ class Bar extends DimsScene{
   }
 }
 
-class CustomOptionsHolder extends OptionsHolder{
-  resized(oldDims, newDims=oldDims){
-    const scale = this.parent.getScale();
-    const padding=scale*3;
-    p5.textSize(scale*6);
-
-    let currY=0;
-    for(const child of this.subScenes){
-      child.optionsResize(padding, currY, this.dims.x-padding*2, scale*6);
-      currY+=child.dims.y+scale*5;
-    }
-
-    return super.resized(oldDims, newDims);
+class OptionsHolder extends ScrollableScene{
+  constructor(){
+    super({min:0});
+  }
+  recalcSize(){
+    this.scrollLimits.max=Math.max.apply(null,this.subScenes.map(s=>s.pos.add(s.dims).y));
+  }
+  addScene(scene){
+    let toReturn = super.addScene(scene);
+    this.resized(new Vector(p5.width,p5.height));
+    this.recalcSize();
+    return toReturn;
   }
 }
 
-function withLabel(label, element, setDims=(s,w,h)=>s.element.dims = new Vector(w,h)){
-  return new OptionsElement(s=>{
-    s.element = s.addScene(element);
-  },(s,x,y,w,h)=>{
-    s.pos = new Vector(x,y);
-
-    p5.textSize(h*0.9);
-    s.element.pos = new Vector(p5.textWidth(label+"m"),0);
-    setDims(s,w-s.element.pos.x,h);
-
-    s.dims = new Vector(w,h);
-  },s=>{
-    p5.textSize(s.dims.y*0.9);
-    fill("scenes.util.text");
-    p5.textAlign(p5.LEFT,p5.CENTER);
-    p5.text(label, 0, s.dims.y/2);
-  });
+class Setting extends DimsScene{
+  constructor({label="",type="dummy",data={},callback=_=>0}={}){
+    super();
+    this.label=label;
+    
+  }
 }
 
-const barButtonWrapper = s=>{
-  fill(s.isIn()?"scenes.buttons.dark.bgHover":"scenes.buttons.dark.bg");
-  p5.rect(0,0,s.dims.x,s.dims.y,(s.dims.x+s.dims.y)*0.1);
-};
 class OptionsScene extends DimsScene{
   constructor(){
     super();
     this.pos.z=10;
 
-    this.options = this.addScene(new CustomOptionsHolder());
+    //the thing that holds everything
+    this.options = this.addScene(new OptionsHolder());
 
-    const submit = _=>Data.scene.optionsScene.applyButton.click(0,0);
-
-    this.applyButton = new OneTimeButtonScene(s=>{
-      fill(s.isIn()?"scenes.util.button.bgHover":"scenes.util.button.bg");
-      p5.rect(0,0,s.dims.x,s.dims.y);
-      p5.textSize(this.getScale()*6);
-      fill("scenes.util.button.color");
-      p5.textAlign(p5.CENTER, p5.CENTER);
-      p5.text("Apply", s.dims.x/2,s.dims.y/2);
-    },s=>{
-      if(!this.boardDims.valid()) return;
-      let dims = this.boardDims.value.split(/[,x]/).map(i=>parseInt(i));
-      if(isNaN(dims[0])||isNaN(dims[1])) return;
-
-      let newLocked = Data.mainBoard.lockedTiles.vectors.filter(v=>v.x<dims[0]&&v.y<dims[1]);
-
-      //TODO
-      let newBoard = new Board(dims[0], dims[1], {
-        lockedTiles:newLocked,
-        ominoes:[],
-        torusMode:this.torusBox.value,
-      });
-      for(const omino of Data.mainBoard.ominoes){
-        let pos = omino.canPlace(newBoard, omino.pos);
-        if(pos){
-          omino.pos = pos;
-          newBoard.add(omino);
-        }
-      }
-
-
-      Data.mainBoard.width = dims[0];
-      Data.mainBoard.height = dims[1];
-      Data.mainBoard.torusMode=this.torusBox.value;
-      Data.mainBoard.ominoes = newBoard.ominoes;
-      
-      Data.mainBoard.recalcPath();
-      if(Data.scene.paletteScene){
-        Data.scene.paletteScene.remove();
-
-        if(allPalettes[this.palette.value-1]){
-          Data.scene.paletteScene = Data.scene.addScene(new PaletteScene({palette:allPalettes[this.palette.value-1]}));
-        }else{
-          Data.scene.paletteScene = Data.scene.addScene(new PaletteScene({palette:nullPalette}));
-        }
-      }
-
-      this.boardDims.oldValue=this.boardDims.value;
-      this.palette.oldValue = this.palette.value;
-      this.torusBox.oldValue = this.torusBox.value;
-
-      p5.windowResized();
-    });
-    this.clearButton = new OneTimeButtonScene(s=>{
-      fill(s.isIn()?"scenes.util.button.bgHover":"scenes.util.button.bg");
-      p5.rect(0,0,s.dims.x,s.dims.y);
-      p5.textSize(this.getScale()*6);
-      fill("scenes.util.button.color");
-      p5.textAlign(p5.CENTER, p5.CENTER);
-      p5.text("Clear Board", s.dims.x/2,s.dims.y/2);
-    },s=>{
-      Data.mainBoard.ominoes=[];
-      Data.mainBoard.lockedTiles=new LockedOmino([]);
-      Data.mainBoard.recalcPath();
-    });
-
+    //bottom bar
     this.bottomBar = this.addScene(new Bar(
       new OneTimeButtonScene(s=>{
         barButtonWrapper(s);
@@ -338,6 +197,7 @@ class OptionsScene extends DimsScene{
       }),//share link
     ));
 
+    //top bar
     this.settingsBar = this.addScene(new Bar(
       new OneTimeButtonScene(s=>{
         barButtonWrapper(s);
@@ -415,12 +275,7 @@ class OptionsScene extends DimsScene{
     this.dims.y=n.y;
     this.dims.x=n.x/4;
 
-    this.offs-=this.settingsBar.dims.y;
-    this.offs*=n.x/old.x;
-
-    let scale = this.getScale();
-    let sbSize = Math.min(this.dims.x/3, scale*30);
-    this.offs+=this.settingsBar.dims.y==0?0:sbSize;
+    let sbSize = Math.min(this.dims.x/3, this.getScale()*30);
 
     this.settingsBar.dims = new Vector(this.dims.x, sbSize);
     this.settingsBar.subScenes[0].dims = new Vector(sbSize*0.8,sbSize*0.8);
@@ -451,9 +306,3 @@ class OptionsScene extends DimsScene{
 }
 
 export default OptionsScene;
-export {
-  OptionsScene,
-  Counter,
-  CustomOptionsHolder,
-  withLabel
-}

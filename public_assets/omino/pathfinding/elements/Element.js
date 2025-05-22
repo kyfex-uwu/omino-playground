@@ -12,11 +12,14 @@ class Element{
 		this.applyPasses=[];
 		this.renderPasses=[];
 	}
-	addSetting(){
-
-	}
+	settings(){ }
+	palette(){ }
 }
 class SelectableElement extends Element{
+	constructor(){
+		super();
+		this.onMouse=false;
+	}
 	isSelected(nodes,env,historicalNodes){
 		return false;
 	}
@@ -29,7 +32,9 @@ class SelectableElement extends Element{
 }
 
 Element.apply = (elements, env={}, historicalNodes={})=>{
-	env.elements=elements;
+	Object.assign(env,{
+		elements:elements
+	});
 	let nodes = {};
 
 	let passes=elements.map(e=>e.applyPasses).flat().toSorted((p1,p2)=>p1.order-p2.order);

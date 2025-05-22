@@ -90,10 +90,10 @@ export default class RectBoardEl extends Element{
 						size*0.8, size*0.8,size*0.1);
 				}
 			}),
-			new Pass(1000,(nodes,env)=>{//draws path
+			new Pass(1000,(nodes,env,historicalNodes)=>{//draws path
 				fill("board.grid", env.drawData.context);
 				let halfCell=env.drawData.nodeSize/2;
-				let positions = env.board.path.map(id=>nodes[id]).map(n=>
+				let positions = env.board.path.map(id=>historicalNodes[id]).map(n=>//todo: revert this back to just nodes
 					env.drawData.nodeToTexPos(n).add(halfCell,halfCell));
 				let size=env.drawData.nodeSize*0.1;
 
@@ -144,6 +144,25 @@ export default class RectBoardEl extends Element{
 				}
 			}),
 		];
+	}
+
+
+	settings(){
+		return [{
+			label: "Width",
+			type: "counter",
+			data: { min:1 },
+			callback: v=>{
+				this.width=v;
+			}
+		},{
+			label: "Height",
+			type: "counter",
+			data: { min:1 },
+			callback: v=>{
+				this.height=v;
+			}
+		}];
 	}
 
 	getNodePos(n,scale){ return n.custom.pos.scale(scale); }

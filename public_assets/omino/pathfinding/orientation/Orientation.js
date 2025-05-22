@@ -9,7 +9,9 @@ class Orientation{
 	//otherDirec: the absolute direction of the other node that this node is connecting to
 	//otherClass: the type of orientation that this function should return
 	//	(also the orientation that otherDirec is attached to)
-	getOtherOrientation(thisDirec, otherDirec, otherClass){}
+	getOtherOrientation(thisDirec, otherDirec, otherClass){
+		return otherDirec;
+	}
 	toString(){ return "Orientation{}"; }
 }
 Orientation.otherClassNotImpl = (thisClass,otherClass)=>

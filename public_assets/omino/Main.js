@@ -9,6 +9,7 @@ import events from "/assets/omino/Events.js";
 
 import RectBoardEl from "/assets/omino/pathfinding/boards/RectBoardEl.js";
 import OminoEl from "/assets/omino/pathfinding/elements/OminoEl.js";
+import PortalEl from "/assets/omino/pathfinding/elements/PortalEl.js";
 import RectOrientation from "/assets/omino/pathfinding/orientation/RectOrientation.js";
 
 //--
@@ -48,7 +49,19 @@ new p5(p5=>{
             }, 
             3:{}
           }
-        },2,new RectOrientation(2)),
+        },24,new RectOrientation(2)),
+        new OminoEl(
+        {
+          0:{
+            0:{
+              0:{
+                0:{},
+              },
+            },
+          },
+        },5,new RectOrientation(2)),
+        new PortalEl(0,"test"),
+        new PortalEl(4,"test"),
       ]
     })});
     data.isFullscreened=pageData.fullscreen;

@@ -9,10 +9,16 @@ class BoardContainer extends DimsScene{
   constructor(parent){
     super();
     this.parent=parent;
+    this.parent.board.elementsListeners.push(_=>this.onElementsChange());
 
     this.dragging=false;
     this.lastPos=false;
     this.shouldUnhold=false;
+
+    this.env={};
+    this.setEnv();
+    this.applyData={};
+    this.apply();
   }
   resized(oldDims,newDims=oldDims){
     let size=Math.min(newDims.x/2,newDims.y);
@@ -32,17 +38,10 @@ class BoardContainer extends DimsScene{
     };
     return true;
   }
-  unHold(){
-    this.shouldUnhold=true;
-  }
-  render(){
-    if(this.dragging){
-      let pos=new Vector(p5.mouseX,p5.mouseY).sub(this.pos);
-      this.dragging.delta=pos.sub(this.dragging.curr);
-      this.dragging.curr=pos;
-    }
 
-    let env={
+  onElementsChange(){ this.apply(); }
+  setEnv(){
+    let newEnv = {
       container:this,
       board:this.parent.board,
       mouse:{
@@ -52,10 +51,30 @@ class BoardContainer extends DimsScene{
       },
       cursor:this.parent.cursor
     };
-    let {nodes, historicalNodes} = Element.applyAndRender(this.parent.board.elements, env);
+    Object.assign(this.env,newEnv);
+  }
+  unHold(){
+    this.shouldUnhold=true;
+  }
+  apply(){
+    this.applyData.historicalNodes = {};
+    this.applyData.nodes = Element.apply(this.parent.board.elements, 
+      this.env, this.applyData.historicalNodes);
+  }
+  render(){
+    if(this.dragging){
+      let pos=new Vector(p5.mouseX,p5.mouseY).sub(this.pos);
+      this.dragging.delta=pos.sub(this.dragging.curr);
+      this.dragging.curr=pos;
+    }
 
-    if(this.parent.cursor.heldElement) 
-      this.parent.cursor.heldElement.drawAtMouse(nodes, env, historicalNodes);
+    this.setEnv();
+    console.log(Object.keys(this.applyData.nodes).length)
+    Element.render(this.parent.board.elements,this.applyData.nodes,this.applyData.historicalNodes,this.env);
+
+    if(this.parent.cursor.heldElement){
+      this.parent.cursor.heldElement.drawAtMouse(this.applyData.nodes, this.env, this.applyData.historicalNodes);
+    }
     if(this.shouldUnhold){
       this.parent.cursor.heldElement=undefined;
       this.shouldUnhold=false;
@@ -71,12 +90,12 @@ class MainScene extends Scene{
 
     this.board=board;
 
-    this.optionsScene = this.addScene(new OptionsScene());
-    this.boardContainer = this.addScene(new BoardContainer(this));
-
     this.cursor={
       heldElement:undefined,
     };
+
+    this.optionsScene = this.addScene(new OptionsScene());
+    this.boardContainer = this.addScene(new BoardContainer(this));
   }
   // drawButton(clickFunc, hoverText){
   //   return s=>{
