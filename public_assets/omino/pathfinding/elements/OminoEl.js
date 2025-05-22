@@ -1,6 +1,7 @@
 import {ApplyData, Pass, SelectableElement} from "/assets/omino/pathfinding/elements/Element.js";
 import {fill, stroke} from "/assets/omino/Colors.js";
 import Vector from "/assets/omino/Vector.js";
+import PortalEl from "/assets/omino/pathfinding/elements/PortalEl.js";
 
 /**
  *  ##
@@ -117,10 +118,23 @@ class OminoEl extends SelectableElement {
         return this.nodes.includes(id);
     }
 
-    checkValid(root, nodes) {
-        if (!Object.values(nodes).find(n => n.id == root)) return false;
-        return !!getNodes(Object.values(nodes).find(n => n.id == root).getView(this.orientation),
+    checkValid(root, nodes, env) {
+        const rootNode = Object.values(nodes).find(n => n.id === root);
+        if (!rootNode) return false;
+        const nodesToCheck = getNodes(rootNode.getView(this.orientation),
             this.connTree, nodes);
+        if(nodesToCheck!==false){
+            nodesToCheck.add(rootNode);
+
+            for(const portal of env.elements.filter(e => e instanceof PortalEl)){
+                for(const node of nodesToCheck){
+                    if(node.id === portal.root) return false;
+                }
+            }
+
+            return true;
+        }
+        return false;
     }
 
     isSelected(nodes, env, historicalNodes) {
@@ -149,7 +163,7 @@ class OminoEl extends SelectableElement {
             if (newRoot == undefined) return false;
             newRoot = newRoot.id;
 
-            if (this.checkValid(newRoot, nodes)) {
+            if (this.checkValid(newRoot, nodes, env)) {
                 this.root = newRoot;
                 this.onMouse = false;
                 return true;
