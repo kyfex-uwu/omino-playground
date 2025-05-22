@@ -42,7 +42,7 @@ class BoardContainer extends DimsScene {
     }
 
     onElementsChange() {
-        this.apply();
+        setTimeout(_=>this.apply(), 0);//alright
     }
 
     setEnv() {

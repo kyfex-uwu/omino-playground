@@ -48,8 +48,6 @@ Element.apply = (elements, env = {}, historicalNodes = {}) => {
     let passes = elements.map(e => e.applyPasses).flat().toSorted((p1, p2) => p1.order - p2.order);
 
     for (let pass of passes) {
-        // if(!(element instanceof Element)) element=element(nodes);
-        // //it can either be an element or a callable
 
         let data = pass.func(nodes, env);
         if (data) {
