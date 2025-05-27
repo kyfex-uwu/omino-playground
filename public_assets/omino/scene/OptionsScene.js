@@ -11,6 +11,9 @@ import Vector from "/assets/omino/Vector.js";
 import Data from "/assets/omino/Main.js";
 import {toLink} from "/assets/omino/Options.js";
 import {background, fill, stroke} from "/assets/omino/Colors.js";
+import {BoardContainer} from "/assets/omino/scene/MainScene.js";
+import Element from "/assets/omino/pathfinding/elements/Element.js";
+import settingsParser from "/assets/omino/scene/SettingsParser.js";
 
 //--
 
@@ -18,11 +21,8 @@ class ShareImageScene extends Scene {
     constructor(mainScene) {
         super();
         this.mainScene = mainScene;
-        this.mainDrawMouse = this.mainScene.boardScene.drawMouse;
-        this.mainScene.boardScene.drawMouse = false;
-        this.mainScene.hasMouseAccess = false;
 
-        this.board = this.mainScene.boardScene.board.clone();
+        this.board = new BoardContainer(mainScene);
     }
 
     render() {
@@ -42,38 +42,43 @@ class ShareImageScene extends Scene {
         p5.textAlign(p5.CENTER, p5.CENTER);
         p5.text("Click to copy", p5.width / 2, p5.height * 0.2 - p5.textSize() * 0.7);
 
-        this.board.renderData.scale =
-            Math.min(p5.width * 0.6 / this.board.width * 0.9, p5.height * 0.6 / this.board.height * 0.9);
+        const smallestDim = Math.min(p5.width * 0.6*0.9*2, p5.height * 0.6*0.9*2);
+        this.board.resized(new Vector(smallestDim,smallestDim));
+        p5.push();
         p5.translate(
-            p5.width * 0.2 + p5.width * 0.6 / 2 - (this.board.renderData.scale * this.board.width) / 2,
-            p5.height * 0.2 + p5.height * 0.6 / 2 - (this.board.renderData.scale * this.board.height) / 2);
-        this.board.render(new Vector(0, 0), {palette: this.mainScene.paletteScene.palette, mouse: false});
+            p5.width * 0.2 + p5.width * 0.6 / 2 - smallestDim/4,
+            p5.height * 0.2 + p5.height * 0.6 / 2 - smallestDim/4);
+        this.board.render();
+        p5.pop();
     }
 
     mouseUp() {
-        let canv = p5.createGraphics(this.board.width * 50 + 10, this.board.height * 50 + 10 + 15);
+        const canv = p5.createGraphics(510,510);
         canv.noStroke();
         background("scenes.share.bg", canv);
         canv.push();
         canv.translate(5, 5);
-        this.board.renderData.scale = 50;
-        this.board.render(new Vector(0, 0), {palette: this.mainScene.palette, env: canv});
+        this.board.resized(new Vector(1000,1000));
+        const oldP5=p5;
+        p5=canv;
+        this.board.render();
+        p5=oldP5;
         canv.pop();
 
-        fill("scenes.share.infoText", canv);
+        let infoText = Element.infoText(this.board.parent.board.elements);
         canv.textSize(15);
-        let infoText = `${this.board.width}x${this.board.height}`;
-        if (this.board.torusMode) infoText += " - Torus";
 
-        canv.textAlign(p5.RIGHT, p5.BOTTOM);
-        canv.text("https://kyfexuwu.com/omino-playground", canv.width - 6, canv.height - 2);
         fill("scenes.share.bg", canv);
-        canv.rect(0, canv.height - canv.textSize() - 2,
-            canv.textWidth(infoText + "n") + 6, canv.textSize() + 2);
+        canv.rect(0, canv.height - canv.textSize()-4,
+            canv.textWidth(infoText + "n"), canv.textSize() + 4);
+        canv.rect(canv.width - canv.textWidth("https://kyfexuwu.com/omino-playground"+"n"), canv.height - canv.textSize()-4,
+            canv.width, canv.textSize() + 4);
 
         fill("scenes.share.infoText", canv);
         canv.textAlign(p5.LEFT, p5.BOTTOM);
         canv.text(infoText, 6, canv.height - 2);
+        canv.textAlign(p5.RIGHT, p5.BOTTOM);
+        canv.text("https://kyfexuwu.com/omino-playground", canv.width - 4, canv.height - 2);
 
         canv.elt.toBlob(blob => {
             navigator.clipboard.write([
@@ -82,12 +87,10 @@ class ShareImageScene extends Scene {
                 })
             ]);
             canv.remove();
-            canv = undefined;
         });
 
         Data.scene = this.mainScene;
         this.mainScene.hasMouseAccess = true;
-        this.mainScene.boardScene.drawMouse = this.mainDrawMouse;
         return true;
     }
 
@@ -117,37 +120,68 @@ class Bar extends DimsScene {
 }
 
 class OptionsHolder extends ScrollableScene {
-    constructor() {
+    constructor(board) {
         super({min: 0});
+
+        this.submit = this.addScene(new OneTimeButtonScene(self => {
+            fill("scenes.util.button."+(self.isIn()?"bgHover":"bg"));
+            p5.rect(0,0,self.dims.x, self.dims.y);
+            fill("scenes.util.button.color");
+            p5.textSize(self.dims.y*0.9);
+            p5.textAlign(p5.CENTER, p5.CENTER);
+            p5.text("Submit", self.dims.x/2,self.dims.y/2);
+        },(self, x, y) => {
+            for(const setting of this.settings){
+                setting.submit();
+            }
+        }));
+
+        this.settings=[];
+        this.board=board;
+        this.board.elementsListeners.push(_ => this.recalcSettings());
+        setTimeout(_=>this.recalcSettings(),0);//top 10 worst things ever: using setTimeout to fix your problems
+    }
+
+    resized(oldDims, newDims=oldDims) {
+        p5.textSize(newDims.x*0.1);
+        this.submit.dims = new Vector(p5.textWidth("nSubmitn"), newDims.x*0.12);
+
+        super.resized(oldDims, newDims);
+        this.recalcSize();
     }
 
     recalcSize() {
+        let y=0;
+        for(const setting of this.settings){
+            setting.pos = new Vector(0,y);
+            y+=setting.dims.y;
+        }
+        this.submit.pos = new Vector((this.dims.x-this.submit.dims.x)/2,y+this.dims.x*0.1);
         this.scrollLimits.max = Math.max.apply(null, this.subScenes.map(s => s.pos.add(s.dims).y));
     }
 
-    addScene(scene) {
-        let toReturn = super.addScene(scene);
-        this.resized(new Vector(p5.width, p5.height));
-        this.recalcSize();
-        return toReturn;
-    }
-}
+    recalcSettings(){
+        this.subScenes=[];
+        this.settings=[];
+        for(const el of this.board.elements){
+            const toAdd = (el.settings()||[]).map(setting => settingsParser(setting));
+            for(const add of toAdd)
+                this.addScene(add,false);
+            this.settings.push(...toAdd);
+        }
+        this.addScene(this.submit);
 
-class Setting extends DimsScene {
-    constructor({label = "", type = "dummy", data = {}, callback = _ => 0} = {}) {
-        super();
-        this.label = label;
-
+        this.resized(this.dims);
     }
 }
 
 class OptionsScene extends DimsScene {
-    constructor() {
+    constructor(board) {
         super();
         this.pos.z = 10;
 
         //the thing that holds everything
-        this.options = this.addScene(new OptionsHolder());
+        this.options = this.addScene(new OptionsHolder(board));
 
         //bottom bar
         this.bottomBar = this.addScene(new Bar(
@@ -288,8 +322,8 @@ class OptionsScene extends DimsScene {
     }
 
     resized(old, n = old) {
-        this.dims.y = n.y;
-        this.dims.x = n.x / 4;
+        const oldDims = this.dims;
+        this.dims = new Vector(n.x/4, n.y);
 
         let sbSize = Math.min(this.dims.x / 3, this.getScale() * 30);
 
@@ -310,7 +344,7 @@ class OptionsScene extends DimsScene {
         this.bottomBar.subScenes[1].dims = new Vector(sbSize * 0.8, sbSize * 0.8);
         this.bottomBar.subScenes[1].pos = new Vector(this.dims.x / 2 - sbSize - sbSize * 0.1, sbSize * 0.1);
 
-        super.resized(old, n);
+        super.resized(oldDims, this.dims);
     }
 
     render() {

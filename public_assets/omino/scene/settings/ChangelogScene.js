@@ -1,5 +1,8 @@
 const changelog = [
-    `v0.2.8 xxx
+    `v1.0.0 xxx
+- Overhauled everything; a lot of features are gone
+- added portals!
+    v0.2.8 (unreleased)
 - Fixed the settings menu so it looks better and works with colorfiles
 - Updated the default colorfile
 - Moved the changelog into settings

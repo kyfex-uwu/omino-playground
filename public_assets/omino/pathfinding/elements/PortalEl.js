@@ -3,12 +3,13 @@ import {fill} from "/assets/omino/Colors.js";
 import Vector from "/assets/omino/Vector.js";
 
 const portalDir = "portalEl-dir";
+const colors="ILYWVTPNFXZU".split("");
 
 class PortalEl extends SelectableElement {
     constructor(root, id) {
         super();
         this.root = root;
-        this.id = id;
+        this.setId(id);
 
         this.applyPasses = [new Pass(0, (nodes, env) => {
             let selfNode = nodes[this.root].getView();
@@ -22,6 +23,20 @@ class PortalEl extends SelectableElement {
         })];
         this.renderPasses = [new Pass(0, (...args) => this.draw(...args))];
     }
+    setId(newId){
+        this.id=newId;
+        this.hashColor = this.idToColor();
+    }
+    idToColor(){
+        let hash = 0;
+        for (let i = 0; i < this.id.length; i++) {
+            let chr = this.id.charCodeAt(i);
+            hash = ((hash << 5) - hash) + chr;
+            hash |= 0;
+        }
+
+        return colors[hash%colors.length];
+    }
 
     draw(nodes, env) {
         let size = env.drawData.nodeSize;
@@ -33,7 +48,7 @@ class PortalEl extends SelectableElement {
             //.add(nodes[this.root].custom.pos.scale(env.drawData.nodeSize));
         }
 
-        fill("ominoColors.I", env.drawData.context);
+        fill("ominoColors."+this.hashColor, env.drawData.context);
         env.drawData.context.ellipse(pos.x, pos.y, size * 0.88);
         for (let i = (p5.frameCount * 0.01) % 1; i < 3; i++) {
             env.drawData.context.fill(255, i * 50);

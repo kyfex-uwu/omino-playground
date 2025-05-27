@@ -3,6 +3,7 @@ import {fill} from "/assets/omino/Colors.js";
 
 class InnerDropdown extends DimsScene {
     constructor(parent) {
+        super();
         this.parent = parent;
     }
 

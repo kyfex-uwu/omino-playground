@@ -17,8 +17,7 @@ class SolveScene extends MainScene {
         super({
             optionsData: {
                 locked: false,
-            },
-            drawMouse: true,
+            }
         });
 
         let highlights = {

@@ -14,60 +14,40 @@ export default class RectBoardEl extends Element {
         this.width = width;
         this.height = height;
 
-        this.lastElements = [];
+        this.currId=0;
+        this.board=[];
+        this.addRow(this.height);
+        this.addColumn(this.width);
 
         this.applyPasses = [
             new Pass(-1000, (nodes, env) => {//generate nodes
                 const toReturn = new ApplyData();
-
-                let currNodeId = 0;
 
                 let currRowNode;
                 for (let y = 0; y < this.height; y++) {
                     let leftView;
                     for (let x = 0; x < this.width; x++) {
                         let node = new Node(RectOrientation.default);
-                        node.id = currNodeId++;
+                        node.id = this.board[y][x];
                         node.custom.pos = new Vector(x, y);
                         toReturn.add(node);
 
                         let nodeView = node.getView(RectOrientation.default);
-                        if (x != 0) {
+                        if (x !== 0) {
                             nodeView.connectNode(3, 1, leftView.node);
 
-                            if (y != 0) {
+                            if (y !== 0) {
                                 nodeView.connectNode(0, 2, leftView.get(0).getNode(1));
                             }
-                        } else if (y != 0) {
+                        } else if (y !== 0) {
                             nodeView.connectNode(0, 2, currRowNode);
                         }
-                        if (x == 0) currRowNode = node;
+                        if (x === 0) currRowNode = node;
                         leftView = nodeView;
                     }
                 }
 
                 return toReturn;
-            }),
-            new Pass(1020, (nodes, env) => {//recalc board if changed
-                //not sure what this even does
-
-                let newPrev = [...env.board.elements];
-
-                let same = true;
-                if (newPrev.length != this.lastElements.length) same = false;
-                else {
-                    for (let i = 0; i < newPrev.length; i++) {
-                        if (newPrev[i] != this.lastElements[i]) {
-                            same = false;
-                            break;
-                        }
-                    }
-                }
-
-                if (!same) {
-                    this.lastElements = newPrev;
-                    env.board.recalcPath();
-                }
             }),
         ];
 
@@ -150,23 +130,68 @@ export default class RectBoardEl extends Element {
 
     settings() {
         return [{
-            label: "Width",
             type: "counter",
-            data: {min: 1},
-            callback: v => {
-                this.width = v;
+            label: "Width",
+            data: {
+                min: 1,
+                value: this.width,
+                submit: v => {
+                    this.addColumn(v-this.width);
+                    this.width = v;
+                    this.needsUpdate=true;
+                    return true;
+                }
             }
         }, {
-            label: "Height",
             type: "counter",
-            data: {min: 1},
-            callback: v => {
-                this.height = v;
+            label: "Height",
+            data: {
+                min: 1,
+                value: this.height,
+                submit: v => {
+                    this.addRow(v-this.height);
+                    this.height = v;
+                    this.needsUpdate=true;
+                    return true;
+                }
             }
         }];
+    }
+    addRow(count=1){
+        if(count<0) return this.subRow(-count);
+        for(;count>0;count--) {
+            let toAdd = [];
+            for (let i = 0; i < this.width; i++)
+                toAdd.push(this.currId++);
+            this.board.push(toAdd);
+        }
+    }
+    addColumn(count=1){
+        if(count<0) return this.subColumn(-count);
+        for(;count>0;count--) {
+            for (let i = 0; i < this.height; i++)
+                this.board[i].push(this.currId++);
+        }
+    }
+    subRow(count=1){
+        if(count<0) return this.addRow(-count);
+        for(;count>0;count--) {
+            this.board.pop();
+        }
+    }
+    subColumn(){
+        if(count<0) return this.addColumn(-count);
+        for(;count>0;count--) {
+            for(let i=0;i<this.width;i++)
+                this.board[i].pop();
+        }
     }
 
     getNodePos(n, scale) {
         return n.custom.pos.scale(scale);
+    }
+
+    infoTextPass(){
+        return `${this.width}x${this.height}`;
     }
 }

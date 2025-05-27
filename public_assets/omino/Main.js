@@ -64,8 +64,8 @@ new p5(p5 => {
                                 },
                             },
                         }, 5, new RectOrientation(2)),
-                    new PortalEl(0, "test"),
-                    new PortalEl(4, "test"),
+                    new PortalEl(0, "meow"),
+                    new PortalEl(4, "meow"),
                 ]
             })
         });

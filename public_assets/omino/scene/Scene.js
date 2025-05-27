@@ -105,12 +105,12 @@ class DimsScene extends Scene {
         this.clipParent = true;
     }
 
-    isIn() {
+    isIn(xOffs=0, yOffs=0, width=this.dims.x, height=this.dims.y) {
         if (this.parent && !this.parent.hasMouseAccess) return false;
         if (this.parent instanceof DimsScene && (this.clipParent && !this.parent.isIn())) return false;
         let absPos = this.getAbsolutePos();
-        return p5.mouseX > absPos.x && p5.mouseY > absPos.y &&
-            p5.mouseX < absPos.x + this.dims.x && p5.mouseY < absPos.y + this.dims.y;
+        return p5.mouseX > absPos.x+xOffs && p5.mouseY > absPos.y+yOffs &&
+            p5.mouseX < absPos.x+xOffs + width && p5.mouseY < absPos.y+yOffs + height;
     }
 }
 

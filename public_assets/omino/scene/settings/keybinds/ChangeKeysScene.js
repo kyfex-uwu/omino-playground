@@ -99,7 +99,7 @@ class ChangeKeysScene extends Scene {
             x += key.dims.x + padding;
         }
 
-        super.render(oldDims, newDims);
+        super.resized(oldDims, newDims);
     }
 
     render() {

@@ -4,20 +4,21 @@ import OptionsScene from "/assets/omino/scene/OptionsScene.js";
 import {background} from "/assets/omino/Colors.js";
 import Element from "/assets/omino/pathfinding/elements/Element.js";
 
-class BoardContainer extends DimsScene {
+export class BoardContainer extends DimsScene {
     constructor(parent) {
         super();
         this.parent = parent;
         this.parent.board.elementsListeners.push(_ => this.onElementsChange());
 
         this.dragging = false;
-        this.lastPos = false;
         this.shouldUnhold = false;
 
         this.env = {};
         this.setEnv();
         this.applyData = {};
         this.apply();
+
+        this.settings=[];
     }
 
     resized(oldDims, newDims = oldDims) {
@@ -27,7 +28,7 @@ class BoardContainer extends DimsScene {
     }
 
     mouseUp(x, y) {
-        this.clicked = this.dragging ? this.dragging.orig.distTo(this.dragging.curr) < 0.1 : true;
+        this.clicked = this.dragging ? this.dragging.orig.distTo(this.dragging.curr) < 10 : true;
         this.dragging = false;
     }
 
@@ -76,6 +77,19 @@ class BoardContainer extends DimsScene {
             this.dragging.curr = pos;
         }
 
+        let shouldUpdate=false;
+        for(const element of this.parent.board.elements){
+            if(element.needsUpdate){
+                element.needsUpdate=false;
+                shouldUpdate=true;
+            }
+        }
+        if(shouldUpdate) {
+            this.apply();
+            for (const l of this.parent.board.elementsListeners) l(this);
+            this.parent.board.recalcPath();
+        }
+
         this.setEnv();
         Element.render(this.parent.board.elements, this.applyData.nodes, this.applyData.historicalNodes, this.env);
 
@@ -101,7 +115,7 @@ class MainScene extends Scene {
             heldElement: undefined,
         };
 
-        this.optionsScene = this.addScene(new OptionsScene());
+        this.optionsScene = this.addScene(new OptionsScene(this.board));
         this.boardContainer = this.addScene(new BoardContainer(this));
     }
 

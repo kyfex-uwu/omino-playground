@@ -11,12 +11,17 @@ class Element {
     constructor() {
         this.applyPasses = [];
         this.renderPasses = [];
+
+        this.needsUpdate=false;
     }
 
     settings() {
     }
 
     palette() {
+    }
+
+    infoTextPass(){
     }
 }
 
@@ -83,6 +88,17 @@ Element.applyAndRender = (elements, applyEnv, renderEnv = applyEnv) => {
     let nodes = Element.apply(elements, applyEnv, historicalNodes);
     Element.render(elements, nodes, historicalNodes, renderEnv);
     return {nodes, historicalNodes};
+}
+
+Element.infoText = (elements, env = {}) => {
+    Object.assign(env, {
+        elements: elements
+    });
+    let text=[];
+    for (let el of elements) {
+        text.push(el.infoTextPass(env));
+    }
+    return text.filter(t=>!!t).join(" ");
 }
 
 class ApplyData {
