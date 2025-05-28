@@ -1,4 +1,4 @@
-import {DimsScene, focus} from "/assets/omino/scene/Scene.js";
+import {DimsScene, focus, isKindaMobile} from "/assets/omino/scene/Scene.js";
 import {fill} from "/assets/omino/Colors.js";
 import MobileKeyboard from "/assets/omino/scene/utils/MobileKeyboard.js";
 

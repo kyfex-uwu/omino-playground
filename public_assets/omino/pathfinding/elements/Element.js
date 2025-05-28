@@ -137,8 +137,10 @@ EditableElement.createDialogPass = (self, posFunc) => {
             const scaleFactor = env.container.dims.x/600;
             env.drawData.context.push();
             let origCenterX=pos.x - self.editDialog.dims.x/2*scaleFactor;
-            env.drawData.context.translate(Math.max(0,origCenterX),pos.y);
+            let offs = new Vector(Math.max(0,origCenterX),pos.y);
+            env.drawData.context.translate(offs.x,offs.y);//todo: snap to right edge as well
             env.drawData.context.scale(scaleFactor);
+            self.editDialog.getAbsolutePos = _=> offs.add(env.container.pos);
             self.editDialog.render(env,Math.min(0,origCenterX/scaleFactor));
             env.drawData.context.pop();
         }
