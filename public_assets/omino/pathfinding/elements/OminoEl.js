@@ -1,4 +1,4 @@
-import {ApplyData, Pass, SelectableElement} from "/assets/omino/pathfinding/elements/Element.js";
+import {ApplyData, EditableElement, Pass, SelectableElement} from "/assets/omino/pathfinding/elements/Element.js";
 import {fill, stroke} from "/assets/omino/Colors.js";
 import Vector from "/assets/omino/Vector.js";
 import PortalEl from "/assets/omino/pathfinding/elements/PortalEl.js";
@@ -35,7 +35,7 @@ function getNodes(currNodeView, connTree, nodes, toReturn = new Set()) {
     return toReturn;
 }
 
-class OminoEl extends SelectableElement {
+class OminoEl extends EditableElement {
     constructor(connTree, root, orientation) {
         super();
         this.connTree = connTree;
@@ -46,7 +46,10 @@ class OminoEl extends SelectableElement {
 
         //note: this assumes the omino is in a valid spot!! it will not check if it can it just does
 
-        this.applyPasses = [new Pass(0, (nodes, env) => {
+        this.applyPasses = [new Pass(-1, (nodes, env) => {
+            if(this.getRoot(nodes) === undefined ||
+                !getNodes(this.getRoot(nodes).getView(this.orientation), this.connTree, nodes)) this.invalid=true;
+        }), new Pass(0, (nodes, env) => {
             let allNodes = getNodes(this.getRoot(nodes).getView(this.orientation), this.connTree, nodes);
 
             this.nodes = [];
@@ -84,7 +87,7 @@ class OminoEl extends SelectableElement {
         env.drawData.notifyTexture();
     }
 
-    drawNode(env, pos) {
+    drawNode(env, pos, _, mouse) {
         env.drawData.context.noStroke();
         env.drawData.context.rect(
             (pos.x / env.drawData.nodeSize + 0.06) * env.drawData.nodeSize,
@@ -138,7 +141,9 @@ class OminoEl extends SelectableElement {
     }
 
     isSelected(nodes, env, historicalNodes) {
-        if (env.mouse.clicked) {
+        if(this.editing && env.mouse.clicked && p5.mouseButton === p5.LEFT) return SelectableElement.CLICK.CONSUME;
+
+        if (env.mouse.clicked && p5.mouseButton === p5.LEFT) {
             let cellPos = env.mouse.pos.sub(env.container.getAbsolutePos())
                 .scale(1 / env.drawData.nodeSize)
 
@@ -148,10 +153,10 @@ class OminoEl extends SelectableElement {
                     this.getRoot(historicalNodes), env, historicalNodes))
                     .sub(env.drawData.nodeSize / 2, env.drawData.nodeSize / 2)
                     .sub(env.container.getAbsolutePos());
-                return true;
+                return SelectableElement.CLICK.PICKUP;
             }
         }
-        return false;
+        return SelectableElement.CLICK.NONE;
     }
 
     tryPlace(nodes, env) {

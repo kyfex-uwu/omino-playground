@@ -1,4 +1,8 @@
 import Vector from "/assets/omino/Vector.js";
+import data, {o} from "/assets/omino/Main.js";
+import {DimsScene} from "/assets/omino/scene/Scene.js";
+import {fill} from "/assets/omino/Colors.js";
+import events from "/assets/omino/Events.js";
 
 class Pass {
     constructor(order, func) {
@@ -13,6 +17,7 @@ class Element {
         this.renderPasses = [];
 
         this.needsUpdate=false;
+        this.invalid=false;
     }
 
     settings() {
@@ -32,7 +37,7 @@ class SelectableElement extends Element {
     }
 
     isSelected(nodes, env, historicalNodes) {
-        return false;
+        return SelectableElement.CLICK.NONE;
     }
 
     tryPlace(nodes, env, historicalNodes) {
@@ -43,6 +48,102 @@ class SelectableElement extends Element {
 
     }
 }
+SelectableElement.CLICK = {
+    PICKUP:0,
+    CONSUME:1,
+    NONE:2
+};
+class EditableDialog extends DimsScene{
+    constructor(){
+        super();
+    }
+
+    addScene(scene) {
+        super.addScene(scene);
+
+        let dims = new Vector(0,10);
+        for(const el of this.subScenes){
+            if(!(el instanceof DimsScene)) continue;
+            dims.x = Math.max(dims.x, el.dims.x+10);
+        }
+        for(const el of this.subScenes){
+            if(!(el instanceof DimsScene)) continue;
+            el.pos = new Vector(dims.x/2-el.dims.x/2, dims.y);
+            dims.y += el.dims.y + 5;
+        }
+        this.dims=dims;
+        this.resized(this.dims, dims);
+    }
+
+    render(env, pointerOffs) {
+        fill("elementDialog.bg", env.drawData.context);
+        env.drawData.context.rect(0,5,this.dims.x,this.dims.y-5, 5);
+        env.drawData.context.triangle(
+            this.dims.x/2+pointerOffs, 0,
+            this.dims.x/2-5+pointerOffs, 5,
+            this.dims.x/2+5+pointerOffs, 5);
+        super.render();
+    }
+}
+let editableElementDialog = undefined;
+events.loaded.on(_=>{
+    data.listeners.keyDown.push((key)=>editableElementDialog?.keyPressed(key));
+    data.listeners.keyUp.push((key)=>editableElementDialog?.keyReleased(key));
+    data.listeners.mouseDown.push((x,y)=>editableElementDialog?.mouseDown(x,y));
+    data.listeners.mouseUp.push((x,y)=>editableElementDialog?.mouseUp(x,y));
+    data.listeners.scroll.push((x,y,delta)=>editableElementDialog?.scrolled(x,y,delta));
+});
+class EditableElement extends SelectableElement {
+    constructor() {
+        super();
+        this.editing=false;
+
+        this.editDialog = new EditableDialog();
+    }
+
+    edit(env){
+        this.editing=true;
+        for(const element of env.elements){
+            if(element!==this && element instanceof EditableElement && element.editing)
+                element.finishEdit();
+        }
+        editableElementDialog=this.editDialog;
+    }
+    finishEdit(){
+        this.editing=false;
+    }
+    isEditing(nodes, env, historicalNodes) {
+        return false;
+    }
+    shouldUnselect(nodes, env, historicalNodes){
+        const scaleFactor = env.container.dims.x/600;
+        const pos = this.posFunc(nodes, env, historicalNodes);
+        if(this.editing && this.editDialog.isIn(
+            pos.x - this.editDialog.dims.x/2*scaleFactor+env.container.pos.x,
+            pos.y+env.container.pos.y)) return false;
+        return env.mouse.clicked;
+    }
+}
+EditableElement.createDialogPass = (self, posFunc) => {
+    self.posFunc = posFunc;
+
+    return new Pass(1000, (nodes, env, historicalNodes) => {
+
+        if(self.shouldUnselect(nodes, env, historicalNodes)) self.finishEdit();
+        if(self.isEditing(nodes, env, historicalNodes)) self.edit(env);
+
+        if(self.editing){
+            const pos = self.posFunc(nodes, env, historicalNodes);
+            const scaleFactor = env.container.dims.x/600;
+            env.drawData.context.push();
+            let origCenterX=pos.x - self.editDialog.dims.x/2*scaleFactor;
+            env.drawData.context.translate(Math.max(0,origCenterX),pos.y);
+            env.drawData.context.scale(scaleFactor);
+            self.editDialog.render(env,Math.min(0,origCenterX/scaleFactor));
+            env.drawData.context.pop();
+        }
+    })
+}
 
 Element.apply = (elements, env = {}, historicalNodes = {}) => {
     Object.assign(env, {
@@ -50,11 +151,16 @@ Element.apply = (elements, env = {}, historicalNodes = {}) => {
     });
     let nodes = {};
 
-    let passes = elements.map(e => e.applyPasses).flat().toSorted((p1, p2) => p1.order - p2.order);
+    let passes = elements.map(e => e.applyPasses.map(pass=>o({e, pass}))).flat()
+        .toSorted((p1, p2) => p1.pass.order - p2.pass.order);
 
-    for (let pass of passes) {
+    for (let passData of passes) {
+        let data = passData.pass.func(nodes, env);
+        if(passData.e.invalid){
+            env.elements.splice(env.elements.indexOf(passData.e),1);
+            break;
+        }
 
-        let data = pass.func(nodes, env);
         if (data) {
             for (const node of Object.values(data.added)) {
                 nodes[node.id] = node;
@@ -123,5 +229,5 @@ class ApplyData {
 export default Element;
 export {
     Element, Pass, ApplyData,
-    SelectableElement
+    SelectableElement, EditableElement
 };

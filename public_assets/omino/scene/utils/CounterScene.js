@@ -2,7 +2,7 @@ import {fill, stroke} from "/assets/omino/Colors.js";
 import {DimsScene} from "/assets/omino/scene/Scene.js";
 
 function hoveredRect(self, x, y, w, h){
-    fill("scenes.util.counter."+(self.isIn(x, y, w, h) ? "bgHover" : "bg"));
+    fill("scenes.util.counter."+(self.isIn(x, y, w, h) ? "bgHover" : "bgButton"));
     p5.rect(x, y, w, h);
 }
 

@@ -27,6 +27,8 @@ class Keybind {
     constructor(dfault) {
         this.values = dfault;
         this.defaultVal = dfault;
+
+        for(const key of dfault) createKey(key);
     }
 
     isDown() {

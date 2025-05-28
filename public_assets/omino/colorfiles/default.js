@@ -120,10 +120,11 @@ exportMod({
 				color:"default:util.button.color",
 			},
 			counter:{
-				bg:"default:util.button.bg",
+				bg:"default:util.field.bg",
+				bgButton: "default:util.button.bg",
 				bgHover:"default:util.button.bgHover",
 				bgUnsaved:"default:options.unsaved",
-				color:"default:util.button.color",
+				color:"default:util.field.color",
 				invalid:"default:options.invalid",
 			},
 			text:"default:util.text",
@@ -247,6 +248,10 @@ exportMod({
 
 		outline:colorFuncs.hexToRGB(0xffffff),
 		"new":colorFuncs.hexToRGB(0xffffff),
+	},
+	elementDialog:{
+		bg: colorFuncs.hexToRGB(0x333333),
+		text: colorFuncs.hexToRGB(0xcccccc)
 	},
 	board:{
 		grid:colorFuncs.hexToRGB(0xBD8BAD),

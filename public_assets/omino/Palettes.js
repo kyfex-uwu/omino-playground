@@ -127,9 +127,7 @@ const Hexonimoes = new OminoPalette([
     " #/###/##",
     "##/ ##/ ##",
     "##/ ##/  ##",
-].map(s => {
-    return {positions: s};
-}), 6);
+].map(s => {return{positions: s}}), 6);
 for (const hexomino of Hexonimoes.data) {
     let color = genHashColor(hexomino.positions);
     hexomino.color = color;

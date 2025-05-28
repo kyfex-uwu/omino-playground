@@ -73,9 +73,9 @@ class TextInputScene extends DimsScene {
 
         fill("scenes.util.textInput.bg");
         if (this.newValue != this.value) fill("scenes.util.textInput.bgUnsaved");
-        if (this.validator.test(this.newValue)) fill("scenes.util.textInput.invalid");
+        if (!this.validator.test(this.newValue)) fill("scenes.util.textInput.invalid");
         p5.rect(0, 0, this.dims.x, this.dims.y);
-        fill("scenes.util.textbox.color");
+        fill("scenes.util.textInput.color");
         p5.textSize(this.dims.y * 0.8);
         p5.textAlign(p5.LEFT, p5.TOP);
         p5.text(this.newValue, 2, 2);

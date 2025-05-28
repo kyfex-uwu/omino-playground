@@ -3,6 +3,7 @@ import {DimsScene, focus, hover, Scene} from "/assets/omino/scene/Scene.js";
 import OptionsScene from "/assets/omino/scene/OptionsScene.js";
 import {background} from "/assets/omino/Colors.js";
 import Element from "/assets/omino/pathfinding/elements/Element.js";
+import {Keybinds} from "/assets/omino/Keybinds.js";
 
 export class BoardContainer extends DimsScene {
     constructor(parent) {
@@ -19,6 +20,8 @@ export class BoardContainer extends DimsScene {
         this.apply();
 
         this.settings=[];
+
+        this.deletingEls=[];
     }
 
     resized(oldDims, newDims = oldDims) {
@@ -71,6 +74,17 @@ export class BoardContainer extends DimsScene {
     }
 
     render() {
+        if(Keybinds.DEL.isReleased() && this.parent.cursor.heldElement){
+            this.deletingEls.push({
+                el: this.parent.cursor.heldElement,
+                timer:0,
+                //speed:Math.random()*0.6*(Math.random()>0.5?-1:1),
+                pos:this.env.mouse.pos.clone()
+            });
+            //this.parent.cursor.heldElement.onMouse=false;
+            this.parent.cursor.heldElement=undefined;
+        }
+
         if (this.dragging) {
             let pos = new Vector(p5.mouseX, p5.mouseY).sub(this.pos);
             this.dragging.delta = pos.sub(this.dragging.curr);
@@ -92,6 +106,29 @@ export class BoardContainer extends DimsScene {
 
         this.setEnv();
         Element.render(this.parent.board.elements, this.applyData.nodes, this.applyData.historicalNodes, this.env);
+
+        for(const data of this.deletingEls){
+            let modifiedEnv = Object.assign(Object.assign({}, this.env), {
+                mouse: {
+                    dragging: this.dragging,
+                    clicked: this.clicked,
+                    pos: new Vector(0,0)
+                },
+            });
+            p5.push();
+            p5.beginClip();
+            for(let i=0;i<p5.height;i+=p5.width*0.04){
+                p5.rect(0,i,p5.width,p5.width*0.04*(1-data.timer**3));
+            }
+            p5.endClip();
+            p5.translate(data.pos.x, data.pos.y);
+            data.el.drawAtMouse(this.applyData.nodes, modifiedEnv, this.applyData.historicalNodes);
+            p5.pop();
+
+            data.timer+=0.08;
+            if(data.timer>1) data.remove=true;
+        }
+        this.deletingEls=this.deletingEls.filter(val=>!val.remove);
 
         if (this.parent.cursor.heldElement) {
             this.parent.cursor.heldElement.drawAtMouse(this.applyData.nodes, this.env, this.applyData.historicalNodes);

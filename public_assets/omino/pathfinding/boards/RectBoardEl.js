@@ -16,8 +16,8 @@ export default class RectBoardEl extends Element {
 
         this.currId=0;
         this.board=[];
-        this.addRow(this.height);
-        this.addColumn(this.width);
+        this.setHeight(this.height);
+        this.setWidth(this.width);
 
         this.applyPasses = [
             new Pass(-1000, (nodes, env) => {//generate nodes
@@ -110,12 +110,20 @@ export default class RectBoardEl extends Element {
 
             new Pass(1010, (nodes, env, historicalNodes) => {//handle click
                 if (!env.cursor.heldElement) {
+                    let pickingUp=undefined;
                     for (const element of env.elements) {
-                        if (element instanceof SelectableElement && element.isSelected(nodes, env, historicalNodes)) {
-                            env.cursor.heldElement = element;
-                            env.board.remove(element);
-                            break;
+                        if (element instanceof SelectableElement) {
+                            const selectionType = element.isSelected(nodes, env, historicalNodes);
+                            if(selectionType === SelectableElement.CLICK.CONSUME) {
+                                pickingUp=undefined;
+                                break;
+                            }
+                            else if (selectionType === SelectableElement.CLICK.PICKUP) pickingUp = element;
                         }
+                    }
+                    if(pickingUp !== undefined){
+                        env.cursor.heldElement = pickingUp;
+                        env.board.remove(pickingUp);
                     }
                 } else {
                     if (env.cursor.heldElement.tryPlace(nodes, env, historicalNodes)) {
@@ -136,7 +144,7 @@ export default class RectBoardEl extends Element {
                 min: 1,
                 value: this.width,
                 submit: v => {
-                    this.addColumn(v-this.width);
+                    this.setWidth(v);
                     this.width = v;
                     this.needsUpdate=true;
                     return true;
@@ -149,7 +157,7 @@ export default class RectBoardEl extends Element {
                 min: 1,
                 value: this.height,
                 submit: v => {
-                    this.addRow(v-this.height);
+                    this.setHeight(v);
                     this.height = v;
                     this.needsUpdate=true;
                     return true;
@@ -157,37 +165,27 @@ export default class RectBoardEl extends Element {
             }
         }];
     }
-    addRow(count=1){
-        if(count<0) return this.subRow(-count);
-        for(;count>0;count--) {
-            let toAdd = [];
-            for (let i = 0; i < this.width; i++)
-                toAdd.push(this.currId++);
-            this.board.push(toAdd);
-        }
+    setHeight(height){
+        if(this.board.length>height)
+            this.board = this.board.slice(0,height);
+
+        if(this.board.length<height)
+            this.board.push(...new Array(height-this.board.length).fill(0).map(_=>
+                new Array(this.width).fill(0).map(_=>this.currId++)))
     }
-    addColumn(count=1){
-        if(count<0) return this.subColumn(-count);
-        for(;count>0;count--) {
-            for (let i = 0; i < this.height; i++)
-                this.board[i].push(this.currId++);
-        }
-    }
-    subRow(count=1){
-        if(count<0) return this.addRow(-count);
-        for(;count>0;count--) {
-            this.board.pop();
-        }
-    }
-    subColumn(){
-        if(count<0) return this.addColumn(-count);
-        for(;count>0;count--) {
-            for(let i=0;i<this.width;i++)
-                this.board[i].pop();
-        }
+    setWidth(width){
+        if(this.board[0].length>width)
+            for(let i=0;i<this.board.length;i++)
+                this.board[i] = this.board[i].slice(0,width);
+
+        if(this.board[0].length<width)
+            for(let i=0;i<this.board.length;i++)
+                this.board[i].push(...new Array(width-this.board[i].length).fill(0).map(_=>this.currId++));
+
     }
 
     getNodePos(n, scale) {
+        if(!n) return new Vector(0,0);
         return n.custom.pos.scale(scale);
     }
 

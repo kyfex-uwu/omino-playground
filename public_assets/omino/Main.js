@@ -18,6 +18,15 @@ const data = {
     scene: undefined,
     isFullscreened: false,
     canvElt: undefined,
+
+    listeners:{
+        mouseDown:[],
+        mouseUp:[],
+        keyDown:[],
+        keyUp:[],
+        scroll:[],
+        resize:[],
+    }
 };
 
 let scrollScale = 0.5;
@@ -71,6 +80,13 @@ new p5(p5 => {
         });
         data.isFullscreened = pageData.fullscreen;
 
+        data.listeners.resize.push((old,nw) => data.scene.resized(old,nw));
+        data.listeners.mouseDown.push((x,y) => data.scene.mouseDown(x,y));
+        data.listeners.mouseUp.push((x,y) => data.scene.mouseUp(x,y));
+        data.listeners.keyDown.push((key) => data.scene.keyPressed(key));
+        data.listeners.keyUp.push((key) => data.scene.keyReleased(key));
+        data.listeners.scroll.push((x, y, amt) => data.scene.scrolled(x, y, amt));
+
         loaded = true;
         p5.windowResized();
     }
@@ -109,17 +125,17 @@ new p5(p5 => {
             }
         }
         p5.resizeCanvas(newWidth, newHeight);
-        data.scene.resized(new Vector(oldWidth, oldHeight), new Vector(p5.width, p5.height));
+        for(const listener of data.listeners.resize) listener(new Vector(oldWidth, oldHeight), new Vector(p5.width, p5.height));
     }
 
     p5.mousePressed = function () {
         if (!loaded) return;
-        data.scene.mouseDown(p5.mouseX, p5.mouseY);
+        for(const listener of data.listeners.mouseDown) listener(p5.mouseX, p5.mouseY);
     }
     p5.touchStarted = p5.mousePressed;
     p5.mouseReleased = function () {
         if (!loaded) return;
-        data.scene.mouseUp(p5.mouseX, p5.mouseY)
+        for(const listener of data.listeners.mouseUp) listener(p5.mouseX, p5.mouseY);
     }
     p5.touchEnded = p5.mouseReleased;
     p5.keyPressed = function (e) {
@@ -127,19 +143,22 @@ new p5(p5 => {
         let key = p5.key.length == 1 ? p5.key.toLowerCase() : p5.key;
         createKey(key);
         rawKeys[key].press();
-        data.scene.keyPressed(key);
+        for(const listener of data.listeners.keyDown) listener(key);
     }
     p5.keyReleased = function () {
         if (!loaded) return;
         let key = p5.key.length == 1 ? p5.key.toLowerCase() : p5.key;
         createKey(key);
         rawKeys[key].release();
-        data.scene.keyReleased(key);
+        for(const listener of data.listeners.keyUp) listener(key);
     }
     p5.mouseWheel = function (e) {
         if (!loaded) return;
         if (p5.mouseX >= 0 && p5.mouseY >= 0 && p5.mouseX < p5.width && p5.mouseY < p5.height) {
-            if (data.scene.scrolled(p5.mouseX, p5.mouseY, e.delta * scrollScale)) {
+            let consumed=false;
+            for(const listener of data.listeners.scroll)
+                consumed ||= listener(p5.mouseX, p5.mouseY, e.delta * scrollScale);
+            if (consumed) {
                 window.scroll(0, data.canvElt.getBoundingClientRect().y - document.body.getBoundingClientRect().y -
                     (p5.windowHeight - p5.height) / 2);
             }
@@ -164,5 +183,7 @@ new p5(p5 => {
         }
     }
 });
+
+export const o = obj=>obj;
 
 export default data;
