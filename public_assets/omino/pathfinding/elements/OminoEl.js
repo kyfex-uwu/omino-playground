@@ -217,7 +217,9 @@ class OminoEl extends EditableElement {
             this.forceSelected=false;
             return SelectableElement.CLICK.PICKUP;
         }
-        if(this.editing && env.mouse.clicked && p5.mouseButton === p5.LEFT) return SelectableElement.CLICK.CONSUME;
+        if(this.editing && env.mouse.clicked && p5.mouseButton === p5.LEFT){
+            return SelectableElement.CLICK.CONSUME;
+        }
 
         if (env.mouse.clicked && p5.mouseButton === p5.LEFT) {
             let cellPos = env.mouse.pos.sub(env.container.getAbsolutePos())

@@ -2,8 +2,8 @@ const changelog = [
     `v1.0.0 xxx
 - Overhauled everything; a lot of features are gone
 - added portals!
-- you can now right-click elements to see/change options about them
-    v0.2.8 (unreleased)
+- you can now right-click elements to see/change options about them`,
+    `v0.2.8 (unreleased)
 - Fixed the settings menu so it looks better and works with colorfiles
 - Updated the default colorfile
 - Moved the changelog into settings
@@ -222,7 +222,7 @@ class ChangelogScene extends ScrollableScene {
         fill("scenes.settings.text");
         p5.textAlign(p5.LEFT, p5.TOP);
 
-        smartText(changelog.join("\n\n"), 0, 0, 1 / scale * this.dims.x);
+        smartText(changelog.join("\n\n"), 0, 4, 1 / scale * this.dims.x);
 
         p5.pop();
 

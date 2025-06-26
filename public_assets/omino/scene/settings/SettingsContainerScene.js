@@ -221,12 +221,14 @@ class SettingsContainerScene extends Scene {
             for (let x = -1; x < p5.width / 100; x++) {
                 if ((x + 1) % 2 == (y + 1) % 2) continue;
                 p5.push();
-                p5.translate(x * 100, y * 100);
+                p5.translate(x * 100+50, y * 100+50);
+                //p5.scale(Math.sin((x*5+this.bgOffs*0.4)*0.1)*0.5+1);
+                p5.scale(Math.sin((x*100+this.bgOffs)*0.01 + (y*100+this.bgOffs)*0.005 + p5.frameCount*0.001)*0.2+1);
                 p5.beginShape();
-                p5.vertex(50, 10);
-                p5.vertex(90, 50);
-                p5.vertex(50, 90);
-                p5.vertex(10, 50);
+                p5.vertex(0, -40);
+                p5.vertex(40, 0);
+                p5.vertex(0, 40);
+                p5.vertex(-40, 0);
                 p5.endShape();
                 p5.pop();
             }

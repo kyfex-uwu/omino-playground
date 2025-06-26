@@ -123,6 +123,8 @@ class EditableElement extends SelectableElement {
             pos.y+env.container.pos.y)) return false;
         return env.mouse.clicked;
     }
+
+
 }
 EditableElement.createDialogPass = (self, posFunc) => {
     self.posFunc = posFunc;
@@ -138,8 +140,9 @@ EditableElement.createDialogPass = (self, posFunc) => {
             env.drawData.context.push();
             let origCenterX=pos.x - self.editDialog.dims.x/2*scaleFactor;
             let offs = new Vector(Math.max(0,origCenterX),pos.y);
+            self.editDialog.pos = offs;
             env.drawData.context.translate(offs.x,offs.y);//todo: snap to right edge as well
-            env.drawData.context.scale(scaleFactor);
+            //env.drawData.context.scale(scaleFactor);
             self.editDialog.getAbsolutePos = _=> offs.add(env.container.pos);
             self.editDialog.render(env,Math.min(0,origCenterX/scaleFactor));
             env.drawData.context.pop();
