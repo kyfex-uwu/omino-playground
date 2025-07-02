@@ -118,7 +118,9 @@ export default class RectBoardEl extends Element {
                                 pickingUp=undefined;
                                 break;
                             }
-                            else if (selectionType === SelectableElement.CLICK.PICKUP) pickingUp = element;
+                            else if (selectionType === SelectableElement.CLICK.PICKUP){
+                                pickingUp = element;
+                            }
                         }
                     }
                     if(pickingUp !== undefined){

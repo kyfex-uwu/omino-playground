@@ -80,8 +80,8 @@ class EditableDialog extends DimsScene{
         env.drawData.context.rect(0,5,this.dims.x,this.dims.y-5, 5);
         env.drawData.context.triangle(
             this.dims.x/2+pointerOffs, 0,
-            this.dims.x/2-5+pointerOffs, 5,
-            this.dims.x/2+5+pointerOffs, 5);
+            this.dims.x/2-6+pointerOffs, 6,
+            this.dims.x/2+6+pointerOffs, 6);
         super.render();
     }
 }
@@ -116,11 +116,7 @@ class EditableElement extends SelectableElement {
         return false;
     }
     shouldUnselect(nodes, env, historicalNodes){
-        const scaleFactor = env.container.dims.x/600;
-        const pos = this.posFunc(nodes, env, historicalNodes);
-        if(this.editing && this.editDialog.isIn(
-            pos.x - this.editDialog.dims.x/2*scaleFactor+env.container.pos.x,
-            pos.y+env.container.pos.y)) return false;
+        if(this.editing && this.editDialog.isIn()) return false;
         return env.mouse.clicked;
     }
 
@@ -136,15 +132,13 @@ EditableElement.createDialogPass = (self, posFunc) => {
 
         if(self.editing){
             const pos = self.posFunc(nodes, env, historicalNodes);
-            const scaleFactor = env.container.dims.x/600;
             env.drawData.context.push();
-            let origCenterX=pos.x - self.editDialog.dims.x/2*scaleFactor;
+            let origCenterX=pos.x - self.editDialog.dims.x/2;
             let offs = new Vector(Math.max(0,origCenterX),pos.y);
             self.editDialog.pos = offs;
             env.drawData.context.translate(offs.x,offs.y);//todo: snap to right edge as well
-            //env.drawData.context.scale(scaleFactor);
             self.editDialog.getAbsolutePos = _=> offs.add(env.container.pos);
-            self.editDialog.render(env,Math.min(0,origCenterX/scaleFactor));
+            self.editDialog.render(env,Math.min(0,origCenterX));
             env.drawData.context.pop();
         }
     })

@@ -53,7 +53,7 @@ class PortalEl extends EditableElement {
         let size = env.drawData.nodeSize;
 
         let pos = env.drawData.nodeToTexPos(nodes[this.root]).add(env.drawData.nodeSize / 2, env.drawData.nodeSize / 2);
-        if (this.onMouse)
+        if (this.onMouse && eng.cursor.heldElement === this)
             pos = env.mouse.pos.sub(env.container.getAbsolutePos().add(this.onMouse || new Vector(0, 0)));
 
         fill("ominoColors."+this.hashColor, env.drawData.context);
@@ -65,7 +65,9 @@ class PortalEl extends EditableElement {
     }
 
     isSelected(nodes, env, historicalNodes) {
-        if(this.editing && env.mouse.clicked && p5.mouseButton === p5.LEFT) return SelectableElement.CLICK.CONSUME;
+        if(this.editing && env.mouse.clicked && p5.mouseButton === p5.LEFT){
+            return SelectableElement.CLICK.CONSUME;
+        }
 
         if (env.mouse.clicked && p5.mouseButton === p5.LEFT) {
             let cellPos = env.mouse.pos.sub(env.container.getAbsolutePos())

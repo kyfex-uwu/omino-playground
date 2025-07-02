@@ -175,7 +175,7 @@ class OminoEl extends EditableElement {
     }
 
     getNodePos(node, env, historicalNodes) {
-        if (this.onMouse) {
+        if (this.onMouse && env.cursor.heldElement === this) {
             return env.mouse.pos.sub(env.container.getAbsolutePos())
                 .sub(env.drawData.nodeToTexPos(this.getRoot(historicalNodes)))
                 .sub(env.drawData.nodeSize / 2, env.drawData.nodeSize / 2)
