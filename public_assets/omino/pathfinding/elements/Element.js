@@ -56,6 +56,7 @@ SelectableElement.CLICK = {
 class EditableDialog extends DimsScene{
     constructor(){
         super();
+        this.visible=false;
     }
 
     addScene(scene) {
@@ -86,12 +87,15 @@ class EditableDialog extends DimsScene{
     }
 
     mouseUp(x, y) {
+        if(!this.visible) return;
         return super.mouseUp(x-this.getAbsolutePos().x,y-this.getAbsolutePos().y)
     }
     mouseDown(x, y) {
+        if(!this.visible) return;
         return super.mouseDown(x-this.getAbsolutePos().x,y-this.getAbsolutePos().y)
     }
     scrolled(x, y, delta) {
+        if(!this.visible) return;
         return super.scrolled(x-this.getAbsolutePos().x,y-this.getAbsolutePos().y, delta)
     }
 }
@@ -118,8 +122,10 @@ class EditableElement extends SelectableElement {
                 element.finishEdit();
         }
         editableElementDialog=this.editDialog;
+        this.editDialog.visible=true;
     }
     finishEdit(){
+        this.editDialog.visible=false;
         this.editing=false;
     }
     isEditing(nodes, env, historicalNodes) {
