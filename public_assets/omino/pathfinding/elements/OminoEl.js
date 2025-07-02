@@ -84,20 +84,20 @@ class OminoEl extends EditableElement {
 
         this.forceSelected=false;
         this.rotateLeft = button(_=>{
+            this.onMouse = new Vector(0,0);
             this.forceSelected=true;
-
         },_=>{
             rotateShape();
         });
         this.rotateRight = button(_=>{
-
+            this.onMouse = new Vector(0,0);
             this.forceSelected=true;
         },_=>{
             p5.scale(-1,1);
             rotateShape();
         });
         this.flipH = button(_=>{
-
+            this.onMouse = new Vector(0,0);
             this.forceSelected=true;
         },_=>{
             p5.rect(-2,-13,4,26);
@@ -105,7 +105,7 @@ class OminoEl extends EditableElement {
             p5.triangle(-6,12,6,12,0,19);
         });
         this.flipV = button(_=>{
-
+            this.onMouse = new Vector(0,0);
             this.forceSelected=true;
         },_=>{
             p5.rect(-2,-13,4,26);
@@ -213,10 +213,6 @@ class OminoEl extends EditableElement {
     }
 
     isSelected(nodes, env, historicalNodes) {
-        if(this.forceSelected){
-            this.forceSelected=false;
-            return SelectableElement.CLICK.PICKUP;
-        }
         if(this.editing && env.mouse.clicked && p5.mouseButton === p5.LEFT){
             return SelectableElement.CLICK.CONSUME;
         }

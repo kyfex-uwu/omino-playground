@@ -84,6 +84,16 @@ class EditableDialog extends DimsScene{
             this.dims.x/2+6+pointerOffs, 6);
         super.render();
     }
+
+    mouseUp(x, y) {
+        return super.mouseUp(x-this.getAbsolutePos().x,y-this.getAbsolutePos().y)
+    }
+    mouseDown(x, y) {
+        return super.mouseDown(x-this.getAbsolutePos().x,y-this.getAbsolutePos().y)
+    }
+    scrolled(x, y, delta) {
+        return super.scrolled(x-this.getAbsolutePos().x,y-this.getAbsolutePos().y, delta)
+    }
 }
 let editableElementDialog = undefined;
 events.loaded.on(_=>{

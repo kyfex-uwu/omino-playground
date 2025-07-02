@@ -177,11 +177,11 @@ class MainScene extends Scene {
         hover.draw();
     }
 
-    mouseUp(x, y) {
-        focus(this);
-
-        return super.mouseUp(x, y);
-    }
+    // mouseUp(x, y) {
+    //     focus(this);
+    //
+    //     return super.mouseUp(x, y);
+    // }
 }
 
 export default MainScene;

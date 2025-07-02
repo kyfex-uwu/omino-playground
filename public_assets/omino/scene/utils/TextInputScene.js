@@ -47,7 +47,6 @@ class TextInputScene extends DimsScene {
 
         for (const listener of this.listeners) listener(this.value);
         return true;
-        return false;
     }
 
     keyPressed(key) {

@@ -111,15 +111,25 @@ export default class RectBoardEl extends Element {
             new Pass(1010, (nodes, env, historicalNodes) => {//handle click
                 if (!env.cursor.heldElement) {
                     let pickingUp=undefined;
-                    for (const element of env.elements) {
-                        if (element instanceof SelectableElement) {
-                            const selectionType = element.isSelected(nodes, env, historicalNodes);
-                            if(selectionType === SelectableElement.CLICK.CONSUME) {
-                                pickingUp=undefined;
-                                break;
-                            }
-                            else if (selectionType === SelectableElement.CLICK.PICKUP){
-                                pickingUp = element;
+                    for(const element of env.elements){
+                        if(element.forceSelected){
+                            pickingUp=element;
+                            element.finishEdit();
+                            element.forceSelected=false;
+                            break;
+                        }
+                    }
+
+                    if(pickingUp===undefined) {
+                        for (const element of env.elements) {
+                            if (element instanceof SelectableElement) {
+                                const selectionType = element.isSelected(nodes, env, historicalNodes);
+                                if (selectionType === SelectableElement.CLICK.CONSUME) {
+                                    pickingUp = undefined;
+                                    break;
+                                } else if (selectionType === SelectableElement.CLICK.PICKUP) {
+                                    pickingUp = element;
+                                }
                             }
                         }
                     }
