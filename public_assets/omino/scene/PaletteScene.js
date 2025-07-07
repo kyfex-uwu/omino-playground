@@ -65,39 +65,39 @@ class PieceHolder extends ScrollableScene {
 class PaletteScene extends DimsScene {
     constructor(data) {
         super();
-        this.palette = data.palette;
+        this.palette = {};
 
         this.piecesHolder = new PieceHolder();
         this.drawButton = {};
 
         this.spaces = [];
         let i = 0;
-        for (const ominoName of Object.keys(this.palette.data)) {
-            this.spaces.push(this.piecesHolder.addScene(new OminoPaletteSpace(this.palette.get(ominoName, new Vector(0, 0)), i)));
-            i++;
-        }
+        // for (const ominoName of Object.keys(this.palette.data)) {
+        //     this.spaces.push(this.piecesHolder.addScene(new OminoPaletteSpace(this.palette.get(ominoName, new Vector(0, 0)), i)));
+        //     i++;
+        // }
         this.addScene(this.piecesHolder);
 
-        this.drawButton = this.addScene(new OneTimeButtonScene(s => {
-            let scale = this.dims.x / 100;
-            let sbSize = Math.min(this.dims.x / 3, scale * 30);
-            fill("scenes.sidebar.bg");
-            p5.rect(-s.pos.x, -s.pos.y + this.dims.y - sbSize, this.dims.x, sbSize);
-
-            fill(s.isIn() ? "scenes.sidebar.button.bgHover" : "scenes.sidebar.button.bg");
-            p5.rect(0, 0, s.dims.x, s.dims.y, (s.dims.x + s.dims.y) * 0.1);
-            fill("scenes.sidebar.button.color");
-            p5.push();
-            p5.translate(s.dims.x / 2, s.dims.y / 2);
-            p5.scale(s.dims.x / 100 * (s.isIn() ? 1.1 : 1));
-            p5.rect(-30, -5, 60, 10);
-            p5.rect(-5, -30, 10, 60);
-            p5.pop();
-
-            if (s.isIn()) hover.set("Add Omino", s);
-        }, _ => {
-            this.parent.enterDrawingMode();
-        }));
+        // this.drawButton = this.addScene(new OneTimeButtonScene(s => {
+        //     let scale = this.dims.x / 100;
+        //     let sbSize = Math.min(this.dims.x / 3, scale * 30);
+        //     fill("scenes.sidebar.bg");
+        //     p5.rect(-s.pos.x, -s.pos.y + this.dims.y - sbSize, this.dims.x, sbSize);
+        //
+        //     fill(s.isIn() ? "scenes.sidebar.button.bgHover" : "scenes.sidebar.button.bg");
+        //     p5.rect(0, 0, s.dims.x, s.dims.y, (s.dims.x + s.dims.y) * 0.1);
+        //     fill("scenes.sidebar.button.color");
+        //     p5.push();
+        //     p5.translate(s.dims.x / 2, s.dims.y / 2);
+        //     p5.scale(s.dims.x / 100 * (s.isIn() ? 1.1 : 1));
+        //     p5.rect(-30, -5, 60, 10);
+        //     p5.rect(-5, -30, 10, 60);
+        //     p5.pop();
+        //
+        //     if (s.isIn()) hover.set("Add Omino", s);
+        // }, _ => {
+        //     this.parent.enterDrawingMode();
+        // }));
     }
 
     resized(oldDims, newDims = oldDims) {
@@ -107,8 +107,8 @@ class PaletteScene extends DimsScene {
         let scale = this.dims.x / 100;
         let sbSize = Math.min(this.dims.x / 3, scale * 30);
 
-        this.drawButton.dims = new Vector(sbSize * 0.8, sbSize * 0.8);
-        this.drawButton.pos = new Vector((this.dims.x - sbSize * 0.9) / 2, this.dims.y - sbSize * 0.9);
+        // this.drawButton.dims = new Vector(sbSize * 0.8, sbSize * 0.8);
+        // this.drawButton.pos = new Vector((this.dims.x - sbSize * 0.9) / 2, this.dims.y - sbSize * 0.9);
 
         this.piecesHolder.dims = new Vector(this.dims.x, this.dims.y - sbSize);
 

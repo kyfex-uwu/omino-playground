@@ -59,6 +59,9 @@ export default class RectBoardEl extends Element {
                     nodeToTexPos: n => this.getNodePos(n, this.renderScale),
                     nodeSize: this.renderScale,
                 });
+
+                this.center = new Vector(this.renderScale*this.width/2, this.renderScale*this.height/2);
+                env.container.center = this.center;
             }),
 
             new Pass(-10, (nodes, env) => {//draws grid

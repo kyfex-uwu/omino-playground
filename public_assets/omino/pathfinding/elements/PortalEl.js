@@ -53,7 +53,7 @@ class PortalEl extends EditableElement {
         let size = env.drawData.nodeSize;
 
         let pos = env.drawData.nodeToTexPos(nodes[this.root]).add(env.drawData.nodeSize / 2, env.drawData.nodeSize / 2);
-        if (this.onMouse && eng.cursor.heldElement === this)
+        if (this.onMouse && env.cursor.heldElement === this)
             pos = env.mouse.pos.sub(env.container.getAbsolutePos().add(this.onMouse || new Vector(0, 0)));
 
         fill("ominoColors."+this.hashColor, env.drawData.context);

@@ -18,6 +18,7 @@ class Element {
 
         this.needsUpdate=false;
         this.invalid=false;
+        this.center = new Vector(0,0);
     }
 
     settings() {

@@ -4,6 +4,7 @@ import OptionsScene from "/assets/omino/scene/OptionsScene.js";
 import {background} from "/assets/omino/Colors.js";
 import Element from "/assets/omino/pathfinding/elements/Element.js";
 import {Keybinds} from "/assets/omino/Keybinds.js";
+import paletteScene from "/assets/omino/scene/PaletteScene.js";
 
 export class BoardContainer extends DimsScene {
     constructor(parent) {
@@ -18,6 +19,7 @@ export class BoardContainer extends DimsScene {
         this.setEnv();
         this.applyData = {};
         this.apply();
+        this.center = new Vector(0,0);
 
         this.settings=[];
 
@@ -25,9 +27,7 @@ export class BoardContainer extends DimsScene {
     }
 
     resized(oldDims, newDims = oldDims) {
-        let size = Math.min(newDims.x / 2, newDims.y);
-        this.dims = new Vector(size, size);
-        this.pos = new Vector((newDims.x - size) / 2, 0);
+        this.dims = new Vector(newDims.x/2,newDims.y);
     }
 
     mouseUp(x, y) {
@@ -106,6 +106,7 @@ export class BoardContainer extends DimsScene {
 
         this.setEnv();
         Element.render(this.parent.board.elements, this.applyData.nodes, this.applyData.historicalNodes, this.env);
+        this.pos = new Vector(p5.width/4,0).add(this.dims.sub(this.center.scale(2)).scale(0.5))
 
         for(const data of this.deletingEls){
             let modifiedEnv = Object.assign(Object.assign({}, this.env), {
@@ -153,35 +154,15 @@ class MainScene extends Scene {
         };
 
         this.optionsScene = this.addScene(new OptionsScene(this.board));
+        this.paletteScene = this.addScene(new paletteScene(this.board));
         this.boardContainer = this.addScene(new BoardContainer(this));
     }
-
-    // drawButton(clickFunc, hoverText){
-    //   return s=>{
-    //     fill(s.isIn()?"scenes.buttons.light.bgHover":"scenes.buttons.light.bg");
-    //     p5.rect(0,0,s.dims.x,s.dims.y, Math.min(s.dims.x,s.dims.y)*0.1);
-
-    //     p5.push();
-    //     p5.translate(s.dims.x/2,s.dims.y/2);
-    //     p5.scale((s.dims.x+s.dims.y)*0.01);
-    //     clickFunc(s);
-    //     p5.pop();
-
-    //     if(hoverText&&s.isIn()) hover.set(hoverText, s);
-    //   };
-    // }
 
     render() {
         background("bg");
         super.render();
         hover.draw();
     }
-
-    // mouseUp(x, y) {
-    //     focus(this);
-    //
-    //     return super.mouseUp(x, y);
-    // }
 }
 
 export default MainScene;
