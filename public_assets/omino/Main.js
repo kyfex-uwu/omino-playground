@@ -28,6 +28,7 @@ const data = {
         resize:[],
     }
 };
+export default data;
 
 let scrollScale = 0.5;
 
@@ -185,5 +186,3 @@ new p5(p5 => {
 });
 
 export const o = obj=>obj;
-
-export default data;

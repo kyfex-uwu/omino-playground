@@ -69,7 +69,6 @@ function loadColors(colorObj) {
             if (addedFont)
                 addedFont.load().then(_ => {
                     events.loaded.on(_ => {
-                        events.loaded
                         p5.textFont(addedFont.family);
                         p5.windowResized();
                     });
