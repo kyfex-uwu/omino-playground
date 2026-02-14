@@ -53,10 +53,8 @@ class Board {
         } catch (e) {
         }
         if (!this.shouldRecalcPath) return;
-        this.path = [];
 
         let lengthWorker;
-        this.lengthWorker = lengthWorker;
         try {
             lengthWorker = new Worker("/assets/omino/pathfinding/Pathfinder.js", {type: "module"});
         } catch (e) {
@@ -68,14 +66,19 @@ class Board {
                 terminate: _ => 0,
             };
         }
+        this.lengthWorker = lengthWorker;
 
         const nodes = this.getNodes();
 
         lengthWorker.onmessage = e => {
+            if (e.data[0] !== undefined && e.data[0].id === this.endPoint ||
+                e.data[e.data.length - 1].id === this.startPoint)
+                e.data.reverse();
+            if(this.startPoint === undefined && this.endPoint === undefined && e.data[0] !== undefined &&
+                e.data[0] === this.path[this.path.length-1] || e.data[e.data.length-1] === this.path[0])
+                e.data.reverse();
+            console.log(e.data[0],this.path[0])
             this.path = e.data;
-            if (this.path[0] && this.path[0].id == this.endPoint ||
-                this.path[this.path.length - 1] && this.path[this.path.length - 1].id == this.startPoint)
-                this.path.reverse();
             lengthWorker.terminate();
         };
 
