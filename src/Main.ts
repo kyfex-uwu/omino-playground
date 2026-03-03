@@ -1,0 +1,209 @@
+import Vector from "omino/Vector.js";
+import MainScene from "omino/scene/MainScene.js";
+import {createKey, rawKeys} from "omino/Keybinds.js";
+import Board from "omino/Board.js";
+import {isKindaMobile} from "omino/scene/Scene.js";
+
+import events from "omino/Events.js";
+
+import RectBoardEl from "omino/pathfinding/boards/RectBoardEl.js";
+import OminoEl from "omino/pathfinding/elements/OminoEl.js";
+import PortalEl from "omino/pathfinding/elements/PortalEl.js";
+import RectOrientation from "omino/pathfinding/orientation/RectOrientation.js";
+import type Scene from "omino/scene/Scene.js";
+import EnvHelper, {type EnhancedEnv} from "omino/EnvHelper.js";
+import {pageData} from "omino/Options.js";
+
+//--
+
+const scrollScale = 0.5;
+export const o = <T>(v:T)=>v;
+
+//--
+
+const data:{
+    scene:Scene<never>
+    isFullscreened:boolean
+    canvElt:HTMLCanvasElement
+    env:EnhancedEnv
+    listeners:{
+        mouseDown:((x:number,y:number)=>void)[],
+        mouseUp:((x:number,y:number)=>void)[],
+        keyDown:((key:string)=>void)[],
+        keyUp:((key:string)=>void)[],
+        scroll:((x:number,y:number,delta:number)=>boolean)[],
+        resize:((old:Vector,nw:Vector)=>void)[],
+    },
+
+    mouseX:number,
+    mouseY:number,
+    elapsed:number,
+} = {
+    isFullscreened: false,
+    scene:undefined!,
+    canvElt:undefined!,
+    env:undefined!,
+
+    listeners:{
+        mouseDown:[],
+        mouseUp:[],
+        keyDown:[],
+        keyUp:[],
+        scroll:[],
+        resize:[],
+    },
+
+    mouseX:0,
+    mouseY:0,
+    elapsed:0,
+};
+export default data;
+
+await events.loaded.resolve();
+
+data.canvElt = document.createElement("canvas");
+document.getElementById("app")!.appendChild(data.canvElt);
+data.env=EnvHelper(data.canvElt.getContext("2d", {alpha:false})!, data.canvElt);
+data.canvElt.addEventListener("contextmenu", e => e.preventDefault());
+data.canvElt.addEventListener("scroll", e => e.preventDefault());
+data.canvElt.addEventListener("touchmove", e => e.preventDefault());
+data.canvElt.style.zIndex = "999";
+
+data.scene = new MainScene(new Board({
+    elements: [
+        new RectBoardEl(7, 7),
+        new OminoEl(
+            {
+                0: {
+                    0: {
+                        1: {}
+                    },
+                    3: {}
+                }
+            }, 24, new RectOrientation("down")),
+        new OminoEl(
+            {
+                0: {
+                    0: {
+                        0: {
+                            0: {},
+                        },
+                    },
+                },
+            }, 5, new RectOrientation("down")),
+        new PortalEl(0, "meow"),
+        new PortalEl(4, "meow"),
+    ]
+}));
+data.isFullscreened = pageData.fullscreen.parsedVal!;
+
+data.listeners.resize.push((old,nw) => data.scene!.resized(old,nw));
+data.listeners.mouseDown.push((x,y) => data.scene!.mouseDown(x,y));
+data.listeners.mouseUp.push((x,y) => data.scene!.mouseUp(x,y));
+data.listeners.keyDown.push((key) => data.scene!.keyPressed(key));
+data.listeners.keyUp.push((key) => data.scene!.keyReleased(key));
+data.listeners.scroll.push((x, y, amt) => data.scene!.scrolled(x, y, amt));
+
+data.canvElt.addEventListener("mousemove", e=>{
+    data.mouseX = e.offsetX;
+    data.mouseY = e.offsetY;
+})
+
+addEventListener("resize", ()=>windowResized());
+data.canvElt.addEventListener("mousedown", (e)=>mouseDown(e.offsetX,e.offsetY));
+data.canvElt.addEventListener("touchstart", (e)=>
+    //whatever this doesnt work
+    mouseDown(e.targetTouches[0]!.pageX-data.canvElt.getBoundingClientRect().x,e.targetTouches[0]!.pageY-data.canvElt.getBoundingClientRect().y));
+data.canvElt.addEventListener("mouseup", (e)=>mouseUp(e.offsetX,e.offsetY));
+data.canvElt.addEventListener("touchend", (e)=>
+    //whatever this doesnt work
+    mouseUp(e.targetTouches[0]!.pageX-data.canvElt.getBoundingClientRect().x,e.targetTouches[0]!.pageY-data.canvElt.getBoundingClientRect().y));
+data.canvElt.addEventListener("keydown", (e)=>{
+    let key = e.key.length == 1 ? e.key.toLowerCase() : e.key;
+    createKey(key);
+    rawKeys[key]?.press();
+    for(const listener of data.listeners.keyDown) listener(key);
+});
+data.canvElt.addEventListener("keyup", (e)=>{
+    let key = e.key.length == 1 ? e.key.toLowerCase() : e.key;
+    createKey(key);
+    rawKeys[key]?.release();
+    for(const listener of data.listeners.keyUp) listener(key);
+});
+windowResized();
+
+let lastScroll=window.scrollY;
+data.canvElt.addEventListener("scroll", (e)=>{
+    let consumed=false;
+    let scrollDelta=window.scrollY-lastScroll;
+    lastScroll=window.scrollY;
+    for(const listener of data.listeners.scroll)
+        consumed ||= listener(data.mouseX, data.mouseY, scrollDelta * scrollScale);
+    if (consumed) {
+        window.scroll(0, data.canvElt.getBoundingClientRect().y - document.body.getBoundingClientRect().y -
+            (window.innerHeight - data.canvElt.height) / 2);
+    }
+});
+
+const draw = (delta:DOMHighResTimeStamp) => {
+    data.elapsed+=delta;
+
+    data.env.clearRect(0,0,9999,9999);
+    data.canvElt.style.cursor = "pointer";
+    data.env.setFontSize(30);
+    data.env.strokeStyle="#0000";
+    data.env.fillStyle="#0000";
+    data.scene.render();
+
+    //--
+
+    for (const key in rawKeys) rawKeys[key]!.reset();
+
+    requestAnimationFrame(draw);
+};
+requestAnimationFrame(draw);
+
+function windowResized(){
+    let oldWidth = data.canvElt!.width;
+    let oldHeight = data.canvElt!.height;
+    let newWidth;
+    let newHeight;
+    if (data.isFullscreened) {
+        if (isKindaMobile) data.canvElt.requestFullscreen();
+        newWidth = window.innerWidth;
+        newHeight = window.innerHeight;
+
+        data.canvElt.style.position="absolute";
+        data.canvElt.style.left="0";
+        data.canvElt.style.top="0";
+        try {
+            //me when im lazy
+            document.getElementById("lightmode-toggle")!.style.display = "none";
+        } catch (e) {
+        }
+    } else {
+        if (isKindaMobile) document.exitFullscreen();
+        newWidth = data.canvElt.parentElement!.clientWidth;
+        newHeight = Math.min(data.canvElt.parentElement!.clientWidth * 3 / 4, window.innerHeight * 0.96);
+
+        data.canvElt.style.position="static";
+        try {
+            //me when im lazy 2: electic boogaloo
+            document.getElementById("lightmode-toggle")!.style.display = "unset";
+        } catch (e) {
+        }
+    }
+    data.canvElt.width = newWidth;
+    data.canvElt.height = newHeight;
+    for(const listener of data.listeners.resize)
+        listener(new Vector(oldWidth, oldHeight), new Vector(newWidth, newHeight));
+}
+
+function mouseDown(x:number,y:number){
+    for(const listener of data.listeners.mouseDown)
+        listener(x, y);
+}
+function mouseUp(x:number,y:number){
+    for(const listener of data.listeners.mouseUp)
+        listener(x, y);
+}

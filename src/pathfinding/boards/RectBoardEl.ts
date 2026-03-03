@@ -1,0 +1,223 @@
+import {
+    ApplyData,
+    EditableElement,
+    Element,
+    type Pass,
+    type RenderPass,
+    SelectableElement
+} from "omino/pathfinding/elements/Element.js";
+import Node from "omino/pathfinding/Node.js";
+import RectOrientation from "omino/pathfinding/orientation/RectOrientation.js";
+import Vector from "omino/Vector.js";
+import {background, fill} from "omino/Colors.js";
+
+//  0
+// 3 1
+//  2
+
+export default class RectBoardEl extends Element {
+    private width: number;
+    private height: number;
+    private currId=0;
+    private board:number[][]=[];
+    private renderScale=1;
+    constructor(width:number, height:number) {
+        let applyPasses:Pass[]=[];
+        let renderPasses:RenderPass[]=[];
+        super(applyPasses,renderPasses);
+        this.width = width;
+        this.height = height;
+
+        this.setHeight(this.height);
+        this.setWidth(this.width);
+
+        applyPasses.push(
+            {order:-1000, func:() => {//generate nodes
+                const toReturn = new ApplyData();
+
+                let currRowNode;
+                for (let y = 0; y < this.height; y++) {
+                    let leftView;
+                    for (let x = 0; x < this.width; x++) {
+                        let node = new Node(RectOrientation.default, {pos:new Vector(x,y)}, this.board[y]![x]!);
+                        toReturn.add(node);
+
+                        let nodeView = node.getView(RectOrientation.default);
+                        if (x !== 0) {
+                            nodeView.connectNode("left", "right", leftView!.node);
+
+                            if (y !== 0) {
+                                nodeView.connectNode("up", "down", leftView!.get("up")!.getNode("right")!);
+                            }
+                        } else if (y !== 0) {
+                            nodeView.connectNode("up", "down", currRowNode!);
+                        }
+                        if (x === 0) currRowNode = node;
+                        leftView = nodeView;
+                    }
+                }
+
+                return toReturn;
+            }},
+        );
+
+        renderPasses.push(
+            {order:-1000, func:(nodes, env) => {//initializes the board area
+                this.renderScale = Math.min(env.container.dims.x / this.width, env.container.dims.y / this.height);
+
+                Object.assign(env.drawData, {
+                    nodeToTexPos: (n:Node<any, any>) => this.getNodePos(n, this.renderScale),
+                    nodeSize: this.renderScale,
+                });
+
+                this.center.replace(this.renderScale*this.width/2, this.renderScale*this.height/2);
+                env.container.center = this.center;
+            }},
+
+            {order:-10, func:(nodes, env) => {//draws grid
+                fill("board.grid", env.drawData.context);
+                let size = env.drawData.nodeSize;
+
+                for (const node of Object.values(nodes)) {
+                    let pos = env.drawData.nodeToTexPos(node);
+                    env.drawData.context.roundRect((pos.x / size + 0.1) * size, (pos.y / size + 0.1) * size,
+                        size * 0.8, size * 0.8, size * 0.1);
+                }
+            }},
+            {order:1000, func:(nodes, env, historicalNodes) => {//draws path
+                fill("board.grid", env.drawData.context);
+                let halfCell = env.drawData.nodeSize / 2;
+                let positions = env.board.path.map(id => historicalNodes[id]!).map(n =>//todo: revert this back to just nodes
+                    env.drawData.nodeToTexPos(n).add(halfCell, halfCell));
+                let size = env.drawData.nodeSize * 0.1;
+
+                env.drawData.context.save();
+                env.drawData.context.beginClip();
+                for (const position of positions) {
+                    env.drawData.context.roundRect(position.x - size / 2, position.y - size / 2, size, size, size);
+                }
+                for (let i = 1; i < positions.length; i++) {
+                    let p1 = positions[i - 1]!;
+                    let p2 = positions[i]!;
+
+                    //this math is so gross lol
+                    env.drawData.context.save();
+                    env.drawData.context.translate(p1.x, p1.y);
+                    env.drawData.context.rotate(-Math.atan2(p2.x - p1.x, p2.y - p1.y));
+                    env.drawData.context.rect(-size / 2, 0, size, Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2));
+                    env.drawData.context.restore();
+                }
+                env.drawData.context.endClip();
+                background("board.pathColor", env.drawData.context);
+                env.drawData.context.restore();
+
+                fill("board.text", env.drawData.context);
+                env.drawData.context.textAlign="center";
+                env.drawData.context.textBaseline="middle";
+                let i = 1;
+                for (const position of positions) {
+                    env.drawData.context.setFontSize(
+                        env.drawData.nodeSize * 0.5 / (Math.floor(Math.log10(i)) * 0.3 + 1));
+                    env.drawData.context.spFillText((i++).toString(), position.x, position.y);
+                }
+            }},
+
+            {order:1010, func:(nodes, env, historicalNodes) => {//handle click
+                if (!env.cursor.heldElement) {
+                    let pickingUp=undefined;
+                    for(const element of env.elements){
+                        if(element instanceof SelectableElement && element.forceSelected){
+                            pickingUp=element;
+                            if(element instanceof EditableElement)
+                                element.finishEdit();
+                            element.forceSelected=false;
+                            break;
+                        }
+                    }
+
+                    if(pickingUp===undefined) {
+                        for (const element of env.elements) {
+                            if (element instanceof SelectableElement) {
+                                const selectionType = element.isSelected(nodes, env, historicalNodes);
+                                if (selectionType === SelectableElement.CLICK.CONSUME) {
+                                    pickingUp = undefined;
+                                    break;
+                                } else if (selectionType === SelectableElement.CLICK.PICKUP) {
+                                    pickingUp = element;
+                                }
+                            }
+                        }
+                    }
+                    if(pickingUp !== undefined){
+                        env.cursor.heldElement = pickingUp;
+                        env.board.remove(pickingUp);
+                    }
+                } else {
+                    if (env.cursor.heldElement instanceof SelectableElement &&
+                            env.cursor.heldElement.tryPlace(nodes, env, historicalNodes)) {
+                        env.board.add(env.cursor.heldElement);
+                        env.container.unHold();
+                    }
+                }
+            }},
+        );
+    }
+
+
+    settings() {
+        return [{
+            type: "counter" as "counter",
+            label: "Width",
+            data: {
+                min: 1,
+                value: this.width,
+                submit: (v:number) => {
+                    this.setWidth(v);
+                    this.width = v;
+                    this.needsUpdate=true;
+                    return true;
+                }
+            }
+        }, {
+            type: "counter" as "counter",
+            label: "Height",
+            data: {
+                min: 1,
+                value: this.height,
+                submit: (v:number) => {
+                    this.setHeight(v);
+                    this.height = v;
+                    this.needsUpdate=true;
+                    return true;
+                }
+            }
+        }];
+    }
+    setHeight(height:number){
+        if(this.board.length>height)
+            this.board = this.board.slice(0,height);
+
+        if(this.board.length<height)
+            this.board.push(...new Array(height-this.board.length).fill(0).map(_=>
+                new Array(this.width).fill(0).map(_=>this.currId++)))
+    }
+    setWidth(width:number){
+        if(this.board.length>0 && this.board[0]!.length>width)
+            for(let i=0;i<this.board.length;i++)
+                this.board[i] = this.board[i]!.slice(0,width);
+
+        if(this.board.length>0 && this.board[0]!.length<width)
+            for(let i=0;i<this.board.length;i++)
+                this.board[i]!.push(...new Array(width-this.board[i]!.length).fill(0).map(_=>this.currId++));
+
+    }
+
+    getNodePos(n:Node<any, {pos:Vector}>, scale:number) {
+        if(!n) return new Vector(0,0);
+        return n.custom.pos.scale(scale);
+    }
+
+    infoTextPass(){
+        return `${this.width}x${this.height}`;
+    }
+}

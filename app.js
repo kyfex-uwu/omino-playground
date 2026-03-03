@@ -10,7 +10,7 @@ console.log("App hosted at http://localhost:4000");
 
 //--
 
-website.use("/assets", express.static(__dirname + "/public_assets/"));
+website.use("/omino-dist", express.static(__dirname + "/dist/"));
 website.get('/favicon.ico', (req, res) => res.sendFile(__dirname+"/public_assets/omino/favicon.ico"));
 website.get('/', (req, res) => res.redirect('/omino-playground?fullscreen=true'));
 website.get("/omino-playground", (req, res) => {
@@ -27,17 +27,18 @@ website.get("/omino-playground", (req, res) => {
 		</style>
 	</head>
 	<body style="height: 100vh; margin:0; background-color:black;">
-		<script src="https://cdn.jsdelivr.net/npm/p5@1.10.0/lib/p5.js"></script>
+		<div id="app"></div>
 		<script type="importmap">
 			{
 				"imports": {
 					"three": "https://cdn.jsdelivr.net/npm/three@0.171.0/build/three.module.js",
-					"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.171.0/examples/jsm/"
+					"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.171.0/examples/jsm/",
+					
+					"omino/": "/omino-dist/"
 				}
 			}
 		</script>
-		
-		<script src="/assets/omino/launcher.js" type="module"></script>
+		<script src="/omino-dist/launcher.js" type="module"></script>
 	</body>
 </html>`);
 });

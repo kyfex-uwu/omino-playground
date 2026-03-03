@@ -1,0 +1,87 @@
+import {DimsScene, focus, isKindaMobile} from "omino/scene/Scene.js";
+import {fill} from "omino/Colors.js";
+import MobileKeyboard from "omino/scene/utils/MobileKeyboard.js";
+import data from "omino/Main.js";
+import {SingleEvent} from "omino/Listeners.js";
+
+const defaultValidator = (str:string)=>/^.*$/.test(str);
+
+class TextInputScene extends SingleEvent(DimsScene<any>, null! as [string]) {
+    private validator: (val:string)=>boolean;
+    private requiresApply: boolean;
+    private value: string;
+    private newValue: string;
+    private keyboard: MobileKeyboard|undefined;
+    constructor({validator = defaultValidator, requiresApply = false, value = ""} = {}) {
+        super();
+        this.validator = validator;
+        this.requiresApply = requiresApply;
+        this.value = value;
+        this.newValue = value;
+    }
+
+    mouseUp(x:number, y:number) {
+        if (super.mouseUp(x, y)) return true;
+        if (this.isIn()) {
+            focus(this);
+
+            if (isKindaMobile && !this.keyboard) {
+                this.keyboard = this.addScene(new MobileKeyboard([
+                    ["1", "2", "3"], ["4", "5", "6"], ["7", "8", "9"], [",", "0", "Backspace"]
+                ])).addListener((key:string) => this.keyPressed(key));
+            }
+
+            return true;
+        } else if (this.keyboard) {
+            if (this.keyboard) this.keyboard.remove();
+            this.keyboard = undefined;
+            return true;
+        }
+
+        return super.mouseUp(x, y);
+    }
+
+    apply() {
+        if (this.validator(this.newValue))
+            this.value = this.newValue;
+
+        this.emitEvent(this.value);
+        return true;
+    }
+
+    keyPressed(key:string) {
+        if (!this.focused) return super.keyPressed(key);
+
+        switch (key) {
+            case "Backspace":
+                this.newValue = this.newValue.slice(0, -1);
+                break;
+            default:
+                if (key.length > 1) break;
+
+                this.newValue += key;
+                break;
+        }
+
+        if (!this.requiresApply) this.apply();
+        return true;
+    }
+
+    render() {
+        if (this.isIn()) data.canvElt.style.cursor = "text";
+
+        fill("scenes.util.textInput.bg");
+        if (this.newValue != this.value) fill("scenes.util.textInput.bgUnsaved");
+        if (!this.validator(this.newValue)) fill("scenes.util.textInput.invalid");
+        data.env.rect(0, 0, this.dims.x, this.dims.y);
+        data.env.fill();
+        fill("scenes.util.textInput.color");
+        data.env.setFontSize(this.dims.y * 0.8);
+        data.env.spFillText(this.newValue, 2, 2, {align:"left", baseline:"top"});
+        if (this.focused && data.elapsed * 0.9 % 1 > 0.5) data.env.rect(data.env.measureText(this.newValue).width + 2, 2, 2, this.dims.y - 4);
+
+        super.render();
+    }
+}
+
+export default TextInputScene;
