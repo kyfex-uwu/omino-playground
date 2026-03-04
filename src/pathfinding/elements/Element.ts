@@ -71,14 +71,17 @@ abstract class Element {
     infoTextPass(env:Env){ return ""; }
 
     static apply(elements:Element[], env:Env, historicalNodes:NodeGroup = {}){
-        const newEnv:Env = {...env};
+        const newEnv:Env = {
+            ...env,
+            elements
+        };
         let nodes:NodeGroup = {};
 
         let passes = elements.map(e => e.applyPasses.map(pass=>o({e, pass}))).flat()
             .toSorted((p1, p2) => p1.pass.order - p2.pass.order);
 
         for (let passData of passes) {
-            let data = passData.pass.func(nodes, env, historicalNodes);
+            let data = passData.pass.func(nodes, newEnv, historicalNodes);
             if(passData.e.invalid){
                 newEnv.elements.splice(newEnv.elements.indexOf(passData.e),1);
                 break;

@@ -9,7 +9,7 @@ import {
 import Node from "omino/pathfinding/Node.js";
 import RectOrientation from "omino/pathfinding/orientation/RectOrientation.js";
 import Vector from "omino/Vector.js";
-import {background, fill} from "omino/Colors.js";
+import {background, fill, getColor} from "omino/Colors.js";
 
 //  0
 // 3 1
@@ -92,9 +92,9 @@ export default class RectBoardEl extends Element {
                 let size = env.drawData.nodeSize * 0.1;
 
                 env.drawData.context.save();
-                env.drawData.context.beginClip();
+                env.drawData.context.beginPath();
                 for (const position of positions) {
-                    env.drawData.context.sRect(position.x - size / 2, position.y - size / 2, size, size, size);
+                    env.drawData.context.roundRect(position.x - size / 2, position.y - size / 2, size, size, size);
                 }
                 for (let i = 1; i < positions.length; i++) {
                     let p1 = positions[i - 1]!;
@@ -107,11 +107,13 @@ export default class RectBoardEl extends Element {
                     env.drawData.context.rect(-size / 2, 0, size, Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2));
                     env.drawData.context.restore();
                 }
-                env.drawData.context.endClip();
-                background("board.pathColor", env.drawData.context);
+                fill("board.pathColor", env.drawData.context);
+                env.drawData.context.fill();
                 env.drawData.context.restore();
 
+                console.log("vv")
                 fill("board.text", env.drawData.context);
+                console.log("^^")
                 env.drawData.context.textAlign="center";
                 env.drawData.context.textBaseline="middle";
                 let i = 1;

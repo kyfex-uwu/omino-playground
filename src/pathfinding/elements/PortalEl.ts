@@ -74,11 +74,15 @@ class PortalEl extends EditableElement {
             pos = env.mouse.pos.sub(env.container.getAbsolutePos().add(this.onMouse || new Vector(0, 0)));
 
         fill("ominoColors."+this.hashColor, env.drawData.context);
+        env.drawData.context.beginPath();
         env.drawData.context.ellipse(pos.x, pos.y, size * 0.44, size*0.44, 0, 0, 6.29);
-        for (let i = (data.elapsed * 0.01) % 1; i < 3; i++) {
-            env.drawData.context.fillStyle = `rgba(255,255,255$,${i*0.2}%})`;
+        env.drawData.context.fill();
+        for (let i = (data.elapsed * 0.0007) % 1; i < 3; i++) {
+            env.drawData.context.fillStyle = `rgba(255,255,255,${(1-Math.sin(i*2.09+1.5))*20}%)`;
             const centerSize = size * 0.88 * (3 - i) / 6;
+            env.drawData.context.beginPath();
             env.drawData.context.ellipse(pos.x, pos.y, centerSize, centerSize, 0, 0, 6.29);
+            env.drawData.context.fill();
         }
     }
 

@@ -14,6 +14,7 @@ import type Scene from "omino/scene/Scene.js";
 import EnvHelper, {type EnhancedEnv} from "omino/EnvHelper.js";
 import {pageData} from "omino/Options.js";
 import data from "omino/Global.js";
+import {fill} from "omino/Colors.js";
 
 //--
 
@@ -37,19 +38,19 @@ data.scene = new MainScene(new Board({
         new RectBoardEl(7, 7),
         new OminoEl(
             {
-                0: {
-                    0: {
-                        1: {}
+                up: {
+                    up: {
+                        right: {}
                     },
-                    3: {}
+                    left: {}
                 }
             }, 24, new RectOrientation("down")),
         new OminoEl(
             {
-                0: {
-                    0: {
-                        0: {
-                            0: {},
+                up: {
+                    up: {
+                        up: {
+                            up: {},
                         },
                     },
                 },
@@ -109,7 +110,7 @@ data.canvElt.addEventListener("scroll", (e)=>{
 });
 
 const draw = (delta:DOMHighResTimeStamp) => {
-    data.elapsed+=delta;
+    data.elapsed=delta;
 
     data.env.clearRect(0,0,9999,9999);
     data.canvElt.style.cursor = "default";

@@ -137,7 +137,7 @@ function getColor(path:ColorPath, colorEnv = Colors):ResultColor {
 }
 
 function handleIfCArr(color:ResultColor){
-    if(Array.isArray(color)) return "#"+color.map(v=>v.toString(16)).join("");
+    if(Array.isArray(color)) return "#"+color.map(v=>v.toString(16).padStart(2,"0")).join("");
     return color;
 }
 
@@ -154,7 +154,7 @@ export function background(path:ColorPath, env = data.env) {
     env.save();
     env.resetTransform();
     fill(path);
-    env.rect(-1,-1,env.width+2,env.height+2);
+    env.rect(-1,-1,env.width()+2,env.height()+2);
     env.fill();
     env.restore();
     env.fillStyle = oldStyle;

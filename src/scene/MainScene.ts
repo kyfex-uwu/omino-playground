@@ -88,9 +88,6 @@ export class BoardContainer extends DimsScene<MainScene> {
     }
 
     render() {
-        // fill([255,0,0])
-        // data.env.sRect(0,0,100,100);
-
         if(Keybinds.DEL.isReleased() && this.parent!.cursor.heldElement){
             this.parent!.cursor.heldElement=undefined;
         }
@@ -116,7 +113,7 @@ export class BoardContainer extends DimsScene<MainScene> {
 
         this.setEnv();
         Element.render(this.parent!.board.elements, this.applyData.nodes, this.applyData.historicalNodes, this.env);
-        this.pos.replace(new Vector(data.env.width/4,0).add(this.dims.sub(this.center.scale(2)).scale(0.5)));
+        this.pos.replace(new Vector(data.env.width()/4,0).add(this.dims.sub(this.center.scale(2)).scale(0.5)));
 
         if (this.parent!.cursor.heldElement) {
             this.parent!.cursor.heldElement.drawAtMouse(this.applyData.nodes, this.env, this.applyData.historicalNodes);

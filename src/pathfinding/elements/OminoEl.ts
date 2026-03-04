@@ -139,9 +139,9 @@ class OminoEl extends EditableElement {
         //note: this assumes the omino is in a valid spot!! it will not check if it can it just does
         applyPasses.push({order:-1, func:(nodes, env) => {
             if(this.getRoot(nodes) === undefined ||
-                !getNodes(this.getRoot(nodes).getView(this.orientation), this.connTree,  new Set(Object.values(nodes)))) this.invalid=true;
+                !getNodes(this.getRoot(nodes).getView(this.orientation), this.connTree)) this.invalid=true;
         }}, {order:0, func:(nodes, env) => {
-            let allNodes = getNodes(this.getRoot(nodes)?.getView(this.orientation), this.connTree, new Set(Object.values(nodes)));
+            let allNodes = getNodes(this.getRoot(nodes)?.getView(this.orientation), this.connTree);
             if(!allNodes) return new ApplyData();
 
             this.nodes.length=0;
@@ -160,14 +160,14 @@ class OminoEl extends EditableElement {
         let size = env.drawData.nodeSize;
 
         env.drawData.context.save();
-        fill("ominoColors.I", env.drawData.context);
+        fill("ominoColors.P", env.drawData.context);
         env.drawData.context.lineWidth = size * 0.88;
         for (const node of this.nodes) {
             let pos = this.getNodePos(node, env, historicalNodes);
 
             this.drawNode(env, pos);
 
-            stroke("ominoColors.I", env.drawData.context);
+            stroke("ominoColors.P", env.drawData.context);
             for (const name in node.historicalConnections) {
                 const connected = node.historicalConnections[name]!;
                 if (this.nodes.some(n => n.id == connected.node.id) && connected.node.id > node.id) {
@@ -223,7 +223,7 @@ class OminoEl extends EditableElement {
         const rootNode = Object.values(nodes).find(n => n.id === root);
         if (!rootNode) return false;
         const nodesToCheck = getNodes(rootNode.getView(this.orientation),
-            this.connTree, new Set(Object.values(nodes)));
+            this.connTree);
         if(nodesToCheck){
             nodesToCheck.add(rootNode);
 

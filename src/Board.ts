@@ -76,7 +76,7 @@ class Board {
             onmessage: ((ev: MessageEvent<any>) => any) | null
         };
         try {
-            lengthWorker = new Worker("/assets/omino/pathfinding/Pathfinder.js", {type: "module"});
+            lengthWorker = new Worker("/omino-dist/pathfinding/Pathfinder.js", {type: "module"});
         } catch (e) {
             const fakePostMessage = (data: any) =>
                 lengthWorker.onmessage!(new MessageEvent("", {data}));
