@@ -9,6 +9,8 @@ export type EnhancedEnv = CanvasRenderingContext2D & {
     endClip:()=>void,
     width:number,
     height:number,
+
+    sRect:(x:number,y:number,w:number,h:number,r?:number)=> void,
 }
 
 let currFont="sans-serif";
@@ -33,10 +35,10 @@ export default (bareEnv:CanvasRenderingContext2D, baseCanvas:HTMLCanvasElement):
         },
 
         beginClip:()=>{
-            console.log("TODO")
+            // console.log("TODO")
         },
         endClip:()=>{
-            console.log("TODO")
+            // console.log("TODO")
         },
 
         get width(){
@@ -44,6 +46,16 @@ export default (bareEnv:CanvasRenderingContext2D, baseCanvas:HTMLCanvasElement):
         },
         get height(){
             return baseCanvas.height;
-        }
+        },
+
+        sRect:(x:number,y:number,w:number,h:number,r?:number)=>{
+            bareEnv.beginPath();
+            if(r === undefined){
+                bareEnv.rect(x,y,w,h);
+            }else{
+                bareEnv.roundRect(x,y,w,h,r);
+            }
+            bareEnv.fill();
+        },
     })
 }

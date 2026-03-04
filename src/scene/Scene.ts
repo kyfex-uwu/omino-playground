@@ -1,7 +1,6 @@
 import Vector from "omino/Vector.js";
-import Data from "omino/Main.js";
 import {fill} from "omino/Colors.js";
-import data from "omino/Main.js";
+import data from "omino/Global.js"
 
 const isKindaMobile = 'ontouchstart' in document.documentElement || 0;
 
@@ -188,25 +187,25 @@ export class ScrollableScene<T extends Scene<any>> extends DimsScene<T> {
             this.lastScroll = undefined;
         }
         const mousemove = (e:{offsetY:number, type:"mouse"}|{touches:TouchList, type:"touch"}) => {
-            let offsY = e.type === "mouse" ? e.offsetY : ((e.touches[0]?.pageY ?? 0) - Data.canvElt.offsetTop);
+            let offsY = e.type === "mouse" ? e.offsetY : ((e.touches[0]?.pageY ?? 0) - data.canvElt.offsetTop);
 
             if (this.lastScroll || Math.abs(this.maybeScrolling.y - offsY) > maxClickDist) {
                 if (!this.lastScroll) {
                     this.lastScroll = this.maybeScrolling;
                     this.abortControllers.up.abort();
 
-                    Data.canvElt.addEventListener("mouseup", mouseup);
-                    Data.canvElt.addEventListener("touchend", mouseup);
+                    data.canvElt.addEventListener("mouseup", mouseup);
+                    data.canvElt.addEventListener("touchend", mouseup);
                 }
                 this.scrolled(data.mouseX, data.mouseY, this.lastScroll.y - data.mouseY);
                 this.lastScroll = new Vector(data.mouseX, data.mouseY);
             }
         }
-        Data.canvElt.addEventListener("mousemove", (e)=>mousemove({
+        data.canvElt.addEventListener("mousemove", (e)=>mousemove({
             type:"mouse",
             offsetY:e.offsetY
         }), {signal: this.abortControllers.move.signal});
-        Data.canvElt.addEventListener("touchmove", (e) => mousemove({
+        data.canvElt.addEventListener("touchmove", (e) => mousemove({
             type:"touch",
             touches:e.touches
         }), {signal: this.abortControllers.move.signal});
@@ -282,7 +281,7 @@ export const hover = {
         let inScene = false;
         let currScene = hoverData.scene;
         while (currScene!==undefined) {
-            if (currScene == Data.scene) {
+            if (currScene == data.scene) {
                 inScene = true;
                 break;
             }
@@ -298,7 +297,7 @@ export const hover = {
         hoverData.time++;
         if (hoverData.time > 0) {
             fill("hover.bg");
-            data.env.roundRect(hoverData.pos.x - hoverData.tWidth / 2, hoverData.pos.y - 20, hoverData.tWidth, 20, 5);
+            data.env.sRect(hoverData.pos.x - hoverData.tWidth / 2, hoverData.pos.y - 20, hoverData.tWidth, 20, 5);
             data.env.fill();
             fill("hover.text");
             data.env.textAlign = "center";

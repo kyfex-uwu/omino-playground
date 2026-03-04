@@ -1,5 +1,5 @@
 import Vector from "omino/Vector.js";
-import data, {o} from "omino/Main.js";
+import {o} from "omino/Main.js";
 import {DimsScene} from "omino/scene/Scene.js";
 import {fill} from "omino/Colors.js";
 import events from "omino/Events.js";
@@ -9,6 +9,7 @@ import type {BoardContainer} from "omino/scene/MainScene.js";
 import type Board from "omino/Board.js";
 import type {OType} from "omino/pathfinding/orientation/Orientation.js";
 import type {EnhancedEnv} from "omino/EnvHelper.js";
+import data from "omino/Global.js";
 
 export type NodeGroup<OrienType extends OType=any,Custom=any> = {[key:string]:Node<OrienType, Custom>};
 export type Env = {
@@ -179,7 +180,7 @@ class EditableDialog extends DimsScene<any>{
 
     render(env=data.env) {
         fill("elementDialog.bg", env);
-        env.roundRect(0,5,this.dims.x,this.dims.y-5, 5);
+        env.sRect(0,5,this.dims.x,this.dims.y-5, 5);
         env.fill();
         env.beginPath();
         env.moveTo(this.dims.x/2+this.pointerOffs, 0);

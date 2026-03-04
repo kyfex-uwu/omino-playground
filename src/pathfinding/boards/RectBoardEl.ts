@@ -80,7 +80,7 @@ export default class RectBoardEl extends Element {
 
                 for (const node of Object.values(nodes)) {
                     let pos = env.drawData.nodeToTexPos(node);
-                    env.drawData.context.roundRect((pos.x / size + 0.1) * size, (pos.y / size + 0.1) * size,
+                    env.drawData.context.sRect((pos.x / size + 0.1) * size, (pos.y / size + 0.1) * size,
                         size * 0.8, size * 0.8, size * 0.1);
                 }
             }},
@@ -94,7 +94,7 @@ export default class RectBoardEl extends Element {
                 env.drawData.context.save();
                 env.drawData.context.beginClip();
                 for (const position of positions) {
-                    env.drawData.context.roundRect(position.x - size / 2, position.y - size / 2, size, size, size);
+                    env.drawData.context.sRect(position.x - size / 2, position.y - size / 2, size, size, size);
                 }
                 for (let i = 1; i < positions.length; i++) {
                     let p1 = positions[i - 1]!;

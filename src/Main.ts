@@ -13,6 +13,7 @@ import RectOrientation from "omino/pathfinding/orientation/RectOrientation.js";
 import type Scene from "omino/scene/Scene.js";
 import EnvHelper, {type EnhancedEnv} from "omino/EnvHelper.js";
 import {pageData} from "omino/Options.js";
+import data from "omino/Global.js";
 
 //--
 
@@ -20,44 +21,6 @@ const scrollScale = 0.5;
 export const o = <T>(v:T)=>v;
 
 //--
-
-const data:{
-    scene:Scene<never>
-    isFullscreened:boolean
-    canvElt:HTMLCanvasElement
-    env:EnhancedEnv
-    listeners:{
-        mouseDown:((x:number,y:number)=>void)[],
-        mouseUp:((x:number,y:number)=>void)[],
-        keyDown:((key:string)=>void)[],
-        keyUp:((key:string)=>void)[],
-        scroll:((x:number,y:number,delta:number)=>boolean)[],
-        resize:((old:Vector,nw:Vector)=>void)[],
-    },
-
-    mouseX:number,
-    mouseY:number,
-    elapsed:number,
-} = {
-    isFullscreened: false,
-    scene:undefined!,
-    canvElt:undefined!,
-    env:undefined!,
-
-    listeners:{
-        mouseDown:[],
-        mouseUp:[],
-        keyDown:[],
-        keyUp:[],
-        scroll:[],
-        resize:[],
-    },
-
-    mouseX:0,
-    mouseY:0,
-    elapsed:0,
-};
-export default data;
 
 await events.loaded.resolve();
 
@@ -149,7 +112,7 @@ const draw = (delta:DOMHighResTimeStamp) => {
     data.elapsed+=delta;
 
     data.env.clearRect(0,0,9999,9999);
-    data.canvElt.style.cursor = "pointer";
+    data.canvElt.style.cursor = "default";
     data.env.setFontSize(30);
     data.env.strokeStyle="#0000";
     data.env.fillStyle="#0000";

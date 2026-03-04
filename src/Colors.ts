@@ -1,5 +1,5 @@
 import events from "omino/Events.js";
-import data from "omino/Main.js";
+import data from "omino/Global.js"
 
 type ColorValArr =[number,number,number]|[number,number,number,number];
 type ResultColor=string|CanvasGradient|CanvasPattern|ColorValArr;
@@ -9,7 +9,10 @@ export type ColorPath=ColorVal|string;
 export type ColorsObj={[key:string]:ColorsObj|ColorPath}
 const Colors:ColorsObj = {};
 
-export function exportMod(obj:ColorsObj){}
+let exportModBehavior = (obj:ColorsObj) => loadDefaultColors(obj);
+export function exportMod(obj:ColorsObj){
+    exportModBehavior(obj);
+}
 
 function deepAssign(target:ColorsObj, source:ColorsObj) {
     for (const [k, v] of Object.entries(source)) {
@@ -23,8 +26,7 @@ function deepAssign(target:ColorsObj, source:ColorsObj) {
 }
 
 function loadColorScript(script:string, callback = (orig:()=>void) => orig()) {
-    //@ts-expect-error
-    window.exportMod =
+    exportModBehavior =
         (mod:ColorsObj) => {
             callback(() => {
                 loadColors(mod);
@@ -86,6 +88,8 @@ const pathRegex = /^([A-Za-z0-9_-]+[:\.][A-Za-z0-9_-]+|[A-Za-z0-9_-]+)(\.[A-Za-z
 let colorCache:{[key:string]:ColorVal} = {};
 
 function cacheAndReturn(cachePath:string, val:ColorVal) {
+    if(val === errorColor) val=[Math.floor(Math.random()*255),Math.floor(Math.random()*255),Math.floor(Math.random()*255),50];
+
     colorCache[cachePath] = val;
     if(val instanceof Function) return val();
     return val;
@@ -102,7 +106,7 @@ function getColor(path:ColorPath, colorEnv = Colors):ResultColor {
     if (!pathRegex.test(path)) {
         if (!loggedColors[path]) console.trace("invalid path: " + path);
         loggedColors[path] = true;
-        return errorColor;
+        return cacheAndReturn(path, errorColor);
     }
     const cached = colorCache[path];
     if (cached !== undefined) {
@@ -123,17 +127,17 @@ function getColor(path:ColorPath, colorEnv = Colors):ResultColor {
         if(pos[road] === undefined){
             if (!loggedColors[path]) console.trace(`color ${path} not found`);
             loggedColors[path] = true;
-            return errorColor;
+            return cacheAndReturn(path, errorColor);
         }
 
         pos = pos[road];
     }
 
-    return errorColor;
+    return cacheAndReturn(path, errorColor);
 }
 
 function handleIfCArr(color:ResultColor){
-    if(Array.isArray(color)) return "";
+    if(Array.isArray(color)) return "#"+color.map(v=>v.toString(16)).join("");
     return color;
 }
 

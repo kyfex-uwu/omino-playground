@@ -1,7 +1,7 @@
 import {DimsScene, focus, isKindaMobile} from "omino/scene/Scene.js";
 import {fill} from "omino/Colors.js";
 import MobileKeyboard from "omino/scene/utils/MobileKeyboard.js";
-import data from "omino/Main.js";
+import data from "omino/Global.js"
 import {SingleEvent} from "omino/Listeners.js";
 
 const defaultValidator = (str:string)=>/^.*$/.test(str);

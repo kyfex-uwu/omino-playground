@@ -5,7 +5,7 @@ import {background, fill} from "omino/Colors.js";
 import Element, {type NodeGroup, type RenderEnv, SelectableElement} from "omino/pathfinding/elements/Element.js";
 import {Keybinds} from "omino/Keybinds.js";
 import type Board from "omino/Board.js";
-import data from "omino/Main.js";
+import data from "omino/Global.js"
 // import PaletteScene from "omino/scene/PaletteScene.js";
 
 export class BoardContainer extends DimsScene<MainScene> {
@@ -88,8 +88,8 @@ export class BoardContainer extends DimsScene<MainScene> {
     }
 
     render() {
-        fill([255,0,0])
-        data.env.fillRect(0,0,100,100);
+        // fill([255,0,0])
+        // data.env.sRect(0,0,100,100);
 
         if(Keybinds.DEL.isReleased() && this.parent!.cursor.heldElement){
             this.parent!.cursor.heldElement=undefined;

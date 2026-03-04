@@ -2,7 +2,7 @@ import {ButtonScene, DimsScene} from "omino/scene/Scene.js";
 import Vector from "omino/Vector.js";
 import {fill} from "omino/Colors.js";
 import {SingleEvent} from "omino/Listeners.js";
-import data from "omino/Main.js";
+import data from "omino/Global.js"
 
 class KeyScene extends SingleEvent(ButtonScene<MobileKeyboard>, null! as []) {
     private key;
@@ -31,7 +31,7 @@ class KeyScene extends SingleEvent(ButtonScene<MobileKeyboard>, null! as []) {
 
     render() {
         fill(this.isIn() ? "scenes.util.keypad.button.bgHover" : "scenes.util.keypad.button.bg");
-        data.env.roundRect(0, 0, this.dims.x, this.dims.y, Math.max(0, Math.min(this.dims.x, this.dims.y)));
+        data.env.sRect(0, 0, this.dims.x, this.dims.y, Math.max(0, Math.min(this.dims.x, this.dims.y)));
         data.env.fill();
         fill("scenes.util.keypad.button.color");
         data.env.setFontSize(this.dims.y * 0.7);
@@ -90,13 +90,13 @@ class MobileKeyboard extends SingleEvent(DimsScene<any>, null! as [string]) {
     render() {
         let unit = Math.max(0, Math.min(this.dims.x, this.dims.y));
         fill("scenes.util.keypad.shadow");
-        data.env.roundRect(-unit * 0.02, -unit * 0.02, this.dims.x + unit * 0.04, this.dims.y + unit * 0.04, unit * 0.04);
+        data.env.sRect(-unit * 0.02, -unit * 0.02, this.dims.x + unit * 0.04, this.dims.y + unit * 0.04, unit * 0.04);
         data.env.fill();
         fill("scenes.util.keypad.bg");
-        data.env.roundRect(0, 0, this.dims.x, this.dims.y, unit * 0.03);
+        data.env.sRect(0, 0, this.dims.x, this.dims.y, unit * 0.03);
         data.env.fill();
         fill("scenes.util.keypad.display");
-        data.env.roundRect(this.dims.y * 0.05, this.dims.y * 0.05, this.dims.x - this.dims.y * 0.1, this.dims.x * 0.3 - this.dims.y * 0.1, unit * 0.01);
+        data.env.sRect(this.dims.y * 0.05, this.dims.y * 0.05, this.dims.x - this.dims.y * 0.1, this.dims.x * 0.3 - this.dims.y * 0.1, unit * 0.01);
         data.env.fill();
         fill("scenes.util.keypad.text");
         data.env.spFillText(this.value || "0", this.dims.x / 2, this.dims.x * 0.15, {align:"center",baseline:"middle"});

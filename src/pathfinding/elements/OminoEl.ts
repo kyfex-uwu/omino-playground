@@ -12,7 +12,7 @@ import Scene, {DimsScene, OneTimeButtonScene} from "omino/scene/Scene.js";
 import Node, {type NodeView} from "omino/pathfinding/Node.js";
 import type Orientation from "omino/pathfinding/orientation/Orientation.js";
 import type { OType } from "omino/pathfinding/orientation/Orientation.js";
-import data from "omino/Main.js";
+import data from "omino/Global.js"
 
 /**
  *  ##
@@ -53,7 +53,7 @@ const button = (
         new OneTimeButtonScene(self=>{
             fill("scenes.util.button."+(self.isIn()?"bgHover":"bg"));
             data.env.beginPath();
-            data.env.roundRect(0,0,self.dims.x,self.dims.y,self.dims.x*0.1);
+            data.env.sRect(0,0,self.dims.x,self.dims.y,self.dims.x*0.1);
             data.env.fill();
             fill("scenes.util.button.color");
             data.env.save();
@@ -187,7 +187,7 @@ class OminoEl extends EditableElement {
 
     drawNode(env:RenderEnv, pos:Vector) {
         env.drawData.context.strokeStyle="#0000";
-        env.drawData.context.roundRect(
+        env.drawData.context.sRect(
             (pos.x / env.drawData.nodeSize + 0.06) * env.drawData.nodeSize,
             (pos.y / env.drawData.nodeSize + 0.06) * env.drawData.nodeSize,
             env.drawData.nodeSize * 0.88,
