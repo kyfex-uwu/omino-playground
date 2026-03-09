@@ -50,12 +50,12 @@ function getNodes(currNodeView:NodeView<any, any>|undefined, connTree:ConnTree<a
 
 const button = (
     click:((self: OneTimeButtonScene<any>, x: number, y: number) => void), icon:(()=>void)) =>
-        new OneTimeButtonScene(self=>{
-            fill("scenes.util.button."+(self.isIn()?"bgHover":"bg"));
+        new OneTimeButtonScene((self, env)=>{
+            fill("scenes.util.button."+(self.isIn()?"bgHover":"bg"), env);
             data.env.beginPath();
             data.env.sRect(0,0,self.dims.x,self.dims.y,self.dims.x*0.1);
             data.env.fill();
-            fill("scenes.util.button.color");
+            fill("scenes.util.button.color", env);
             data.env.save();
             data.env.translate(20,20);
             data.env.scale(0.8,0.8);

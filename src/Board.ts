@@ -99,7 +99,6 @@ class Board {
             if(this.startPoint === undefined && this.endPoint === undefined && e.data[0] !== undefined &&
                 e.data[0] === this.path[this.path.length-1] || e.data[e.data.length-1] === this.path[0])
                 e.data.reverse();
-            console.log(e.data[0],this.path[0])
             this.path = e.data;
             lengthWorker.terminate();
         };

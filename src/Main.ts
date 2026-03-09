@@ -10,15 +10,12 @@ import RectBoardEl from "omino/pathfinding/boards/RectBoardEl.js";
 import OminoEl from "omino/pathfinding/elements/OminoEl.js";
 import PortalEl from "omino/pathfinding/elements/PortalEl.js";
 import RectOrientation from "omino/pathfinding/orientation/RectOrientation.js";
-import type Scene from "omino/scene/Scene.js";
-import EnvHelper, {type EnhancedEnv} from "omino/EnvHelper.js";
+import EnvHelper from "omino/EnvHelper.js";
 import {pageData} from "omino/Options.js";
 import data from "omino/Global.js";
-import {fill} from "omino/Colors.js";
 
 //--
 
-const scrollScale = 0.5;
 export const o = <T>(v:T)=>v;
 
 //--
@@ -27,9 +24,9 @@ await events.loaded.resolve();
 
 data.canvElt = document.createElement("canvas");
 document.getElementById("app")!.appendChild(data.canvElt);
-data.env=EnvHelper(data.canvElt.getContext("2d", {alpha:false})!, data.canvElt);
+data.env=EnvHelper(data.canvElt.getContext("2d", {alpha: false})!, data.canvElt);
 data.canvElt.addEventListener("contextmenu", e => e.preventDefault());
-data.canvElt.addEventListener("scroll", e => e.preventDefault());
+data.canvElt.addEventListener("wheel", e => e.preventDefault());
 data.canvElt.addEventListener("touchmove", e => e.preventDefault());
 data.canvElt.style.zIndex = "999";
 
@@ -96,18 +93,15 @@ data.canvElt.addEventListener("keyup", (e)=>{
 });
 windowResized();
 
-let lastScroll=window.scrollY;
-data.canvElt.addEventListener("scroll", (e)=>{
+data.canvElt.addEventListener("wheel", (e)=>{
     let consumed=false;
-    let scrollDelta=window.scrollY-lastScroll;
-    lastScroll=window.scrollY;
     for(const listener of data.listeners.scroll)
-        consumed ||= listener(data.mouseX, data.mouseY, scrollDelta * scrollScale);
+        consumed ||= listener(data.mouseX, data.mouseY, e.deltaY * data.scrollScale);
     if (consumed) {
         window.scroll(0, data.canvElt.getBoundingClientRect().y - document.body.getBoundingClientRect().y -
             (window.innerHeight - data.canvElt.height) / 2);
     }
-});
+}, {passive:false});
 
 const draw = (delta:DOMHighResTimeStamp) => {
     data.elapsed=delta;
@@ -117,7 +111,7 @@ const draw = (delta:DOMHighResTimeStamp) => {
     data.env.setFontSize(30);
     data.env.strokeStyle="#0000";
     data.env.fillStyle="#0000";
-    data.scene.render();
+    data.scene.render(data.env);
 
     //--
 
@@ -127,7 +121,7 @@ const draw = (delta:DOMHighResTimeStamp) => {
 };
 requestAnimationFrame(draw);
 
-function windowResized(){
+export function windowResized(){
     let oldWidth = data.canvElt!.width;
     let oldHeight = data.canvElt!.height;
     let newWidth;

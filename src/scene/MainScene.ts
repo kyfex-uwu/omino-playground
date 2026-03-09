@@ -1,11 +1,12 @@
 import Vector from "omino/Vector.js";
 import {DimsScene, focus, hover, OneTimeButtonScene, Scene} from "omino/scene/Scene.js";
-// import OptionsScene from "omino/scene/OptionsScene.js";
+import OptionsScene from "omino/scene/OptionsScene.js";
 import {background, fill} from "omino/Colors.js";
 import Element, {type NodeGroup, type RenderEnv, SelectableElement} from "omino/pathfinding/elements/Element.js";
 import {Keybinds} from "omino/Keybinds.js";
 import type Board from "omino/Board.js";
 import data from "omino/Global.js"
+import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
 // import PaletteScene from "omino/scene/PaletteScene.js";
 
 export class BoardContainer extends DimsScene<MainScene> {
@@ -34,7 +35,7 @@ export class BoardContainer extends DimsScene<MainScene> {
 
         parent.board.elementsListeners.push(() => this.onElementsChange());
 
-        this.env=({} as unknown as undefined)!;
+        this.env=({} as unknown as undefined)!;//todo:fix
         this.setEnv();
         this.apply();
     }
@@ -63,8 +64,12 @@ export class BoardContainer extends DimsScene<MainScene> {
         setTimeout(()=>this.apply(), 0);//alright
     }
 
-    setEnv() {
+    setEnv(env:AnyEnhancedEnv=data.env) {
         let newEnv = {
+            drawData: {
+                ...this.env.drawData,
+                context:env,
+            },
             container: this,
             board: this.parent!.board,
             mouse: {
@@ -87,7 +92,7 @@ export class BoardContainer extends DimsScene<MainScene> {
             this.env, this.applyData.historicalNodes);
     }
 
-    render() {
+    render(env:AnyEnhancedEnv=data.env) {
         if(Keybinds.DEL.isReleased() && this.parent!.cursor.heldElement){
             this.parent!.cursor.heldElement=undefined;
         }
@@ -111,7 +116,7 @@ export class BoardContainer extends DimsScene<MainScene> {
             this.parent!.board.recalcPath();
         }
 
-        this.setEnv();
+        this.setEnv(env);
         Element.render(this.parent!.board.elements, this.applyData.nodes, this.applyData.historicalNodes, this.env);
         this.pos.replace(new Vector(data.env.width()/4,0).add(this.dims.sub(this.center.scale(2)).scale(0.5)));
 
@@ -130,23 +135,23 @@ export class BoardContainer extends DimsScene<MainScene> {
 class MainScene extends Scene<never> {
     cursor: { heldElement: SelectableElement|undefined }={heldElement:undefined};
     board: Board;
-    // private optionsScene: OptionsScene;
+    private optionsScene: OptionsScene;
     // private paletteScene: PaletteScene;
-    private boardContainer: BoardContainer;
+    public boardContainer: BoardContainer;
     constructor(board:Board) {
         super();
 
         this.board = board;
 
-        // this.optionsScene = this.addScene(new OptionsScene(this.board));
+        this.optionsScene = this.addScene(new OptionsScene(this.board));
         // this.paletteScene = this.addScene(new PaletteScene(this.board));
         this.boardContainer = this.addScene(new BoardContainer(this));
     }
 
-    render() {
-        background("bg");
-        super.render();
-        hover.draw();
+    render(env:AnyEnhancedEnv) {
+        background("bg", env);
+        super.render(env);
+        hover.draw(env);
     }
 }
 

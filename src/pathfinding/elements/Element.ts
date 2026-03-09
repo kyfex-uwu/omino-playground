@@ -8,7 +8,7 @@ import type Scene from "omino/scene/Scene.js";
 import type {BoardContainer} from "omino/scene/MainScene.js";
 import type Board from "omino/Board.js";
 import type {OType} from "omino/pathfinding/orientation/Orientation.js";
-import type {EnhancedEnv} from "omino/EnvHelper.js";
+import type {AnyEnhancedEnv, EnhancedEnv} from "omino/EnvHelper.js";
 import data from "omino/Global.js";
 
 export type NodeGroup<OrienType extends OType=any,Custom=any> = {[key:string]:Node<OrienType, Custom>};
@@ -181,7 +181,7 @@ class EditableDialog extends DimsScene<any>{
         return scene;
     }
 
-    render(env=data.env) {
+    render(env:AnyEnhancedEnv) {
         fill("elementDialog.bg", env);
         env.sRect(0,5,this.dims.x,this.dims.y-5, 5);
         env.fill();

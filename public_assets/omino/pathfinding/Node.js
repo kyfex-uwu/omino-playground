@@ -60,9 +60,9 @@ class Connection {
 }
 
 /**
- * A node viewed from ma certain orientation
+ * A node viewed from a certain orientation
  */
-class NodeView {
+export class NodeView {
     constructor(node, orientation) {
         this.node = node;
         this.orientation = orientation;

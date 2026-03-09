@@ -3,6 +3,7 @@ import {fill} from "omino/Colors.js";
 import MobileKeyboard from "omino/scene/utils/MobileKeyboard.js";
 import data from "omino/Global.js"
 import {SingleEvent} from "omino/Listeners.js";
+import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
 
 const defaultValidator = (str:string)=>/^.*$/.test(str);
 
@@ -67,20 +68,20 @@ class TextInputScene extends SingleEvent(DimsScene<any>, null! as [string]) {
         return true;
     }
 
-    render() {
+    render(env:AnyEnhancedEnv) {
         if (this.isIn()) data.canvElt.style.cursor = "text";
 
-        fill("scenes.util.textInput.bg");
-        if (this.newValue != this.value) fill("scenes.util.textInput.bgUnsaved");
-        if (!this.validator(this.newValue)) fill("scenes.util.textInput.invalid");
-        data.env.rect(0, 0, this.dims.x, this.dims.y);
-        data.env.fill();
-        fill("scenes.util.textInput.color");
-        data.env.setFontSize(this.dims.y * 0.8);
-        data.env.spFillText(this.newValue, 2, 2, {align:"left", baseline:"top"});
-        if (this.focused && data.elapsed * 0.9 % 1 > 0.5) data.env.rect(data.env.measureText(this.newValue).width + 2, 2, 2, this.dims.y - 4);
+        fill("scenes.util.textInput.bg", env);
+        if (this.newValue != this.value) fill("scenes.util.textInput.bgUnsaved", env);
+        if (!this.validator(this.newValue)) fill("scenes.util.textInput.invalid", env);
+        env.rect(0, 0, this.dims.x, this.dims.y);
+        env.fill();
+        fill("scenes.util.textInput.color", env);
+        env.setFontSize(this.dims.y * 0.8);
+        env.spFillText(this.newValue, 2, 2, {align:"left", baseline:"top"});
+        if (this.focused && data.elapsed * 0.9 % 1 > 0.5) env.rect(env.measureText(this.newValue).width + 2, 2, 2, this.dims.y - 4);
 
-        super.render();
+        super.render(env);
     }
 }
 

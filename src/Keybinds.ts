@@ -35,10 +35,10 @@ function createKey(key:string) {
     rawKeys[key] = new RawKey();
 }
 
-class Keybind {
+export class Keybind {
     public name:string="";
 
-    private readonly values:Set<string>;
+    readonly values:Set<string>;
     private readonly defaultVal:string[];
     constructor(dfault:string[]) {
         this.values = new Set(dfault);

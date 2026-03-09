@@ -1,5 +1,6 @@
 import events from "omino/Events.js";
 import data from "omino/Global.js"
+import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
 
 type ColorValArr =[number,number,number]|[number,number,number,number];
 type ResultColor=string|CanvasGradient|CanvasPattern|ColorValArr;
@@ -141,19 +142,19 @@ function handleIfCArr(color:ResultColor){
     return color;
 }
 
-function fill(path:ColorPath, env = data.env) {
+function fill(path:ColorPath, env:AnyEnhancedEnv) {
     env.fillStyle = handleIfCArr(getColor(path));
 }
 
-function stroke(path:ColorPath, env = data.env) {
+function stroke(path:ColorPath, env:AnyEnhancedEnv) {
     env.strokeStyle = handleIfCArr(getColor(path));
 }
 
-export function background(path:ColorPath, env = data.env) {
+export function background(path:ColorPath, env:AnyEnhancedEnv) {
     const oldStyle = env.fillStyle;
     env.save();
     env.resetTransform();
-    fill(path);
+    fill(path, env);
     env.rect(-1,-1,env.width()+2,env.height()+2);
     env.fill();
     env.restore();

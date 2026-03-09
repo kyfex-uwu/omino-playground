@@ -1,6 +1,7 @@
 import Vector from "omino/Vector.js";
-import {fill} from "omino/Colors.js";
+import {fill, stroke} from "omino/Colors.js";
 import data from "omino/Global.js"
+import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
 
 const isKindaMobile = 'ontouchstart' in document.documentElement || 0;
 
@@ -12,30 +13,31 @@ function forReverse<T,V>(array:T[], callback:((p:T)=>V)):V|undefined {
 }
 
 //--
-const a=()=>{
-    new Scene().addScene(new ScrollableScene<ScrollableScene<any>>(undefined!))
-}
+
 export default class Scene<ParentType extends Scene<any>> {
     public readonly pos = new Vector(0,0);
     protected readonly subScenes:Scene<this>[] = [];
     public parent:ParentType|undefined;
     protected focused=false;
-    public readonly hasMouseAccess=true
+    public hasMouseAccess=true
     constructor() {}
 
     addScene<T extends Scene<any>>(scene:T) {
         this.subScenes.push(scene);
         this.subScenes.sort((s1, s2) => s1.pos.z - s2.pos.z);
-        scene.parent = this;
+        scene.parented(this);
 
         return scene;
     }
+    parented(parent:ParentType){
+        this.parent = parent;
+    }
 
-    render(env=data.env) {
+    render(env:AnyEnhancedEnv) {
         Scene.renderChildren(this, env);
     }
 
-    static renderChildren(self:Scene<any>, env=data.env) {
+    static renderChildren(self:Scene<any>, env:AnyEnhancedEnv) {
         for (const scene of self.subScenes) {
             env.save()
             env.translate(scene.pos.x, scene.pos.y);
@@ -79,7 +81,7 @@ export default class Scene<ParentType extends Scene<any>> {
         return this.parent.getAbsolutePos().add(this.pos);
     }
 
-    resized(oldDims:Vector, newDims:Vector) {
+    resized(oldDims:Vector, newDims=oldDims) {
         for (const scene of this.subScenes) {
             scene.resized(oldDims, newDims);
         }
@@ -109,6 +111,10 @@ export class DimsScene<T extends Scene<any>> extends Scene<T> {
         return data.mouseX > absPos.x+xOffs && data.mouseY > absPos.y+yOffs &&
             data.mouseX < absPos.x+xOffs + width && data.mouseY < absPos.y+yOffs + height;
     }
+
+    render(env: AnyEnhancedEnv) {
+        super.render(env);
+    }
 }
 
 export class ButtonScene<T extends Scene<any>> extends DimsScene<T> {
@@ -126,11 +132,11 @@ export class ButtonScene<T extends Scene<any>> extends DimsScene<T> {
 
 type ThisFunc<T,OtherParams extends any[]=[]> = (self:T, ...other:OtherParams)=>void
 export class OneTimeButtonScene<T extends Scene<any>> extends ButtonScene<T> {
-    private readonly renderFunc:ThisFunc<this>;
+    private readonly renderFunc:ThisFunc<this,[AnyEnhancedEnv]>;
     private readonly clickFunc:ThisFunc<this, [number,number]>;
-    public constructor(render:(self:OneTimeButtonScene<T>)=>void,
+    public constructor(render:(self:OneTimeButtonScene<T>, env:AnyEnhancedEnv)=>void,
                         click:(self:OneTimeButtonScene<T>, x:number, y:number)=>void,
-                        init:(self:OneTimeButtonScene<T>)=>void) {
+                        init:(self:OneTimeButtonScene<T>)=>void=()=>{}) {
         super();
 
         this.renderFunc = render;
@@ -139,8 +145,8 @@ export class OneTimeButtonScene<T extends Scene<any>> extends ButtonScene<T> {
         init(this);
     }
 
-    render() {
-        this.renderFunc(this);
+    render(env:AnyEnhancedEnv) {
+        this.renderFunc(this, env);
     }
 
     click(x:number, y:number) {
@@ -152,8 +158,8 @@ export class OneTimeButtonScene<T extends Scene<any>> extends ButtonScene<T> {
 const maxClickDist = 5;
 
 export class ScrollableScene<T extends Scene<any>> extends DimsScene<T> {
-    private offs=0;
-    private scrollLimits:{min:number,max:number};
+    protected offs=0;
+    protected scrollLimits:{min:number,max:number};
     private maybeScrolling = new Vector(0,0);
     private lastScroll: Vector | undefined = undefined;
     private abortControllers:{up:AbortController,move:AbortController}={
@@ -230,6 +236,7 @@ export class ScrollableScene<T extends Scene<any>> extends DimsScene<T> {
         for (const child of this.subScenes)
             child.pos.y -= correctedDelta;
 
+
         return true;
     }
 }
@@ -277,7 +284,7 @@ export const hover = {
         });
         data.env.restore();
     },
-    draw: function () {
+    draw: function (env:AnyEnhancedEnv) {
         let inScene = false;
         let currScene = hoverData.scene;
         while (currScene!==undefined) {
@@ -296,14 +303,14 @@ export const hover = {
         }
         hoverData.time++;
         if (hoverData.time > 0) {
-            fill("hover.bg");
-            data.env.sRect(hoverData.pos.x - hoverData.tWidth / 2, hoverData.pos.y - 20, hoverData.tWidth, 20, 5);
-            data.env.fill();
-            fill("hover.text");
-            data.env.textAlign = "center";
-            data.env.textBaseline = "bottom";
-            data.env.setFontSize(15);
-            data.env.fillText(hoverData.text, hoverData.pos.x, hoverData.pos.y - 5 / 2);
+            fill("hover.bg", env);
+            env.sRect(hoverData.pos.x - hoverData.tWidth / 2, hoverData.pos.y - 20, hoverData.tWidth, 20, 5);
+            env.fill();
+            fill("hover.text", env);
+            env.textAlign = "center";
+            env.textBaseline = "bottom";
+            env.setFontSize(15);
+            env.fillText(hoverData.text, hoverData.pos.x, hoverData.pos.y - 5 / 2);
         }
     }
 };

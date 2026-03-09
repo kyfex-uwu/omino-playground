@@ -111,9 +111,7 @@ export default class RectBoardEl extends Element {
                 env.drawData.context.fill();
                 env.drawData.context.restore();
 
-                console.log("vv")
                 fill("board.text", env.drawData.context);
-                console.log("^^")
                 env.drawData.context.textAlign="center";
                 env.drawData.context.textBaseline="middle";
                 let i = 1;
@@ -220,6 +218,6 @@ export default class RectBoardEl extends Element {
     }
 
     infoTextPass(){
-        return `${this.width}x${this.height}`;
+        return `${this.width}x${this.height} rectangle`;
     }
 }
