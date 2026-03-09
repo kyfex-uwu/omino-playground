@@ -21,8 +21,8 @@ class TextInputScene extends SingleEvent(DimsScene<any>, null! as [string]) {
         this.newValue = value;
     }
 
-    mouseUp(x:number, y:number) {
-        if (super.mouseUp(x, y)) return true;
+    mouseUp(x:number, y:number, button:number) {
+        if (super.mouseUp(x, y, button)) return true;
         if (this.isIn()) {
             focus(this);
 
@@ -39,7 +39,7 @@ class TextInputScene extends SingleEvent(DimsScene<any>, null! as [string]) {
             return true;
         }
 
-        return super.mouseUp(x, y);
+        return super.mouseUp(x, y, button);
     }
 
     apply() {

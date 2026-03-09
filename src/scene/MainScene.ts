@@ -26,7 +26,7 @@ export class BoardContainer extends DimsScene<MainScene> {
     };
     center=new Vector(0,0);
     private settings=[];
-    private clicked: boolean=false;
+    private clicked: boolean[]=[];
 
     constructor(parent:MainScene) {
         super();
@@ -44,13 +44,13 @@ export class BoardContainer extends DimsScene<MainScene> {
         this.dims.replace(newDims.x/2,newDims.y);
     }
 
-    mouseUp(x:number, y:number) {
-        this.clicked = this.dragging ? this.dragging.orig.distTo(this.dragging.curr) < 10 : true;
+    mouseUp(x:number, y:number, button:number) {
+        this.clicked[button]=this.dragging ? this.dragging.orig.distTo(this.dragging.curr) < 10 : true;
         this.dragging = false;
         return true;
     }
 
-    mouseDown(x:number, y:number) {
+    mouseDown(x:number, y:number, button:number) {
         if (!this.isIn()) return false;
         this.dragging = {
             orig: new Vector(x, y),
@@ -74,11 +74,14 @@ export class BoardContainer extends DimsScene<MainScene> {
             board: this.parent!.board,
             mouse: {
                 dragging: this.dragging,
-                clicked: this.clicked,
+                clickedLeft: !!this.clicked[0],
+                clickedRight: !!this.clicked[1],
                 pos: new Vector(data.mouseX, data.mouseY),
             },
-            cursor: this.parent!.cursor
-        };
+            cursor: this.parent!.cursor,
+
+            elements:[]
+        } satisfies RenderEnv;
         Object.assign(this.env, newEnv);
     }
 
@@ -128,7 +131,7 @@ export class BoardContainer extends DimsScene<MainScene> {
             this.shouldUnhold = false;
         }
 
-        this.clicked = false;
+        this.clicked=[];
     }
 }
 

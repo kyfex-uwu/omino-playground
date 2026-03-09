@@ -59,8 +59,8 @@ data.scene = new MainScene(new Board({
 data.isFullscreened = pageData.fullscreen.parsedVal!;
 
 data.listeners.resize.push((old,nw) => data.scene!.resized(old,nw));
-data.listeners.mouseDown.push((x,y) => data.scene!.mouseDown(x,y));
-data.listeners.mouseUp.push((x,y) => data.scene!.mouseUp(x,y));
+data.listeners.mouseDown.push((x,y, button) => data.scene!.mouseDown(x,y, button));
+data.listeners.mouseUp.push((x,y, button) => data.scene!.mouseUp(x,y, button));
 data.listeners.keyDown.push((key) => data.scene!.keyPressed(key));
 data.listeners.keyUp.push((key) => data.scene!.keyReleased(key));
 data.listeners.scroll.push((x, y, amt) => data.scene!.scrolled(x, y, amt));
@@ -71,14 +71,14 @@ data.canvElt.addEventListener("mousemove", e=>{
 })
 
 addEventListener("resize", ()=>windowResized());
-data.canvElt.addEventListener("mousedown", (e)=>mouseDown(e.offsetX,e.offsetY));
+data.canvElt.addEventListener("mousedown", (e)=>mouseDown(e.offsetX,e.offsetY, e.button));
 data.canvElt.addEventListener("touchstart", (e)=>
     //whatever this doesnt work
-    mouseDown(e.targetTouches[0]!.pageX-data.canvElt.getBoundingClientRect().x,e.targetTouches[0]!.pageY-data.canvElt.getBoundingClientRect().y));
-data.canvElt.addEventListener("mouseup", (e)=>mouseUp(e.offsetX,e.offsetY));
+    mouseDown(e.targetTouches[0]!.pageX-data.canvElt.getBoundingClientRect().x,e.targetTouches[0]!.pageY-data.canvElt.getBoundingClientRect().y, 0));
+data.canvElt.addEventListener("mouseup", (e)=>mouseUp(e.offsetX,e.offsetY, e.button));
 data.canvElt.addEventListener("touchend", (e)=>
     //whatever this doesnt work
-    mouseUp(e.targetTouches[0]!.pageX-data.canvElt.getBoundingClientRect().x,e.targetTouches[0]!.pageY-data.canvElt.getBoundingClientRect().y));
+    mouseUp(e.targetTouches[0]!.pageX-data.canvElt.getBoundingClientRect().x,e.targetTouches[0]!.pageY-data.canvElt.getBoundingClientRect().y, 0));
 data.canvElt.addEventListener("keydown", (e)=>{
     let key = e.key.length == 1 ? e.key.toLowerCase() : e.key;
     createKey(key);
@@ -157,11 +157,11 @@ export function windowResized(){
         listener(new Vector(oldWidth, oldHeight), new Vector(newWidth, newHeight));
 }
 
-function mouseDown(x:number,y:number){
+function mouseDown(x:number,y:number, button:number){
     for(const listener of data.listeners.mouseDown)
-        listener(x, y);
+        listener(x, y, button);
 }
-function mouseUp(x:number,y:number){
+function mouseUp(x:number,y:number, button:number){
     for(const listener of data.listeners.mouseUp)
-        listener(x, y);
+        listener(x, y, button);
 }

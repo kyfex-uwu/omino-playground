@@ -113,12 +113,12 @@ export default class ChangeKeysScene extends Scene<any> {
         this.backScreen.render(env);
         background([0,0,0,100], env);
 
-        data.env.setFontSize(data.env.height() * 0.07);
+        env.setFontSize(env.height() * 0.07);
         fill("scenes.settings.modal.bg", env);
-        let w = data.env.measureText(keybindNames[this.keybind.name] + "m").width;
-        data.env.rect((data.env.width() - w) / 2, data.env.height() / 3 - data.env.getFontSize() * 1.1, w, data.env.getFontSize() * 1.2);
+        let w = env.measureText(keybindNames[this.keybind.name] + "m").width;
+        env.rect((env.width() - w) / 2, env.height() / 3 - env.getFontSize() * 1.1, w, env.getFontSize() * 1.2);
         fill("scenes.settings.modal.text", env);
-        data.env.spFillText(keybindNames[this.keybind.name]!, data.env.width() / 2, data.env.height() / 3, {align:"center",baseline:"bottom"});
+        env.spFillText(keybindNames[this.keybind.name]!, env.width() / 2, env.height() / 3, {align:"center",baseline:"bottom"});
 
         super.render(env);
     }

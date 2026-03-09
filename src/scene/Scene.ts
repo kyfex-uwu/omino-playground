@@ -46,15 +46,15 @@ export default class Scene<ParentType extends Scene<any>> {
         }
     }
 
-    mouseDown(x:number, y:number) {
+    mouseDown(x:number, y:number, button:number) {
         return !!forReverse(this.subScenes, scene => {
-            if (scene.mouseDown(x - scene.pos.x, y - scene.pos.y)) return true;
+            if (scene.mouseDown(x - scene.pos.x, y - scene.pos.y, button)) return true;
         });
     }
 
-    mouseUp(x:number, y:number) {
+    mouseUp(x:number, y:number, button:number) {
         return !!forReverse(this.subScenes, scene => {
-            if (scene.mouseUp(x - scene.pos.x, y - scene.pos.y)) return true;
+            if (scene.mouseUp(x - scene.pos.x, y - scene.pos.y, button)) return true;
         });
     }
 
@@ -174,8 +174,8 @@ export class ScrollableScene<T extends Scene<any>> extends DimsScene<T> {
         this.lastScroll = undefined;
     }
 
-    mouseDown(x:number, y:number) {
-        if (!isKindaMobile) super.mouseDown(x, y);
+    mouseDown(x:number, y:number, button:number) {
+        if (!isKindaMobile) super.mouseDown(x, y, button);
         if (!isKindaMobile || !this.isIn()) return false;
 
         this.maybeScrolling = new Vector(data.mouseX, data.mouseY);
@@ -219,10 +219,10 @@ export class ScrollableScene<T extends Scene<any>> extends DimsScene<T> {
         return true;
     }
 
-    mouseUp(x:number, y:number) {
+    mouseUp(x:number, y:number, button:number) {
         if (this.lastScroll) return false;
         this.abortControllers.move.abort();
-        return super.mouseUp(x, y);
+        return super.mouseUp(x, y, button);
     }
 
     scrolled(x:number, y:number, delta:number) {

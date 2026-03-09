@@ -8,8 +8,8 @@ const data:{
     canvElt:HTMLCanvasElement
     env:EnhancedEnv
     listeners:{
-        mouseDown:((x:number,y:number)=>void)[],
-        mouseUp:((x:number,y:number)=>void)[],
+        mouseDown:((x:number,y:number, button:number)=>void)[],
+        mouseUp:((x:number,y:number, button:number)=>void)[],
         keyDown:((key:string)=>void)[],
         keyUp:((key:string)=>void)[],
         scroll:((x:number,y:number,delta:number)=>boolean)[],

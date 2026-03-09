@@ -19,14 +19,18 @@ export type Env = {
 export type RenderEnv = Env & {
     drawData: {
         nodeToTexPos: (node:Node<any, any>) => Vector,
-        context: EnhancedEnv,
+        context: AnyEnhancedEnv,
         nodeSize: number,
         notifyTexture: () => void,
     },
     container: BoardContainer,
     board: Board,
     mouse: {
-        dragging: boolean,
+        dragging: false|{
+            orig:Vector,
+            curr:Vector,
+            delta:Vector,
+        },
         clickedLeft: boolean,
         clickedRight: boolean,
         pos: Vector,
@@ -193,13 +197,13 @@ class EditableDialog extends DimsScene<any>{
         super.render(env);
     }
 
-    mouseUp(x:number, y:number) {
+    mouseUp(x:number, y:number, button:number) {
         if(!this.visible) return false;
-        return super.mouseUp(x-this.getAbsolutePos().x,y-this.getAbsolutePos().y)
+        return super.mouseUp(x-this.getAbsolutePos().x,y-this.getAbsolutePos().y, button)
     }
-    mouseDown(x:number, y:number) {
+    mouseDown(x:number, y:number, button:number) {
         if(!this.visible) return false;
-        return super.mouseDown(x-this.getAbsolutePos().x,y-this.getAbsolutePos().y)
+        return super.mouseDown(x-this.getAbsolutePos().x,y-this.getAbsolutePos().y, button)
     }
     scrolled(x:number, y:number, delta:number) {
         if(!this.visible) return false;
@@ -210,8 +214,8 @@ let editableElementDialog:EditableDialog|undefined = undefined;
 events.loaded.on(()=>{
     data.listeners.keyDown.push((key:string)=>editableElementDialog?.keyPressed(key));
     data.listeners.keyUp.push((key:string)=>editableElementDialog?.keyReleased(key));
-    data.listeners.mouseDown.push((x:number,y:number)=>editableElementDialog?.mouseDown(x,y));
-    data.listeners.mouseUp.push((x:number,y:number)=>editableElementDialog?.mouseUp(x,y));
+    data.listeners.mouseDown.push((x:number,y:number, button:number)=>editableElementDialog?.mouseDown(x,y, button));
+    data.listeners.mouseUp.push((x:number,y:number, button:number)=>editableElementDialog?.mouseUp(x,y, button));
     data.listeners.scroll.push((x:number,y:number,delta:number)=>editableElementDialog?.scrolled(x,y,delta)??false);
 });
 class EditableElement extends SelectableElement {

@@ -13,6 +13,7 @@ import Node, {type NodeView} from "omino/pathfinding/Node.js";
 import type Orientation from "omino/pathfinding/orientation/Orientation.js";
 import type { OType } from "omino/pathfinding/orientation/Orientation.js";
 import data from "omino/Global.js"
+import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
 
 /**
  *  ##
@@ -49,18 +50,18 @@ function getNodes(currNodeView:NodeView<any, any>|undefined, connTree:ConnTree<a
 }
 
 const button = (
-    click:((self: OneTimeButtonScene<any>, x: number, y: number) => void), icon:(()=>void)) =>
+    click:((self: OneTimeButtonScene<any>, x: number, y: number) => void), icon:((env:AnyEnhancedEnv)=>void)) =>
         new OneTimeButtonScene((self, env)=>{
             fill("scenes.util.button."+(self.isIn()?"bgHover":"bg"), env);
-            data.env.beginPath();
-            data.env.sRect(0,0,self.dims.x,self.dims.y,self.dims.x*0.1);
-            data.env.fill();
+            env.beginPath();
+            env.sRect(0,0,self.dims.x,self.dims.y,self.dims.x*0.1);
+            env.fill();
             fill("scenes.util.button.color", env);
-            data.env.save();
-            data.env.translate(20,20);
-            data.env.scale(0.8,0.8);
-            icon();
-            data.env.restore();
+            env.save();
+            env.translate(20,20);
+            env.scale(0.8,0.8);
+            icon(env);
+            env.restore();
         },click,self => {
             self.dims.replace(40,40);
         });

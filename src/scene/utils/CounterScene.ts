@@ -63,8 +63,8 @@ class CounterScene extends DimsScene<any> implements Submittable<number>{
         super.render(env)
     }
 
-    mouseUp(x:number, y:number) {
-        if (!this.isIn()) return super.mouseUp(x, y);
+    mouseUp(x:number, y:number, button:number) {
+        if (!this.isIn()) return super.mouseUp(x, y, button);
 
         if (x > this.dims.x - this.dims.y) this.value -= this.inc;
         else if (x > this.dims.x - this.dims.y * 2) this.value += this.inc;

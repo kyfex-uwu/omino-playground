@@ -104,8 +104,8 @@ class MobileKeyboard extends SingleEvent(DimsScene<any>, null! as [string]) {
         super.render(env);
     }
 
-    mouseUp(x:number, y:number) {
-        if (super.mouseUp(x, y)) return true;
+    mouseUp(x:number, y:number, button:number) {
+        if (super.mouseUp(x, y, button)) return true;
         return this.isIn();
 
     }
