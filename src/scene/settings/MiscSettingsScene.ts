@@ -1,10 +1,8 @@
-import {DimsScene, ScrollableScene} from "omino/scene/Scene.js";
+import {ScrollableScene} from "omino/scene/Scene.js";
 import type Vector from "omino/Vector.js";
 import data from "omino/Global.js";
-import {fill} from "omino/Colors.js";
 import CounterScene from "omino/scene/utils/CounterScene.js";
 import {LabeledScene} from "omino/scene/SettingsParser.js";
-import type {Submittable} from "omino/scene/utils/Submittable.js";
 import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
 
 type gorp<T> = {value:T, submit:(val:T)=>any}

@@ -5,7 +5,6 @@ import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
 import {Keybinds} from "omino/Keybinds.js";
 import Vector from "omino/Vector.js";
 import data from "omino/Global.js";
-import {stroke} from "omino/Colors.js";
 
 type Options={
     elements: Element[],

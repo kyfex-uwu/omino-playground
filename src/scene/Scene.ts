@@ -1,5 +1,5 @@
 import Vector from "omino/Vector.js";
-import {fill, stroke} from "omino/Colors.js";
+import {fill} from "omino/Colors.js";
 import data from "omino/Global.js"
 import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
 

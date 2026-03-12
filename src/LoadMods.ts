@@ -1,4 +1,4 @@
-import {loadColorScript, loadDefaultColors} from "omino/Colors.js";
+import {loadColorScript} from "omino/Colors.js";
 
 await import("omino/colorfiles/default.js");
 

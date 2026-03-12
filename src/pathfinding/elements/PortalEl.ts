@@ -1,7 +1,9 @@
-import element, {
-    EditableElement, Element, type Env,
+import {
+    EditableElement,
+    type Env,
     type NodeGroup,
-    type RenderEnv, type RenderPass,
+    type RenderEnv,
+    type RenderPass,
     SelectableElement
 } from "omino/pathfinding/elements/Element.js";
 import {fill} from "omino/Colors.js";
@@ -9,7 +11,6 @@ import Vector from "omino/Vector.js";
 import TextInputScene from "omino/scene/utils/TextInputScene.js";
 import {focus} from "omino/scene/Scene.js";
 import data from "omino/Global.js"
-import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
 
 const portalDir = "portalEl-dir";
 const colors="ILYWVTPNFXZU".split("");

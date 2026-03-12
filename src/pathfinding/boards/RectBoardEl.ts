@@ -1,7 +1,7 @@
 import {
     ApplyData,
     EditableElement,
-    Element, type Env, type NodeGroup,
+    Element,
     type Pass,
     type RenderPass,
     SelectableElement
@@ -9,8 +9,7 @@ import {
 import Node from "omino/pathfinding/Node.js";
 import RectOrientation from "omino/pathfinding/orientation/RectOrientation.js";
 import Vector from "omino/Vector.js";
-import {background, fill, getColor} from "omino/Colors.js";
-import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
+import {fill} from "omino/Colors.js";
 
 //  0
 // 3 1

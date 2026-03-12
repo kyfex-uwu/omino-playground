@@ -2,7 +2,6 @@ import {ButtonScene, DimsScene} from "omino/scene/Scene.js";
 import Vector from "omino/Vector.js";
 import {fill} from "omino/Colors.js";
 import {SingleEvent} from "omino/Listeners.js";
-import data from "omino/Global.js"
 import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
 
 class KeyScene extends SingleEvent(ButtonScene<MobileKeyboard>, null! as []) {

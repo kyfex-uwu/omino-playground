@@ -1,12 +1,10 @@
 import Vector from "omino/Vector.js";
-import {DimsScene, focus, hover, OneTimeButtonScene, Scene} from "omino/scene/Scene.js";
+import {hover, Scene} from "omino/scene/Scene.js";
 import OptionsScene from "omino/scene/OptionsScene.js";
-import {background, fill} from "omino/Colors.js";
-import Element, {type NodeGroup, type RenderEnv, SelectableElement} from "omino/pathfinding/elements/Element.js";
-import {Keybinds} from "omino/Keybinds.js";
+import {background} from "omino/Colors.js";
 import type Board from "omino/Board.js";
-import data from "omino/Global.js"
 import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
+
 // import PaletteScene from "omino/scene/PaletteScene.js";
 
 class MainScene extends Scene<never> {

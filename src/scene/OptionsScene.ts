@@ -1,11 +1,4 @@
-import {
-    DimsScene,
-    hover,
-    isKindaMobile,
-    OneTimeButtonScene,
-    Scene,
-    ScrollableScene
-} from "omino/scene/Scene.js";
+import {DimsScene, hover, isKindaMobile, OneTimeButtonScene, Scene, ScrollableScene} from "omino/scene/Scene.js";
 import SettingsContainerScene from "omino/scene/settings/SettingsContainerScene.js";
 import Vector from "omino/Vector.js";
 import data from "omino/Global.js"

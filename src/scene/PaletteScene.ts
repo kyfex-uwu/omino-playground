@@ -1,9 +1,7 @@
 import Vector from "omino/Vector.js";
-import Scene, {ButtonScene, DimsScene, hover, OneTimeButtonScene, ScrollableScene} from "omino/scene/Scene.js";
-import data from "omino/Global.js";
-import {background, fill} from "omino/Colors.js";
+import {ButtonScene, DimsScene, ScrollableScene} from "omino/scene/Scene.js";
+import {fill} from "omino/Colors.js";
 import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
-import type {Env, NodeGroup} from "omino/pathfinding/elements/Element.js";
 
 class PaletteSpace extends ButtonScene<any> {
     private elementGenerator: () => Element;

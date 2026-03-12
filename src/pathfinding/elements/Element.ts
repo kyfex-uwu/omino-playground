@@ -1,13 +1,13 @@
 import Vector from "omino/Vector.js";
 import {o} from "omino/Main.js";
+import type Scene from "omino/scene/Scene.js";
 import {DimsScene} from "omino/scene/Scene.js";
 import {fill} from "omino/Colors.js";
 import events from "omino/Events.js";
 import type Node from "omino/pathfinding/Node.js";
-import type Scene from "omino/scene/Scene.js";
 import type Board from "omino/Board.js";
 import type {OType} from "omino/pathfinding/orientation/Orientation.js";
-import type {AnyEnhancedEnv, EnhancedEnv} from "omino/EnvHelper.js";
+import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
 import data from "omino/Global.js";
 import type {SettingData} from "omino/scene/SettingsParser.js";
 

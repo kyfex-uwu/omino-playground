@@ -1,7 +1,10 @@
 import {
     ApplyData,
-    EditableElement, Element, type Env, type NodeGroup,
-    type Pass, type RenderEnv,
+    EditableElement,
+    type Env,
+    type NodeGroup,
+    type Pass,
+    type RenderEnv,
     type RenderPass,
     SelectableElement
 } from "omino/pathfinding/elements/Element.js";
@@ -10,9 +13,8 @@ import Vector from "omino/Vector.js";
 import PortalEl from "omino/pathfinding/elements/PortalEl.js";
 import Scene, {DimsScene, OneTimeButtonScene} from "omino/scene/Scene.js";
 import Node, {type NodeView} from "omino/pathfinding/Node.js";
-import  Orientation from "omino/pathfinding/orientation/Orientation.js";
-import type { OType } from "omino/pathfinding/orientation/Orientation.js";
-import data from "omino/Global.js"
+import type {OType} from "omino/pathfinding/orientation/Orientation.js";
+import Orientation from "omino/pathfinding/orientation/Orientation.js";
 import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
 
 /**
