@@ -30,7 +30,7 @@ export default class Board extends MultipleEvents(DimsScene<any>, {
         curr: Vector
         delta: Vector
     }=false;
-    private shouldUnhold=false;
+    shouldUnhold=false;
     private env: BoardRenderEnv;
     private applyData: {
         historicalNodes:NodeGroup,

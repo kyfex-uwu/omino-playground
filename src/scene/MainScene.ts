@@ -19,8 +19,8 @@ class MainScene extends Scene<never> {
 
         this.board = this.addScene(board);
 
-        this.optionsScene = this.addScene(new OptionsScene(this.board));
-        this.paletteScene = this.addScene(new PaletteScene(this.board));
+        this.optionsScene = this.addScene(new OptionsScene(board));
+        this.paletteScene = this.addScene(new PaletteScene(board));
 
         this.board.setEnv();
         this.board.apply();

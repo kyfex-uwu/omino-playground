@@ -58,7 +58,7 @@ abstract class Element {
     }
     abstract settings(nodes:NodeGroup, env:BoardEnv, historicalNodes:NodeGroup):SettingData<any>[];
     abstract palette(nodes:NodeGroup, env:BoardEnv, historicalNodes:NodeGroup): {
-        el:((nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup)=>SelectableElement),
+        el:((nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup)=>SelectableElement|void),
         draw:(nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup)=>void
     }[];
     infoTextPass(env:BoardEnv){ return ""; }

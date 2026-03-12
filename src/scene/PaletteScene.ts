@@ -13,10 +13,10 @@ import {
 import settingsParser from "omino/scene/SettingsParser.js";
 
 class PaletteSpace extends ButtonScene<any> {
-    private elementGenerator: (nodes: NodeGroup, env: BoardRenderEnv, historicalNodes: NodeGroup) => SelectableElement;
+    private elementGenerator: (nodes: NodeGroup, env: BoardRenderEnv, historicalNodes: NodeGroup) => SelectableElement|void;
     private drawFunc: (nodes: NodeGroup, env: BoardRenderEnv, historicalNodes: NodeGroup) => void;
     private board: Board;
-    constructor(el:((nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup)=>SelectableElement),
+    constructor(el:((nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup)=>SelectableElement|void),
                 draw:(nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup)=>void,
                 board:Board) {
         super();
@@ -40,11 +40,9 @@ class PaletteSpace extends ButtonScene<any> {
     }
 
     click(x:number, y:number) {
-        this.board.cursor.heldElement = this.elementGenerator(...this.board.getRenderingData())
-        // this.parent.parent.parent.mouseData.omino = this.elementGenerator()
-        // let scale = this.parent.parent.parent.boardScene.board.renderData.scale;
-        // this.parent.parent.parent.mouseData.offs =
-        //     new Vector(scale * this.omino.tiles[0].length / 2, scale * this.omino.tiles.length / 2);
+        const result = this.elementGenerator(...this.board.getRenderingData());
+        if(result instanceof SelectableElement)
+            this.board.cursor.heldElement = result;
         return true;
     }
 
@@ -132,6 +130,12 @@ class PaletteScene extends DimsScene<any> {
     //     this.spaces.push(space);
     //     space.recalc(this);
     // }
+
+    mouseUp(x: number, y: number, button: number): boolean {
+        if(this.isIn())
+            this.board.getRenderingData()[1].cursor.heldElement=undefined;
+        return super.mouseUp(x, y, button);
+    }
 
     render(env:AnyEnhancedEnv) {
         fill("scenes.sidebar.bg", env);

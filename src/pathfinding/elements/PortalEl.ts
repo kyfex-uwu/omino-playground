@@ -76,15 +76,22 @@ class PortalEl extends EditableElement {
         if (this.onMouse && env.cursor.heldElement === this)
             pos = env.mouse.pos.sub(env.board.getAbsolutePos().add(this.onMouse || new Vector(0, 0)));
 
-        fill("ominoColors."+this.hashColor, env.drawData.context);
+        env.drawData.context.save();
+        env.drawData.context.translate(pos.x, pos.y);
+        env.drawData.context.scale(size, size);
+        PortalEl.draw(this.hashColor, env);
+        env.drawData.context.restore();
+    }
+    static draw(color:string, env:BoardRenderEnv){
+        fill("ominoColors."+color, env.drawData.context);
         env.drawData.context.beginPath();
-        env.drawData.context.ellipse(pos.x, pos.y, size * 0.44, size*0.44, 0, 0, 6.29);
+        env.drawData.context.ellipse(0,0, 0.44, 0.44, 0, 0, 6.29);
         env.drawData.context.fill();
         for (let i = (data.elapsed * 0.0007) % 1; i < 3; i++) {
             env.drawData.context.fillStyle = `rgba(255,255,255,${(1-Math.sin(i*2.09+1.5))*20}%)`;
-            const centerSize = size * 0.88 * (3 - i) / 6;
+            const centerSize = 0.88 * (3 - i) / 6;
             env.drawData.context.beginPath();
-            env.drawData.context.ellipse(pos.x, pos.y, centerSize, centerSize, 0, 0, 6.29);
+            env.drawData.context.ellipse(0,0, centerSize, centerSize, 0, 0, 6.29);
             env.drawData.context.fill();
         }
     }

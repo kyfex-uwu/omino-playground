@@ -7,17 +7,15 @@ import {
     SelectableElement, type BoardRenderEnv
 } from "omino/pathfinding/elements/Element.js";
 import Node from "omino/pathfinding/Node.js";
-import RectOrientation from "omino/pathfinding/orientation/RectOrientation.js";
+import RectOrientation, {type RectOrienVal} from "omino/pathfinding/orientation/RectOrientation.js";
 import Vector from "omino/Vector.js";
-import {background, fill} from "omino/Colors.js";
+import {fill} from "omino/Colors.js";
 import type {SettingData} from "omino/scene/SettingsParser.js";
-import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
 import OminoEl, {type ConnTree} from "omino/pathfinding/elements/OminoEl.js";
-import data from "omino/Global.js"
-
-//  0
-// 3 1
-//  2
+import PortalEl from "omino/pathfinding/elements/PortalEl.js";
+import data from "omino/Global.js";
+import CreatingOminoScene from "omino/scene/CreatingOminoScene.js";
+import MainScene from "omino/scene/MainScene.js";
 
 export default class RectBoardEl extends Element {
     private width: number;
@@ -217,21 +215,26 @@ export default class RectBoardEl extends Element {
     }
     palette(){
         const zipped = ([
-            {"left":{},"right":{"up":{}},"down":{}},
-            {"left":{},"right":{},"down":{"left":{}}},
-            {"left":{},"down":{"down":{}}},
-            {"left":{},"right":{"right":{}}},
-            {"left":{}},
-            {"right":{}},
-            {"up":{}},
-            {"down":{}}
+            {down:{down:{down:{down:{}}}}},
+            {down:{down:{down:{right:{}}}}},
+            {down:{down:{down:{},right:{}}}},
+            {down:{down:{right:{down:{}}}}},
+            {down:{right:{down:{right:{}}}}},
+            {down:{down:{right:{right:{}}}}},
+            {left:{},right:{},down:{down:{}}},
+            {left:{},right:{},down:{left:{up:{}}}},
+            {left:{},down:{},up:{right:{}}},
+            {left:{},down:{},right:{},up:{}},
+            {up:{left:{}},down:{right:{}}},
+            {up:{left:{}},down:{left:{}}},
+
         ] satisfies ConnTree<RectOrientation>[]);
-        return zipped.map(d=>{return{
+
+        return (zipped.map(d=>{return{
             el:(nodes: NodeGroup, env: BoardRenderEnv, historicalNodes: NodeGroup)=> {
                 const el = new OminoEl(d, 0, new RectOrientation("up"));
                 el.onMouse = new Vector(0,0);
                 env.cursor.heldElement = el;
-                // env.board.add(el);
                 return el;
             },
             draw:(nodes: NodeGroup, env: BoardRenderEnv, historicalNodes: NodeGroup)=>{
@@ -240,7 +243,33 @@ export default class RectBoardEl extends Element {
                 OminoEl.drawFromConnTree(d, env, "center");
                 env.drawData.context.restore();
             }
-        }});
+        }}) as {
+            el:((nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup)=>SelectableElement|void),
+            draw:(nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup)=>void
+        }[]).concat([{
+            el:(nodes: NodeGroup, env: BoardRenderEnv, historicalNodes: NodeGroup)=> {
+                if(data.scene instanceof MainScene)
+                    data.scene = new CreatingOminoScene(data.scene, env.cursor);
+            },
+            draw:(nodes: NodeGroup, env: BoardRenderEnv, historicalNodes: NodeGroup)=>{
+                fill("scenes.sidebar.button.color", env.drawData.context);
+                env.drawData.context.fillRect(-30,-5,60,10);
+                env.drawData.context.fillRect(-5,-30,10,60);
+            }
+        }]).concat([{
+            el:(nodes: NodeGroup, env: BoardRenderEnv, historicalNodes: NodeGroup)=> {
+                const el = new PortalEl(0, "portal");
+                el.onMouse = new Vector(0,0);
+                env.cursor.heldElement = el;
+                return el;
+            },
+            draw:(nodes: NodeGroup, env: BoardRenderEnv, historicalNodes: NodeGroup)=>{
+                env.drawData.context.save();
+                env.drawData.context.scale(70,70)
+                PortalEl.draw("I", env)
+                env.drawData.context.restore();
+            }
+        }]);
     }
 
     setHeight(height:number){

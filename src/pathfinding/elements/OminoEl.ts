@@ -42,7 +42,7 @@ export type ConnTree<O extends Orientation<T>, T extends OType=O["__only_for_ts"
 function internalHash(tree:ConnTree<any, any>, hash=0){
     for (const name in tree) {
         for(const char of name) {
-            hash = (hash << 5) - hash + char.charCodeAt(0);
+            hash = hash*4357277 + char.charCodeAt(0);
             hash |= 0; // Constrain to 32bit integer
         }
         hash=internalHash(tree[name]!, hash)
@@ -146,7 +146,7 @@ class OminoEl<ThisOType extends OType> extends EditableElement {
         env.rotate(Math.PI/2);
         flipShape(env);
     });
-    private color: string;
+    public readonly color: string;
 
     constructor(connTree:ConnTree<Orientation<ThisOType>, any>, root:number, orientation:Orientation<ThisOType>) {
         let applyPasses:Pass[]=[];

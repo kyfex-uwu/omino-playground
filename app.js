@@ -11,6 +11,7 @@ console.log("App hosted at http://localhost:4000");
 //--
 
 website.use("/omino-dist", express.static(__dirname + "/dist/"));
+website.use("/public_assets", express.static(__dirname + "/src/resources/"));
 website.get('/favicon.ico', (req, res) => res.sendFile(__dirname+"/public_assets/omino/favicon.ico"));
 website.get('/', (req, res) => res.redirect('/omino-playground?fullscreen=true'));
 website.get("/omino-playground", (req, res) => {

@@ -98,7 +98,7 @@ function cacheAndReturn(cachePath:string, val:ColorVal) {
 
 let loggedColors:{[key:string]:true} = {};
 
-function getColor(path:ColorPath, colorEnv = Colors):ResultColor {
+function getColor(path:ColorPath, colorEnv = Colors, rootPath?:string):ResultColor {
     if (Array.isArray(path))
         return path.length === 3 ? `rgb(${path.join(",")})` : `rgba(${path.slice(0,3).join(",")},${path[3]!/255}%)`;
     if (path instanceof Function) return path();
@@ -107,7 +107,7 @@ function getColor(path:ColorPath, colorEnv = Colors):ResultColor {
     if (!pathRegex.test(path)) {
         if (!loggedColors[path]) console.trace("invalid path: " + path);
         loggedColors[path] = true;
-        return cacheAndReturn(path, errorColor);
+        return cacheAndReturn(rootPath ?? path, errorColor);
     }
     const cached = colorCache[path];
     if (cached !== undefined) {
@@ -120,21 +120,21 @@ function getColor(path:ColorPath, colorEnv = Colors):ResultColor {
 
     let pos = colorEnv;
     for (const road of path.split(".")) {
-        if (Array.isArray(pos[road]) || pos[road] instanceof Function)
-            return cacheAndReturn(path, pos[road]);
-        if(typeof pos[road] === "string") return getColor(pos[road]);
-        if (pos[road] instanceof CanvasGradient || pos[road] instanceof CanvasPattern) return pos[road];
+        if (Array.isArray(pos[road]) || pos[road] instanceof Function ||
+            pos[road] instanceof CanvasGradient || pos[road] instanceof CanvasPattern)
+            return cacheAndReturn(rootPath ?? path, pos[road]);
+        if(typeof pos[road] === "string") return getColor(pos[road], colorEnv, rootPath ?? path);
 
         if(pos[road] === undefined){
             if (!loggedColors[path]) console.trace(`color ${path} not found`);
             loggedColors[path] = true;
-            return cacheAndReturn(path, errorColor);
+            return cacheAndReturn(rootPath ?? path, errorColor);
         }
 
         pos = pos[road];
     }
 
-    return cacheAndReturn(path, errorColor);
+    return cacheAndReturn(rootPath ?? path, errorColor);
 }
 
 function handleIfCArr(color:ResultColor){

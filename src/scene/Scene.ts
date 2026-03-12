@@ -20,6 +20,7 @@ export default class Scene<ParentType extends Scene<any>> {
     public parent:ParentType|undefined;
     protected focused=false;
     public hasMouseAccess=true
+
     constructor() {}
 
     addScene<T extends Scene<any>>(scene:T) {

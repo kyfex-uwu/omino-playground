@@ -34,27 +34,6 @@ data.canvElt.style.zIndex = "999";
 data.scene = new MainScene(new Board({
     elements: [
         new RectBoardEl(7, 7),
-        new OminoEl(
-            {
-                up: {
-                    up: {
-                        right: {}
-                    },
-                    left: {}
-                }
-            }, 24, new RectOrientation("down")),
-        new OminoEl(
-            {
-                up: {
-                    up: {
-                        up: {
-                            up: {},
-                        },
-                    },
-                },
-            }, 5, new RectOrientation("down")),
-        new PortalEl(0, "meow"),
-        new PortalEl(4, "meow"),
     ]
 }));
 data.isFullscreened = pageData.fullscreen.parsedVal!;

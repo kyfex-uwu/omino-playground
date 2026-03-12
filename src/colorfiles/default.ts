@@ -38,6 +38,7 @@
  * and the changes will stick.
  */
 import {exportMod} from "omino/Colors.js";
+import data from "omino/Global.js";
 
 const colorFuncs=(await import("omino/Colors.js")).colorFuncs;
 
@@ -174,14 +175,6 @@ exportMod({
             darken:"default:util.darken",
             infoText:colorFuncs.hexToRGBA(0x000000c8),
         },
-        drawing:{
-            darken:"default:util.darken",
-            button:{
-                bg:"default:util.button.bg",
-                bgHover:"default:util.button.bgHover",
-                color:"default:util.button.color",
-            },
-        },
         settings:{
             darken:"default:util.darken",
             hasFile:colorFuncs.hexToRGBA(0x2f658b6f),
@@ -207,30 +200,19 @@ exportMod({
                 },
             },
         },
-        buildPuzz:{
-            buttons:{
-                "default":{
-                    bg:"default:buttons.light.bg",
-                    bgHover:"default:buttons.light.bgHover",
-                    icon:"default:buttons.light.icon",
-                },
-                start:{
-                    bg:colorFuncs.hexToRGB(0xa4ff85),
-                    bgHover:colorFuncs.lighten("scenes.buildPuzz.buttons.start.bg", 0.6),
-                    icon:"default:buttons.light.icon",
-                },
-                end:{
-                    bg:colorFuncs.hexToRGB(0xff8585),
-                    bgHover:colorFuncs.lighten("scenes.buildPuzz.buttons.end.bg", 0.3),
-                    icon:"default:buttons.light.icon",
-                },
-                locked:{
-                    bg:colorFuncs.hexToRGB(0x323232),
-                    bgHover:colorFuncs.lighten("scenes.buildPuzz.buttons.locked.bg", 0.15),
-                    icon:"default:buttons.dark.icon",
-                }
-            }
-        },
+        createOmino:{
+            darken:"default:util.darken",
+            modal:()=>{
+                const image = document.createElement("img");
+                image.src="/public_assets/create_omino.png";
+                return data.env.createPattern(image, "repeat")!;
+            },
+            outline:colorFuncs.hexToRGB(0xf2efeb),
+            piece:colorFuncs.hexToRGB(0xf2efeb),
+            submit:colorFuncs.hexToRGB(0xf2efeb),
+            submitHover:colorFuncs.hexToRGB(0xffffff),
+            text:colorFuncs.hexToRGB(0x000000),
+        }
     },
 
     bg:"default:bg",
