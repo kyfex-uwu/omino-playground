@@ -2,14 +2,27 @@ import Vector from "omino/Vector.js";
 import {ButtonScene, DimsScene, ScrollableScene} from "omino/scene/Scene.js";
 import {fill} from "omino/Colors.js";
 import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
+import type Board from "omino/Board.js";
+import {
+    type BoardEnv,
+    type BoardRenderEnv,
+    Element,
+    type NodeGroup,
+    SelectableElement
+} from "omino/pathfinding/elements/Element.js";
+import settingsParser from "omino/scene/SettingsParser.js";
 
 class PaletteSpace extends ButtonScene<any> {
-    private elementGenerator: () => Element;
-    private drawFunc: (env: AnyEnhancedEnv) => void;
-    constructor(el:(()=>Element), draw:(env:AnyEnhancedEnv)=>void) {
+    private elementGenerator: (nodes: NodeGroup, env: BoardEnv, historicalNodes: NodeGroup) => SelectableElement;
+    private drawFunc: (nodes: NodeGroup, env: BoardRenderEnv, historicalNodes: NodeGroup) => void;
+    private board: Board;
+    constructor(el:((nodes:NodeGroup, env:BoardEnv, historicalNodes:NodeGroup)=>SelectableElement),
+                draw:(nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup)=>void,
+                board:Board) {
         super();
         this.elementGenerator = el;
         this.drawFunc = draw;
+        this.board=board;
     }
 
     render(env:AnyEnhancedEnv) {
@@ -17,16 +30,17 @@ class PaletteSpace extends ButtonScene<any> {
         env.sRect(this.dims.x * 0.05, this.dims.y * 0.05, this.dims.x * 0.9, this.dims.y * 0.9, this.dims.x * 0.1);
 
         env.save();
-        env.translate(this.dims.x/2, this.dims.y/2);
-        env.scale(100/(this.dims.x*0.9), 100/(this.dims.y*0.9));
+        env.scale(this.dims.x/100,this.dims.y/100);
+        env.translate(50,50);
         env.beginPath();
-        env.rect(0, 0, this.dims.x, this.dims.y);
+        env.sRect(-42, -42, 84,84, 8);
         env.clip();
-        this.drawFunc(env);
+        this.drawFunc(...this.board.getRenderingData(env));
         env.restore();
     }
 
     click(x:number, y:number) {
+        this.board.cursor.heldElement = this.elementGenerator(...this.board.getRenderingData())
         // this.parent.parent.parent.mouseData.omino = this.elementGenerator()
         // let scale = this.parent.parent.parent.boardScene.board.renderData.scale;
         // this.parent.parent.parent.mouseData.offs =
@@ -45,8 +59,29 @@ class PaletteSpace extends ButtonScene<any> {
 
 class PieceHolder extends ScrollableScene<any> {
     declare subScenes:PaletteSpace[];
-    constructor() {
+    private board: Board;
+    constructor(board:Board) {
         super({min: 0});
+
+        this.board=board;
+
+        board.addListener("elements", (board) => this.recalcBits(
+            ...board.getRenderingData()
+        ));
+        setTimeout(()=>this.recalcBits(
+            ...board.getRenderingData()
+        ),0);//top 10 worst things ever: using setTimeout to fix your problems 2: electric boogaloo
+    }
+
+    recalcBits(nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup){
+        this.subScenes.length=0;
+        for(const el of this.board.elements){
+            const toAdd = el.palette(nodes, env, historicalNodes)
+                .map(data=>new PaletteSpace(data.el, data.draw, this.board));
+            for(const add of toAdd) this.addScene(add);
+        }
+
+        this.resized(this.dims);
     }
 
     resized(oldDims:Vector, newDims = oldDims) {
@@ -69,9 +104,11 @@ class PieceHolder extends ScrollableScene<any> {
 
 class PaletteScene extends DimsScene<any> {
     private piecesHolder: PieceHolder;
-    constructor() {
+    private board: Board;
+    constructor(board:Board) {
         super();
-        this.piecesHolder = new PieceHolder();
+        this.board=board;
+        this.piecesHolder = new PieceHolder(board);
         this.addScene(this.piecesHolder);
     }
 

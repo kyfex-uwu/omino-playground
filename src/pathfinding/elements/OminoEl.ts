@@ -1,10 +1,10 @@
 import {
     ApplyData,
     EditableElement,
-    type Env,
+    type BoardEnv,
     type NodeGroup,
     type Pass,
-    type RenderEnv,
+    type BoardRenderEnv,
     type RenderPass,
     SelectableElement
 } from "omino/pathfinding/elements/Element.js";
@@ -36,7 +36,20 @@ import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
  *
  */
 
-type ConnTree<O extends Orientation<T>, T extends OType> = {[key in T]:ConnTree<O, T>}
+export type ConnTree<O extends Orientation<T>, T extends OType=O["__only_for_ts"]> = {[key in T]?:ConnTree<O, T>}
+function internalHash(tree:ConnTree<any, any>, hash=0){
+    for (const name in tree) {
+        for(const char of name) {
+            hash = (hash << 5) - hash + char.charCodeAt(0);
+            hash |= 0; // Constrain to 32bit integer
+        }
+        hash=internalHash(tree[name]!, hash)
+    }
+    return hash;
+}
+export function connTreeHash(tree:ConnTree<any, any>, limit=12){
+    return Math.abs(internalHash(tree))%limit;
+}
 
 function getNodes(currNodeView:NodeView<any, any>|undefined, connTree:ConnTree<any, any>, toReturn:Set<Node<any, any>> = new Set()) {
     if(currNodeView === undefined) return toReturn;
@@ -99,11 +112,11 @@ const flipShape = (env:AnyEnhancedEnv) =>{
     env.fill();
 }
 
-class OminoEl extends EditableElement {
+class OminoEl<ThisOType extends OType> extends EditableElement {
     private readonly connTree;
     private root;
     private readonly orientation;
-    private readonly nodes:Node<any, any>[]=[];
+    private readonly nodes:Node<ThisOType, any>[]=[];
 
     private readonly rotateLeft = button(_=>{
         this.onMouse = new Vector(0,0);
@@ -131,8 +144,9 @@ class OminoEl extends EditableElement {
         env.rotate(Math.PI/2);
         flipShape(env);
     });
+    private color: string;
 
-    constructor(connTree:ConnTree<any, any>, root:number, orientation:Orientation<any>) {
+    constructor(connTree:ConnTree<Orientation<ThisOType>, any>, root:number, orientation:Orientation<ThisOType>) {
         let applyPasses:Pass[]=[];
         let renderPasses:RenderPass[]=[];
         super(applyPasses,renderPasses);
@@ -142,6 +156,8 @@ class OminoEl extends EditableElement {
 
         this.editDialog.addScene(buttonBar(this.rotateLeft, this.rotateRight));
         this.editDialog.addScene(buttonBar(this.flipH, this.flipV));
+
+        this.color=(["I", "L", "Y", "W", "V", "T", "P", "N", "F", "X", "Z", "U"])[connTreeHash(this.connTree)%12]!
 
         //note: this assumes the omino is in a valid spot!! it will not check if it can it just does
         applyPasses.push({order:-1, func:(nodes, env) => {
@@ -163,18 +179,18 @@ class OminoEl extends EditableElement {
                 env.drawData.nodeToTexPos(historicalNodes[this.root]!).add(env.drawData.nodeSize / 2, env.drawData.nodeSize / 2)));//todo: change pos
     }
 
-    draw(nodes:NodeGroup, env:RenderEnv, historicalNodes:NodeGroup) {
+    draw(nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup) {
         let size = env.drawData.nodeSize;
 
         env.drawData.context.save();
-        fill("ominoColors.P", env.drawData.context);
+        fill("ominoColors."+this.color, env.drawData.context);
         env.drawData.context.lineWidth = size * 0.88;
         for (const node of this.nodes) {
             let pos = this.getNodePos(node, env, historicalNodes);
 
-            this.drawNode(env, pos);
+            OminoEl.drawNode(env, pos);
 
-            stroke("ominoColors.P", env.drawData.context);
+            stroke("ominoColors."+this.color, env.drawData.context);
             for (const name in node.historicalConnections) {
                 const connected = node.historicalConnections[name]!;
                 if (this.nodes.some(n => n.id == connected.node.id) && connected.node.id > node.id) {
@@ -191,8 +207,60 @@ class OminoEl extends EditableElement {
         env.drawData.context.restore();
         env.drawData.notifyTexture();
     }
+    static drawFromConnTree(tree:ConnTree<any>, env:BoardRenderEnv){
+        const color = (["I", "L", "Y", "W", "V", "T", "P", "N", "F", "X", "Z", "U"])[connTreeHash(tree)]!;
 
-    drawNode(env:RenderEnv, pos:Vector) {
+        const nodes:[ConnTree<any>, Vector][] = [];
+        const bounds = {min:new Vector(Infinity, Infinity), max:new Vector(-Infinity, -Infinity)};
+        const untraveledNodes:[ConnTree<any>, Vector][] = [[tree, new Vector(0,0)]];
+        while(untraveledNodes.length>0){
+            nodes.push(untraveledNodes[0]!);
+            bounds.min.x=Math.min(bounds.min.x, untraveledNodes[0]![1].x);
+            bounds.min.y=Math.min(bounds.min.y, untraveledNodes[0]![1].y);
+            bounds.max.x=Math.max(bounds.max.x, untraveledNodes[0]![1].x);
+            bounds.max.y=Math.max(bounds.max.y, untraveledNodes[0]![1].y);
+
+            for(const child in untraveledNodes[0]![0])
+                untraveledNodes.push([untraveledNodes[0]![0][child]!, untraveledNodes[0]![1].add({
+                    up:new Vector(0,-1),
+                    down:new Vector(0,1),
+                    left:new Vector(-1,0),
+                    right:new Vector(1,0)
+                }[child]!)]);
+            untraveledNodes.shift();
+        }
+
+        env.drawData.context.save();
+        fill("ominoColors."+color, env.drawData.context);
+        env.drawData.context.lineWidth = 0.88;
+        const offs = bounds.min.add(bounds.max.sub(bounds.min).scale(0.5)).add(0.5, 0.5);
+        for (const pos of nodes) {
+
+            this.drawNode({...env, drawData:{...env.drawData, nodeSize:1}}, pos[1].sub(offs));
+
+            stroke("ominoColors."+color, env.drawData.context);
+            for (const name in pos[0]) {
+                const destPos = ({
+                    up:new Vector(0,-1),
+                    down:new Vector(0,1),
+                    left:new Vector(-1,0),
+                    right:new Vector(1,0),
+                })[name]!;
+
+                let otherPos = pos[1].sub(offs).add(destPos);
+                env.drawData.context.beginPath();
+                env.drawData.context.moveTo(
+                    (pos[1].sub(offs).x + 0.5), (pos[1].sub(offs).y + 0.5))
+                env.drawData.context.lineTo(
+                    (otherPos.x + 0.5), (otherPos.y + 0.5));
+                env.drawData.context.stroke();
+            }
+        }
+        env.drawData.context.restore();
+        env.drawData.notifyTexture();
+    }
+
+    static drawNode(env:BoardRenderEnv, pos:Vector) {
         env.drawData.context.strokeStyle="#0000";
         env.drawData.context.sRect(
             (pos.x / env.drawData.nodeSize + 0.06) * env.drawData.nodeSize,
@@ -207,7 +275,7 @@ class OminoEl extends EditableElement {
         //  env.drawData.nodeSize*0.88);
     }
 
-    getNodePos(node:Node<any, {pos:Vector}>, env:RenderEnv, historicalNodes:NodeGroup) {
+    getNodePos(node:Node<ThisOType, {pos:Vector}>, env:BoardRenderEnv, historicalNodes:NodeGroup) {
         if (this.onMouse && env.cursor.heldElement === this) {
             return env.mouse.pos.sub(env.board.getAbsolutePos())
                 .sub(env.drawData.nodeToTexPos(this.getRoot(historicalNodes)))
@@ -222,11 +290,11 @@ class OminoEl extends EditableElement {
         return nodes[this.root]!;
     }
 
-    isMyNode(node:Node<any, any>) {
+    isMyNode(node:Node<ThisOType, any>) {
         return this.nodes.includes(node);
     }
 
-    checkValid(root:number, nodes:NodeGroup, env:Env) {
+    checkValid(root:number, nodes:NodeGroup, env:BoardEnv) {
         const rootNode = Object.values(nodes).find(n => n.id === root);
         if (!rootNode) return false;
         const nodesToCheck = getNodes(rootNode.getView(this.orientation),
@@ -245,7 +313,7 @@ class OminoEl extends EditableElement {
         return false;
     }
 
-    isSelected(_nodes:NodeGroup, env:RenderEnv, historicalNodes:NodeGroup) {
+    isSelected(_nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup) {
         if(this.editing && env.mouse.clickedLeft)
             return SelectableElement.CLICK.CONSUME;
 
@@ -265,7 +333,7 @@ class OminoEl extends EditableElement {
         return SelectableElement.CLICK.NONE;
     }
 
-    isEditing(nodes:NodeGroup, env:RenderEnv, historicalNodes:NodeGroup) {
+    isEditing(nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup) {
         if (env.mouse.clickedRight) {
             let cellPos = env.mouse.pos.sub(env.board.getAbsolutePos())
                 .scale(1 / env.drawData.nodeSize);
@@ -276,7 +344,7 @@ class OminoEl extends EditableElement {
         return false;
     }
 
-    tryPlace(nodes:NodeGroup, env:RenderEnv) {
+    tryPlace(nodes:NodeGroup, env:BoardRenderEnv) {
         if (env.mouse.clickedLeft) {
             let cellPos = env.mouse.pos.sub(env.board.getAbsolutePos())
                 .sub(this.onMouse || new Vector(0, 0)).scale(1 / env.drawData.nodeSize).floor();
@@ -293,12 +361,12 @@ class OminoEl extends EditableElement {
         return false;
     }
 
-    drawAtMouse(nodes: NodeGroup, env: RenderEnv, historicalNodes: NodeGroup) {
+    drawAtMouse(nodes: NodeGroup, env: BoardRenderEnv, historicalNodes: NodeGroup) {
         this.draw(nodes, env, historicalNodes);
     }
 
-    static factory(connTree:ConnTree<any, any>){
-        return (root:number, orientation:Orientation<any>) => new OminoEl(connTree, root, orientation)
+    static factory<T extends OType>(connTree:ConnTree<Orientation<T>, any>){
+        return (root:number, orientation:Orientation<T>) => new OminoEl<T>(connTree, root, orientation)
     }
 
     palette(){

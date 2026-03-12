@@ -4,6 +4,7 @@ import OptionsScene from "omino/scene/OptionsScene.js";
 import {background} from "omino/Colors.js";
 import type Board from "omino/Board.js";
 import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
+import PaletteScene from "omino/scene/PaletteScene.js";
 
 // import PaletteScene from "omino/scene/PaletteScene.js";
 
@@ -12,14 +13,14 @@ class MainScene extends Scene<never> {
 
     board: Board;
     private optionsScene: OptionsScene;
-    // private paletteScene: PaletteScene;
+    private paletteScene: PaletteScene;
     constructor(board:Board) {
         super();
 
         this.board = this.addScene(board);
 
         this.optionsScene = this.addScene(new OptionsScene(this.board));
-        // this.paletteScene = this.addScene(new PaletteScene(this.board));
+        this.paletteScene = this.addScene(new PaletteScene(this.board));
 
         this.board.setEnv();
         this.board.apply();

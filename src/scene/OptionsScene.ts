@@ -3,7 +3,7 @@ import SettingsContainerScene from "omino/scene/settings/SettingsContainerScene.
 import Vector from "omino/Vector.js";
 import data from "omino/Global.js"
 import {background, fill, stroke} from "omino/Colors.js";
-import Element, {type Env, type NodeGroup} from "omino/pathfinding/elements/Element.js";
+import Element, {type BoardEnv, type NodeGroup} from "omino/pathfinding/elements/Element.js";
 import settingsParser, {LabeledScene} from "omino/scene/SettingsParser.js";
 import MainScene from "omino/scene/MainScene.js";
 import type Board from "omino/Board.js";
@@ -169,7 +169,7 @@ class OptionsHolder extends ScrollableScene<any> {
             s instanceof DimsScene ? s.pos.add(s.dims).y : 0));
     }
 
-    recalcBits(nodes:NodeGroup, env:Env, historicalNodes:NodeGroup){
+    recalcBits(nodes:NodeGroup, env:BoardEnv, historicalNodes:NodeGroup){
         this.subScenes.length=0;
         this.settings.length=0;
         for(const el of this.board.elements){

@@ -1,16 +1,18 @@
 import {
     ApplyData,
     EditableElement,
-    Element,
+    Element, type BoardEnv, type NodeGroup,
     type Pass,
     type RenderPass,
-    SelectableElement
+    SelectableElement, type BoardRenderEnv
 } from "omino/pathfinding/elements/Element.js";
 import Node from "omino/pathfinding/Node.js";
 import RectOrientation from "omino/pathfinding/orientation/RectOrientation.js";
 import Vector from "omino/Vector.js";
-import {fill} from "omino/Colors.js";
+import {background, fill} from "omino/Colors.js";
 import type {SettingData} from "omino/scene/SettingsParser.js";
+import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
+import OminoEl, {type ConnTree} from "omino/pathfinding/elements/OminoEl.js";
 
 //  0
 // 3 1
@@ -165,7 +167,6 @@ export default class RectBoardEl extends Element {
         );
     }
 
-
     settings():SettingData<any>[] {
         return [{
             type: "counter" as "counter",
@@ -201,7 +202,7 @@ export default class RectBoardEl extends Element {
             type:"tickbox",
             label:"Enable Portals",
             data:{
-                value:false,
+                value:true,
                 submitFunc:(v:boolean)=>{
                     this.portalsEnabled=v;
                     this.needsUpdate=true;
@@ -214,7 +215,22 @@ export default class RectBoardEl extends Element {
         } satisfies SettingData<"tickbox">];
     }
     palette(){
-        return [];
+        const zipped = ([
+            {"left":{},"right":{},"down":{"down":{}}},
+            {"left":{},"right":{},"down":{"left":{}}},
+            {"left":{},"down":{"down":{}}},
+            {"left":{},"right":{"right":{}}},
+        ] satisfies ConnTree<RectOrientation>[]);
+        return zipped.map(data=>{return{
+            el:(nodes: NodeGroup, env: BoardEnv, historicalNodes: NodeGroup)=>
+                new OminoEl(data, 21, new RectOrientation("up")),
+            draw:(nodes: NodeGroup, env: BoardRenderEnv, historicalNodes: NodeGroup)=>{
+                env.drawData.context.save();
+                env.drawData.context.scale(20, 20)
+                OminoEl.drawFromConnTree(data, env);
+                env.drawData.context.restore();
+            }
+        }});
     }
 
     setHeight(height:number){

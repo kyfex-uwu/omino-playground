@@ -1,8 +1,8 @@
 import {
     EditableElement,
-    type Env,
+    type BoardEnv,
     type NodeGroup,
-    type RenderEnv,
+    type BoardRenderEnv,
     type RenderPass,
     SelectableElement
 } from "omino/pathfinding/elements/Element.js";
@@ -69,7 +69,7 @@ class PortalEl extends EditableElement {
         return colors[Math.abs(hash)%colors.length]!;
     }
 
-    draw(nodes:NodeGroup, env:RenderEnv, _historicalNodes:NodeGroup) {
+    draw(nodes:NodeGroup, env:BoardRenderEnv, _historicalNodes:NodeGroup) {
         let size = env.drawData.nodeSize;
 
         let pos = env.drawData.nodeToTexPos(nodes[this.root]!).add(env.drawData.nodeSize / 2, env.drawData.nodeSize / 2);
@@ -89,7 +89,7 @@ class PortalEl extends EditableElement {
         }
     }
 
-    isSelected(nodes:NodeGroup, env:RenderEnv, historicalNodes:NodeGroup<any,{pos:Vector}>) {
+    isSelected(nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup<any,{pos:Vector}>) {
         if(this.editing && env.mouse.clickedLeft){
             return SelectableElement.CLICK.CONSUME;
         }
@@ -108,7 +108,7 @@ class PortalEl extends EditableElement {
         }
         return SelectableElement.CLICK.NONE;
     }
-    isEditing(_nodes:NodeGroup, env:RenderEnv, historicalNodes:NodeGroup<any,{pos:Vector}>) {
+    isEditing(_nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup<any,{pos:Vector}>) {
         if (env.mouse.clickedRight) {
             let cellPos = env.mouse.pos.sub(env.board.getAbsolutePos())
                 .scale(1 / env.drawData.nodeSize);
@@ -118,13 +118,13 @@ class PortalEl extends EditableElement {
         }
         return false;
     }
-    edit(env:Env){
+    edit(env:BoardEnv){
         super.edit(env);
 
         focus(this.idInput);
     }
 
-    tryPlace(nodes:NodeGroup<any,{pos:Vector}>, env:RenderEnv) {
+    tryPlace(nodes:NodeGroup<any,{pos:Vector}>, env:BoardRenderEnv) {
         if (env.mouse.clickedLeft) {
             let cellPos = env.mouse.pos.sub(env.board.getAbsolutePos())
                 .sub(this.onMouse || new Vector(0, 0)).scale(1 / env.drawData.nodeSize).floor();
@@ -141,15 +141,15 @@ class PortalEl extends EditableElement {
         return false;
     }
 
-    drawAtMouse(nodes:NodeGroup, env:RenderEnv, historicalNodes:NodeGroup) {
+    drawAtMouse(nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup) {
         this.draw(nodes, env, historicalNodes);
     }
 
-    palette(nodes: NodeGroup, env: Env, historicalNodes: NodeGroup){
+    palette(nodes: NodeGroup, env: BoardEnv, historicalNodes: NodeGroup){
         return [];
     }
 
-    settings(nodes: NodeGroup, env: Env, historicalNodes: NodeGroup) {
+    settings(nodes: NodeGroup, env: BoardEnv, historicalNodes: NodeGroup) {
         return [];
     }
 }

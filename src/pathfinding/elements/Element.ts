@@ -12,11 +12,11 @@ import data from "omino/Global.js";
 import type {SettingData} from "omino/scene/SettingsParser.js";
 
 export type NodeGroup<OrienType extends OType=any,Custom=any> = {[key:string]:Node<OrienType, Custom>};
-export type Env = {
+export type BoardEnv = {
     elements: Element[],
     board:Board,
 }
-export type RenderEnv = Env & {
+export type BoardRenderEnv = BoardEnv & {
     drawData: {
         nodeToTexPos: (node:Node<any, any>) => Vector,
         context: AnyEnhancedEnv,
@@ -39,11 +39,11 @@ export type RenderEnv = Env & {
     }
 }
 
-interface Pass<ReturnType=ApplyData, E=Env>{
+interface Pass<ReturnType=ApplyData, E=BoardEnv>{
     func:(nodes:NodeGroup, env:E, historicalNodes:NodeGroup)=>ReturnType|void;
     order:number
 }
-export interface RenderPass extends Pass<void, RenderEnv>{}
+export interface RenderPass extends Pass<void, BoardRenderEnv>{}
 
 abstract class Element {
     public readonly applyPasses:Pass[];
@@ -56,13 +56,15 @@ abstract class Element {
         this.applyPasses=applyPasses;
         this.renderPasses=renderPasses;
     }
-    abstract settings(nodes:NodeGroup, env:Env, historicalNodes:NodeGroup):SettingData<any>[];
-    abstract palette(nodes:NodeGroup, env:Env, historicalNodes:NodeGroup):
-        {el:((nodes:NodeGroup, env:Env, historicalNodes:NodeGroup)=>Element), draw:(env:AnyEnhancedEnv)=>void}[];
-    infoTextPass(env:Env){ return ""; }
+    abstract settings(nodes:NodeGroup, env:BoardEnv, historicalNodes:NodeGroup):SettingData<any>[];
+    abstract palette(nodes:NodeGroup, env:BoardEnv, historicalNodes:NodeGroup): {
+        el:((nodes:NodeGroup, env:BoardEnv, historicalNodes:NodeGroup)=>SelectableElement),
+        draw:(nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup)=>void
+    }[];
+    infoTextPass(env:BoardEnv){ return ""; }
 
-    static apply(elements:Element[], env:Env, historicalNodes:NodeGroup = {}){
-        const newEnv:Env = {
+    static apply(elements:Element[], env:BoardEnv, historicalNodes:NodeGroup = {}){
+        const newEnv:BoardEnv = {
             ...env,
             elements
         };
@@ -88,7 +90,7 @@ abstract class Element {
         }
         return nodes;
     }
-    static render(elements:Element[], nodes:NodeGroup, historicalNodes:NodeGroup, env:RenderEnv){
+    static render(elements:Element[], nodes:NodeGroup, historicalNodes:NodeGroup, env:BoardRenderEnv){
         Object.assign(env, {
             drawData: {
                 nodeToTexPos: () => new Vector(0, 0),
@@ -112,7 +114,7 @@ abstract class Element {
     //     return {nodes, historicalNodes};
     // }
 
-    static infoText(elements:Element[], env:Env){
+    static infoText(elements:Element[], env:BoardEnv){
         Object.assign(env, {
             elements: elements
         });
@@ -129,15 +131,15 @@ abstract class SelectableElement extends Element {
     protected onMouse:false|Vector=false;
     public forceSelected=false;
 
-    isSelected(nodes:NodeGroup, env:RenderEnv, historicalNodes:NodeGroup) {
+    isSelected(nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup) {
         return SelectableElement.CLICK.NONE;
     }
 
-    tryPlace(nodes:NodeGroup, env:Env, historicalNodes:NodeGroup) {
+    tryPlace(nodes:NodeGroup, env:BoardEnv, historicalNodes:NodeGroup) {
         return false;
     }
 
-    drawAtMouse(nodes:NodeGroup, env:RenderEnv, historicalNodes:NodeGroup) {
+    drawAtMouse(nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup) {
 
     }
 }
@@ -217,7 +219,7 @@ abstract class EditableElement extends SelectableElement {
     protected editing=false;
     protected editDialog = new EditableDialog();
 
-    edit(env:Env){
+    edit(env:BoardEnv){
         this.editing=true;
         for(const element of env.elements){
             if(element!==this && element instanceof EditableElement && element.editing)
@@ -230,15 +232,15 @@ abstract class EditableElement extends SelectableElement {
         this.editDialog.visible=false;
         this.editing=false;
     }
-    isEditing(nodes:NodeGroup, env:RenderEnv, historicalNodes:NodeGroup) {
+    isEditing(nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup) {
         return false;
     }
-    shouldUnselect(nodes:NodeGroup, env:RenderEnv, historicalNodes:NodeGroup){
+    shouldUnselect(nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup){
         if(this.editing && this.editDialog.isIn()) return false;
         return env.mouse.clickedLeft;
     }
 
-    static createDialogPass(self:EditableElement, posFunc:((nodes:NodeGroup, env:RenderEnv, historicalNodes:NodeGroup)=>Vector)):RenderPass{
+    static createDialogPass(self:EditableElement, posFunc:((nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup)=>Vector)):RenderPass{
         return {
             func:(nodes, env, historicalNodes) => {
                 if(self.shouldUnselect(nodes, env, historicalNodes)) self.finishEdit();

@@ -4,6 +4,8 @@ export type OType=string
 
 //instances of this class should not change!!! instead they should return new instances
 export default abstract class Orientation<ThisOType extends OType> {
+    public __only_for_ts:ThisOType=undefined!;
+
     // direc: the direction from this orientation's perspective
     // returns: the direction translated to the default/absolute perspective
     abstract apply(direc:ThisOType):ThisOType;

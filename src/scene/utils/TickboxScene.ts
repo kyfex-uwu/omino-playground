@@ -7,17 +7,18 @@ import type Vector from "omino/Vector.js";
 
 export default class TickboxScene extends SingleEvent(DimsScene<any>, null! as [boolean]) implements Submittable<boolean>{
     private value: boolean;
-    private newValue: boolean;
+    private oldValue: boolean;
     private requiresApply: boolean;
     constructor({value = false, extra:{requiresApply = false}}) {
         super();
         this.value = value;
-        this.newValue = value;
+        this.oldValue = value;
         this.requiresApply = requiresApply;
     }
 
     apply() {
-        this.value = this.newValue;
+        this.oldValue = this.value;
+        console.log("A")
 
         this.emitEvent(this.value);
         return true;
@@ -26,7 +27,8 @@ export default class TickboxScene extends SingleEvent(DimsScene<any>, null! as [
     mouseUp(x:number, y:number, button:number) {
         if (this.isIn()) {
             focus(this);
-            this.newValue = !this.newValue;
+            this.value = !this.value;
+            this.oldValue=this.value;
             if (!this.requiresApply) this.apply();
             return true;
         }
@@ -35,9 +37,9 @@ export default class TickboxScene extends SingleEvent(DimsScene<any>, null! as [
     }
 
     render(env:AnyEnhancedEnv) {
-        fill(this.value == this.newValue ? "scenes.util.tickbox.bg" : "scenes.util.tickbox.bgUnsaved", env);
+        fill(this.value == this.oldValue ? "scenes.util.tickbox.bg" : "scenes.util.tickbox.bgUnsaved", env);
         env.fillRect(0, 0, this.dims.x, this.dims.y);
-        if (this.newValue) {
+        if (this.value) {
             stroke("scenes.util.tickbox.color", env);
             env.scale((this.dims.x + this.dims.y) * 0.05, (this.dims.x + this.dims.y) * 0.05);
             env.lineWidth=2;
@@ -59,6 +61,6 @@ export default class TickboxScene extends SingleEvent(DimsScene<any>, null! as [
     }
 
     submit() {
-        this.value=this.newValue;
+        this.oldValue=this.value;
     }
 }

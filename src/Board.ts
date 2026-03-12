@@ -1,4 +1,4 @@
-import Element, {type NodeGroup, type RenderEnv, SelectableElement} from "omino/pathfinding/elements/Element.js";
+import Element, {type NodeGroup, type BoardRenderEnv, SelectableElement} from "omino/pathfinding/elements/Element.js";
 import * as FakeWebWorker from "omino/pathfinding/Pathfinder.js";
 import {DimsScene} from "omino/scene/Scene.js";
 import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
@@ -31,7 +31,7 @@ export default class Board extends MultipleEvents(DimsScene<any>, {
         delta: Vector
     }=false;
     private shouldUnhold=false;
-    private env: RenderEnv;
+    private env: BoardRenderEnv;
     private applyData: {
         historicalNodes:NodeGroup,
         nodes:NodeGroup
@@ -91,7 +91,7 @@ export default class Board extends MultipleEvents(DimsScene<any>, {
             cursor: this.cursor,
 
             elements:[]
-        } satisfies RenderEnv;
+        } satisfies BoardRenderEnv;
         Object.assign(this.env, newEnv);
     }
 
@@ -104,8 +104,12 @@ export default class Board extends MultipleEvents(DimsScene<any>, {
         this.applyData.nodes = Element.apply(this.elements,
             this.env, this.applyData.historicalNodes);
     }
-    getRenderingData():[NodeGroup, RenderEnv, NodeGroup]{
-        return [this.applyData.nodes, this.env, this.applyData.historicalNodes];
+    getRenderingData(env?:AnyEnhancedEnv):[NodeGroup, BoardRenderEnv, NodeGroup]{
+        return [
+            this.applyData.nodes,
+            {...this.env, drawData:{...this.env.drawData, context:env ?? this.env.drawData.context}},
+            this.applyData.historicalNodes
+        ];
     }
 
     add(element:Element) {
