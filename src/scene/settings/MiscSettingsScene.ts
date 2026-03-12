@@ -24,10 +24,10 @@ export default class MiscSettingsScene extends ScrollableScene<any>{
     resized(oldDims:Vector, newDims = oldDims) {
         this.dims.replace(newDims);
 
-        data.env.setFontSize(25);
+        data.env.setFontSize(35);
         this.scrollLimits.max = 0 - this.dims.y + this.offs;
         this.scrollSens.pos.replace(4,10);
-        this.scrollSens.dims.replace(newDims.x-8, 30);
+        this.scrollSens.dims.replace(newDims.x-8, 50);
 
         super.resized(oldDims, newDims);
     }
@@ -48,7 +48,7 @@ export default class MiscSettingsScene extends ScrollableScene<any>{
         for(const submittable of this.toSubmit)
             submittable.submit(submittable.value);
 
-        data.env.setFontSize(25);
+        data.env.setFontSize(35);
         super.render(env);
     }
 }

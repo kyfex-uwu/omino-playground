@@ -11,7 +11,7 @@ import Vector from "omino/Vector.js";
 import data from "omino/Global.js"
 import {background, fill, stroke} from "omino/Colors.js";
 import {BoardContainer} from "omino/scene/MainScene.js";
-import Element from "omino/pathfinding/elements/Element.js";
+import Element, {type Env, type NodeGroup} from "omino/pathfinding/elements/Element.js";
 import settingsParser, {LabeledScene} from "omino/scene/SettingsParser.js";
 import MainScene from "omino/scene/MainScene.js";
 import type Board from "omino/Board.js";
@@ -149,8 +149,8 @@ class OptionsHolder extends ScrollableScene<any> {
         }));
 
         this.board=board;
-        this.board.elementsListeners.push(_ => this.recalcSettings());
-        setTimeout(()=>this.recalcSettings(),0);//top 10 worst things ever: using setTimeout to fix your problems
+        // this.board.elementsListeners.push((board) => this.recalcBits());
+        // setTimeout(()=>this.recalcBits(),0);//top 10 worst things ever: using setTimeout to fix your problems
     }
 
     resized(oldDims:Vector, newDims=oldDims) {
@@ -173,11 +173,11 @@ class OptionsHolder extends ScrollableScene<any> {
             s instanceof DimsScene ? s.pos.add(s.dims).y : 0));
     }
 
-    recalcSettings(){
+    recalcBits(nodes:NodeGroup, env:Env, historicalNodes:NodeGroup){
         this.subScenes.length=0;
         this.settings.length=0;
         for(const el of this.board.elements){
-            const toAdd = (el.settings()||[]).map(setting => settingsParser(setting))
+            const toAdd = el.settings(nodes, env, historicalNodes).map(setting => settingsParser(setting))
                 .filter(val=>val!==undefined);
             for(const add of toAdd) this.addScene(add);
             this.settings.push(...toAdd);

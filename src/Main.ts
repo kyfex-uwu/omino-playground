@@ -23,6 +23,7 @@ export const o = <T>(v:T)=>v;
 await events.loaded.resolve();
 
 data.canvElt = document.createElement("canvas");
+data.canvElt.tabIndex=0;
 document.getElementById("app")!.appendChild(data.canvElt);
 data.env=EnvHelper(data.canvElt.getContext("2d", {alpha: false})!, data.canvElt);
 data.canvElt.addEventListener("contextmenu", e => e.preventDefault());

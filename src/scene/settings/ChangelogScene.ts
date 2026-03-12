@@ -207,7 +207,7 @@ class ChangelogScene extends ScrollableScene<any> {
         this.dims.replace(newDims);
 
         let scale = this.dims.x * 0.001;
-        data.env.setFontSize(25);
+        data.env.setFontSize(20);
         this.scrollLimits.max = (smartText(changelog.join("\n\n"), data.env, 0, 0, 1 / scale * this.dims.x).length + 2) *
             lineHeight() * scale - this.dims.y + this.offs;
 
@@ -225,7 +225,7 @@ class ChangelogScene extends ScrollableScene<any> {
         let scale = this.dims.x * 0.001;
         env.scale(scale,scale);
 
-        env.setFontSize(25);
+        env.setFontSize(20);
         fill("scenes.settings.text", env);
         const lines = smartText(changelog.join("\n\n"), env, 0, 4, 1 / scale * this.dims.x)
             .map(l => l.join(""));

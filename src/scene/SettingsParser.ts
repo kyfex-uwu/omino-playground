@@ -3,13 +3,24 @@ import {DimsScene} from "omino/scene/Scene.js";
 import Vector from "omino/Vector.js";
 import {fill} from "omino/Colors.js";
 import data from "omino/Global.js";
-import type {Setting} from "omino/pathfinding/elements/Element.js";
 import type {Submittable} from "omino/scene/utils/Submittable.js";
 import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
+import TickboxScene from "omino/scene/utils/TickboxScene.js";
 
-const functions = {
-    counter: (data:{value?:number, min?:number, max?:number, inc?:number, submit:(val:number)=>void}) =>
+type InternalSetting<T,E extends {}={}> = {value:T, submit:(v:T)=>void, extra:E};
+export type SettingData<T extends keyof Settings> = {type:T, label:string, data:Settings[T]}
+export type Settings = {
+    counter:InternalSetting<number, {min?:number, max?:number, inc?:number}>,
+    tickbox:InternalSetting<boolean>
+}
+
+const functions:{
+    [key in keyof Settings]:(data:Settings[key]) => DimsScene<any> & Submittable<Settings[key]["value"]>
+} = {
+    counter: (data:{value:number, submit:(val:number)=>void, extra:{min?:number, max?:number, inc?:number}}) =>
         new CounterScene(data),
+    tickbox: (data:{value:boolean, submit:(val:boolean)=>void})=>
+        new TickboxScene(data),
 };
 
 export class LabeledScene<T> extends DimsScene<any>{
@@ -52,7 +63,7 @@ class LocalLabeledScene<T> extends LabeledScene<T>{
     }
 }
 
-export default (setting:Setting) => {
+export default <T extends keyof Settings>(setting:SettingData<T>) => {
     if(functions[setting.type] !== undefined)
         return new LocalLabeledScene(functions[setting.type](setting.data), setting.label, 0.1);
 }

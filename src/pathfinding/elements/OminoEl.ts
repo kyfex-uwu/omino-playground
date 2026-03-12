@@ -1,6 +1,6 @@
 import {
     ApplyData,
-    EditableElement, type Env, type NodeGroup,
+    EditableElement, Element, type Env, type NodeGroup,
     type Pass, type RenderEnv,
     type RenderPass,
     SelectableElement
@@ -10,7 +10,7 @@ import Vector from "omino/Vector.js";
 import PortalEl from "omino/pathfinding/elements/PortalEl.js";
 import Scene, {DimsScene, OneTimeButtonScene} from "omino/scene/Scene.js";
 import Node, {type NodeView} from "omino/pathfinding/Node.js";
-import type Orientation from "omino/pathfinding/orientation/Orientation.js";
+import  Orientation from "omino/pathfinding/orientation/Orientation.js";
 import type { OType } from "omino/pathfinding/orientation/Orientation.js";
 import data from "omino/Global.js"
 import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
@@ -73,22 +73,29 @@ const buttonBar = (b1:Scene<any>,b2:Scene<any>) => {
     return toReturn;
 }
 
-const rotateShape = ()=>{
-    data.env.beginPath();
-    data.env.moveTo(10,10);
-    data.env.lineTo(15,15);
-    data.env.bezierCurveTo(23,7,23,-7,15,-15);
-    data.env.bezierCurveTo(7,-23,-7,-23,-15,-15);
-    data.env.bezierCurveTo(-23,-7,-23,7,-15,15);
-    data.env.lineTo(-18,18);
-    data.env.lineTo(-7,18);
-    data.env.lineTo(-7,7);
-    data.env.lineTo(-10,10);
-    data.env.bezierCurveTo(-15,5,-15,-5,-10,-10);
-    data.env.bezierCurveTo(-5,-15,5,-15,10,-10);
-    data.env.bezierCurveTo(15,-5,15,5,10,10);
-    data.env.fill();
+const rotateShape = (env:AnyEnhancedEnv)=>{
+    env.beginPath();
+    env.moveTo(10,10);
+    env.lineTo(15,15);
+    env.bezierCurveTo(23,7,23,-7,15,-15);
+    env.bezierCurveTo(7,-23,-7,-23,-15,-15);
+    env.bezierCurveTo(-23,-7,-23,7,-15,15);
+    env.lineTo(-18,18);
+    env.lineTo(-7,18);
+    env.lineTo(-7,7);
+    env.lineTo(-10,10);
+    env.bezierCurveTo(-15,5,-15,-5,-10,-10);
+    env.bezierCurveTo(-5,-15,5,-15,10,-10);
+    env.bezierCurveTo(15,-5,15,5,10,10);
+    env.fill();
 };
+const flipShape = (env:AnyEnhancedEnv) =>{
+    env.fillRect(-3,-13,6,26);
+    env.polygon([-9,-9],[9,-9],[0,-19]);
+    env.fill();
+    env.polygon([-9,9],[9,9],[0,19]);
+    env.fill();
+}
 
 class OminoEl extends EditableElement {
     private readonly connTree;
@@ -99,31 +106,28 @@ class OminoEl extends EditableElement {
     private readonly rotateLeft = button(_=>{
         this.onMouse = new Vector(0,0);
         this.forceSelected=true;
-    },()=>{
-        rotateShape();
+    },(env)=>{
+        rotateShape(env);
     });
     private readonly rotateRight = button(_=>{
         this.onMouse = new Vector(0,0);
         this.forceSelected=true;
-    },()=>{
-        data.env.scale(-1,1);
-        rotateShape();
+    },(env)=>{
+        env.scale(-1,1);
+        rotateShape(env);
     });
     private readonly flipH = button(_=>{
         this.onMouse = new Vector(0,0);
         this.forceSelected=true;
-    },()=>{
-        // p5.rect(-2,-13,4,26);
-        // p5.triangle(-6,-12,6,-12,0,-19);
-        // p5.triangle(-6,12,6,12,0,19);
+    },(env)=>{
+        flipShape(env);
     });
     private readonly flipV = button(_=>{
         this.onMouse = new Vector(0,0);
         this.forceSelected=true;
-    },()=>{
-        // p5.rect(-2,-13,4,26);
-        // p5.triangle(-6,-12,6,-12,0,-19);
-        // p5.triangle(-6,12,6,12,0,19);
+    },(env)=>{
+        env.rotate(Math.PI/2);
+        flipShape(env);
     });
 
     constructor(connTree:ConnTree<any, any>, root:number, orientation:Orientation<any>) {
@@ -293,6 +297,14 @@ class OminoEl extends EditableElement {
 
     static factory(connTree:ConnTree<any, any>){
         return (root:number, orientation:Orientation<any>) => new OminoEl(connTree, root, orientation)
+    }
+
+    palette(){
+        return [];
+    }
+
+    settings() {
+        return [];
     }
 }
 

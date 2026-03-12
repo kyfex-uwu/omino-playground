@@ -1,7 +1,7 @@
 import {
     ApplyData,
     EditableElement,
-    Element,
+    Element, type Env, type NodeGroup,
     type Pass,
     type RenderPass,
     SelectableElement
@@ -10,6 +10,7 @@ import Node from "omino/pathfinding/Node.js";
 import RectOrientation from "omino/pathfinding/orientation/RectOrientation.js";
 import Vector from "omino/Vector.js";
 import {background, fill, getColor} from "omino/Colors.js";
+import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
 
 //  0
 // 3 1
@@ -21,6 +22,7 @@ export default class RectBoardEl extends Element {
     private currId=0;
     private board:number[][]=[];
     private renderScale=1;
+    private portalsEnabled=false;
     constructor(width:number, height:number) {
         let applyPasses:Pass[]=[];
         let renderPasses:RenderPass[]=[];
@@ -191,8 +193,23 @@ export default class RectBoardEl extends Element {
                     return true;
                 }
             }
+        }, {
+            type:"tickbox",
+            label:"Enable Portals",
+            data:{
+                value:false,
+                submit:(v:boolean)=>{
+                    this.portalsEnabled=v;
+                    this.needsUpdate=true;
+                    return true;
+                }
+            }
         }];
     }
+    palette(){
+        return [];
+    }
+
     setHeight(height:number){
         if(this.board.length>height)
             this.board = this.board.slice(0,height);

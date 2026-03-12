@@ -16,7 +16,7 @@ const defaultOptions:Options = {
     endPoint:undefined
 };
 
-class Board {
+export default class Board {
     elements: Element[];
     private startPoint: number|undefined;
     private endPoint: number|undefined;
@@ -121,5 +121,3 @@ class Board {
         });
     }
 }
-
-export default Board;

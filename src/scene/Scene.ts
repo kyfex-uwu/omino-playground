@@ -65,7 +65,7 @@ export default class Scene<ParentType extends Scene<any>> {
     }
 
     keyReleased(key:string) {
-        return forReverse(this.subScenes, scene => {
+        return !!forReverse(this.subScenes, scene => {
             if (scene.keyReleased(key)) return true;
         });
     }

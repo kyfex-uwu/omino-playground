@@ -75,7 +75,7 @@ export class BoardContainer extends DimsScene<MainScene> {
             mouse: {
                 dragging: this.dragging,
                 clickedLeft: !!this.clicked[0],
-                clickedRight: !!this.clicked[1],
+                clickedRight: !!this.clicked[2],
                 pos: new Vector(data.mouseX, data.mouseY),
             },
             cursor: this.parent!.cursor,

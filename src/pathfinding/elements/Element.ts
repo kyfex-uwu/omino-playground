@@ -10,6 +10,7 @@ import type Board from "omino/Board.js";
 import type {OType} from "omino/pathfinding/orientation/Orientation.js";
 import type {AnyEnhancedEnv, EnhancedEnv} from "omino/EnvHelper.js";
 import data from "omino/Global.js";
+import type {SettingData} from "omino/scene/SettingsParser.js";
 
 export type NodeGroup<OrienType extends OType=any,Custom=any> = {[key:string]:Node<OrienType, Custom>};
 export type Env = {
@@ -46,17 +47,6 @@ interface Pass<ReturnType=ApplyData, E=Env>{
 }
 export interface RenderPass extends Pass<void, RenderEnv>{}
 
-export type Setting = {label:string} & ({
-    type: "counter",
-    data: {
-        value?: number
-        min?: number,
-        max?: number,
-        inc?: number,
-        submit: (newVal: number) => boolean
-    }
-})
-
 abstract class Element {
     public readonly applyPasses:Pass[];
     public readonly renderPasses:RenderPass[];
@@ -68,10 +58,9 @@ abstract class Element {
         this.applyPasses=applyPasses;
         this.renderPasses=renderPasses;
     }
-    settings():Setting[] {
-        return [];
-    }
-    palette() {}
+    abstract settings(nodes:NodeGroup, env:Env, historicalNodes:NodeGroup):SettingData<any>[];
+    abstract palette(nodes:NodeGroup, env:Env, historicalNodes:NodeGroup):
+        {el:((nodes:NodeGroup, env:Env, historicalNodes:NodeGroup)=>Element), draw:(env:AnyEnhancedEnv)=>void}[];
     infoTextPass(env:Env){ return ""; }
 
     static apply(elements:Element[], env:Env, historicalNodes:NodeGroup = {}){
@@ -138,7 +127,7 @@ abstract class Element {
 
 }
 
-class SelectableElement extends Element {
+abstract class SelectableElement extends Element {
     protected onMouse:false|Vector=false;
     public forceSelected=false;
 
@@ -166,16 +155,16 @@ class EditableDialog extends DimsScene<any>{
     visible=false;
     pointerOffs=0;
 
+    declare subScenes:DimsScene<any>[];
+
     addScene<T extends Scene<any>>(scene:T) {
         super.addScene(scene);
 
         const dims = new Vector(0,10);
         for(const el of this.subScenes){
-            if(!(el instanceof DimsScene)) continue;
             dims.x = Math.max(dims.x, el.dims.x+10);
         }
         for(const el of this.subScenes){
-            if(!(el instanceof DimsScene)) continue;
             el.pos.replace(dims.x/2-el.dims.x/2, dims.y);
             dims.y += el.dims.y + 5;
         }
@@ -209,6 +198,14 @@ class EditableDialog extends DimsScene<any>{
         if(!this.visible) return false;
         return super.scrolled(x-this.getAbsolutePos().x,y-this.getAbsolutePos().y, delta)
     }
+    keyPressed(key: string): boolean {
+        if(!this.visible) return false;
+        return super.keyPressed(key);
+    }
+    keyReleased(key: string): boolean {
+        if(!this.visible) return false;
+        return super.keyReleased(key);
+    }
 }
 let editableElementDialog:EditableDialog|undefined = undefined;
 events.loaded.on(()=>{
@@ -218,7 +215,7 @@ events.loaded.on(()=>{
     data.listeners.mouseUp.push((x:number,y:number, button:number)=>editableElementDialog?.mouseUp(x,y, button));
     data.listeners.scroll.push((x:number,y:number,delta:number)=>editableElementDialog?.scrolled(x,y,delta)??false);
 });
-class EditableElement extends SelectableElement {
+abstract class EditableElement extends SelectableElement {
     protected editing=false;
     protected editDialog = new EditableDialog();
 

@@ -1,5 +1,5 @@
-import {
-    EditableElement, type Env,
+import element, {
+    EditableElement, Element, type Env,
     type NodeGroup,
     type RenderEnv, type RenderPass,
     SelectableElement
@@ -9,6 +9,7 @@ import Vector from "omino/Vector.js";
 import TextInputScene from "omino/scene/utils/TextInputScene.js";
 import {focus} from "omino/scene/Scene.js";
 import data from "omino/Global.js"
+import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
 
 const portalDir = "portalEl-dir";
 const colors="ILYWVTPNFXZU".split("");
@@ -27,7 +28,6 @@ class PortalEl extends EditableElement {
         }}, {order:0, func:(nodes, env) => {
             let selfNode = nodes[this.root]?.getView();
             if(selfNode === undefined){
-                console.log("mroe");
                 return;
             }
 
@@ -48,7 +48,9 @@ class PortalEl extends EditableElement {
 
         this.idInput = new TextInputScene({value:this.id});
         this.idInput.dims.replace(150,20);
-        this.idInput.addListener((newId:string) => this.setId(newId));
+        this.idInput.addListener((newId:string) => {
+            this.setId(newId)
+        });
         this.editDialog.addScene(this.idInput);
     }
     setId(newId:string){
@@ -140,6 +142,14 @@ class PortalEl extends EditableElement {
 
     drawAtMouse(nodes:NodeGroup, env:RenderEnv, historicalNodes:NodeGroup) {
         this.draw(nodes, env, historicalNodes);
+    }
+
+    palette(nodes: NodeGroup, env: Env, historicalNodes: NodeGroup){
+        return [];
+    }
+
+    settings(nodes: NodeGroup, env: Env, historicalNodes: NodeGroup) {
+        return [];
     }
 }
 
