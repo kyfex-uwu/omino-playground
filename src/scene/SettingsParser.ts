@@ -7,19 +7,19 @@ import type {Submittable} from "omino/scene/utils/Submittable.js";
 import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
 import TickboxScene from "omino/scene/utils/TickboxScene.js";
 
-type InternalSetting<T,E extends {}={}> = {value:T, submit:(v:T)=>void, extra:E};
+type InternalSetting<T,E extends {}={}> = {value:T, submitFunc:(v:T)=>boolean, extra:E};
 export type SettingData<T extends keyof Settings> = {type:T, label:string, data:Settings[T]}
 export type Settings = {
     counter:InternalSetting<number, {min?:number, max?:number, inc?:number}>,
-    tickbox:InternalSetting<boolean>
+    tickbox:InternalSetting<boolean, {requiresApply?:boolean}>
 }
 
 const functions:{
     [key in keyof Settings]:(data:Settings[key]) => DimsScene<any> & Submittable<Settings[key]["value"]>
 } = {
-    counter: (data:{value:number, submit:(val:number)=>void, extra:{min?:number, max?:number, inc?:number}}) =>
+    counter: (data:{value:number, submitFunc:(val:number)=>boolean, extra:{min?:number, max?:number, inc?:number}}) =>
         new CounterScene(data),
-    tickbox: (data:{value:boolean, submit:(val:boolean)=>void})=>
+    tickbox: (data:{value:boolean, submitFunc:(val:boolean)=>boolean, extra:{requiresApply?:boolean}})=>
         new TickboxScene(data),
 };
 

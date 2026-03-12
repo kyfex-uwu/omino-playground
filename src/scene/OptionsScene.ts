@@ -141,8 +141,12 @@ class OptionsHolder extends ScrollableScene<any> {
         }));
 
         this.board=board;
-        // this.board.elementsListeners.push((board) => this.recalcBits());
-        // setTimeout(()=>this.recalcBits(),0);//top 10 worst things ever: using setTimeout to fix your problems
+        this.board.addListener("elements", (board) => this.recalcBits(
+            ...board.getRenderingData()
+        ));
+        setTimeout(()=>this.recalcBits(
+            ...this.board.getRenderingData()
+        ),0);//top 10 worst things ever: using setTimeout to fix your problems
     }
 
     resized(oldDims:Vector, newDims=oldDims) {

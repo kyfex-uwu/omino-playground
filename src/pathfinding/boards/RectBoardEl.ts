@@ -10,6 +10,7 @@ import Node from "omino/pathfinding/Node.js";
 import RectOrientation from "omino/pathfinding/orientation/RectOrientation.js";
 import Vector from "omino/Vector.js";
 import {fill} from "omino/Colors.js";
+import type {SettingData} from "omino/scene/SettingsParser.js";
 
 //  0
 // 3 1
@@ -165,45 +166,52 @@ export default class RectBoardEl extends Element {
     }
 
 
-    settings() {
+    settings():SettingData<any>[] {
         return [{
             type: "counter" as "counter",
             label: "Width",
             data: {
-                min: 1,
                 value: this.width,
-                submit: (v:number) => {
+                submitFunc: (v:number) => {
                     this.setWidth(v);
                     this.width = v;
                     this.needsUpdate=true;
                     return true;
+                },
+                extra:{
+                    min:1
                 }
             }
-        }, {
+        } satisfies SettingData<"counter">, {
             type: "counter" as "counter",
             label: "Height",
             data: {
-                min: 1,
                 value: this.height,
-                submit: (v:number) => {
+                submitFunc: (v:number) => {
                     this.setHeight(v);
                     this.height = v;
                     this.needsUpdate=true;
                     return true;
+                },
+                extra:{
+                    min:1
                 }
             }
-        }, {
+        } satisfies SettingData<"counter">, {
             type:"tickbox",
             label:"Enable Portals",
             data:{
                 value:false,
-                submit:(v:boolean)=>{
+                submitFunc:(v:boolean)=>{
                     this.portalsEnabled=v;
                     this.needsUpdate=true;
                     return true;
+                },
+                extra:{
+                    requiresApply:true,
                 }
             }
-        }];
+        } satisfies SettingData<"tickbox">];
     }
     palette(){
         return [];
@@ -215,7 +223,7 @@ export default class RectBoardEl extends Element {
 
         if(this.board.length<height)
             this.board.push(...new Array(height-this.board.length).fill(0).map(_=>
-                new Array(this.width).fill(0).map(_=>this.currId++)))
+                new Array(this.width).fill(0).map(_=>this.currId++)));
     }
     setWidth(width:number){
         if(this.board.length>0 && this.board[0]!.length>width)

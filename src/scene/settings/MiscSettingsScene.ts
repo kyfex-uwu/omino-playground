@@ -12,10 +12,10 @@ export default class MiscSettingsScene extends ScrollableScene<any>{
     constructor() {
         super({min:0});
 
-        const scrollSensScene = new CounterScene({value:data.scrollScale, min:0, inc:0.1, submitFunc:val=>{
+        const scrollSensScene = new CounterScene({value:data.scrollScale, submitFunc:val=>{
             data.scrollScale=val;
             return true;
-        }});
+        }, extra:{min:0, inc:0.1}});
         this.toSubmit.push(scrollSensScene);
         this.scrollSens = this.addScene(new LabeledScene(scrollSensScene, "Scroll Sensitivity", 0.1));
     }

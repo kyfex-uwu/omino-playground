@@ -5,6 +5,7 @@ import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
 import {Keybinds} from "omino/Keybinds.js";
 import Vector from "omino/Vector.js";
 import data from "omino/Global.js";
+import {MultipleEvents} from "omino/Listeners.js";
 
 type Options={
     elements: Element[],
@@ -21,7 +22,9 @@ const defaultOptions:Options = {
     endPoint:undefined
 };
 
-export default class Board extends DimsScene<any>{
+export default class Board extends MultipleEvents(DimsScene<any>, {
+    elements:null! as [Board],
+}){
     private dragging:false|{
         orig: Vector
         curr: Vector
@@ -45,7 +48,6 @@ export default class Board extends DimsScene<any>{
     private endPoint: number|undefined;
     path: number[];
     private shouldRecalcPath: boolean;
-    elementsListeners: ((board:this)=>void)[];
     private lengthWorker: {
         postMessage: (message: any) => void
         terminate: ()=>void
@@ -67,16 +69,13 @@ export default class Board extends DimsScene<any>{
         this.shouldRecalcPath = filledInOptions.calcPath;
         this.recalcPath();
 
-        this.elementsListeners = []
-
         this.env=({} as unknown as undefined)!;//todo:fix
 
-        this.elementsListeners.push(() => this.onElementsChange());
+        this.addListener("elements", ()=>this.onElementsChange());
 
     }
 
     setEnv(env:AnyEnhancedEnv=data.env) {
-        const size = Math.min(env.width()/2, env.height());
         let newEnv = {
             drawData: {
                 ...this.env.drawData,
@@ -105,17 +104,20 @@ export default class Board extends DimsScene<any>{
         this.applyData.nodes = Element.apply(this.elements,
             this.env, this.applyData.historicalNodes);
     }
+    getRenderingData():[NodeGroup, RenderEnv, NodeGroup]{
+        return [this.applyData.nodes, this.env, this.applyData.historicalNodes];
+    }
 
     add(element:Element) {
         this.elements.push(element);
-        for (const l of this.elementsListeners) l(this);
+        this.emitEvent("elements", this);
         this.recalcPath();
     }
 
     removeElement(element:Element) {
         if (this.elements.includes(element)) {
-            for (const l of this.elementsListeners) l(this);
             this.elements.splice(this.elements.indexOf(element), 1);
+            this.emitEvent("elements", this);
             this.recalcPath();
         }
     }
@@ -224,7 +226,7 @@ export default class Board extends DimsScene<any>{
         }
         if(shouldUpdate) {
             this.apply();
-            for (const l of this.elementsListeners) l(this);
+            this.emitEvent("elements", this);
             this.recalcPath();
         }
 

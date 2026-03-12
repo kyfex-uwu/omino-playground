@@ -15,7 +15,7 @@ class CounterScene extends DimsScene<any> implements Submittable<number>{
     public value: number;
     private oldValue: number;
     private readonly submitFunc: (val:number) => boolean;
-    constructor({value=0, min = -Infinity, max = Infinity, inc = 1, submitFunc = (val:number) => true}) {
+    constructor({value=0, submitFunc = (val:number) => true, extra:{min = -Infinity, max = Infinity, inc = 1}}) {
         super();
 
         this.min = min;

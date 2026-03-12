@@ -3,12 +3,13 @@ import {fill, stroke} from "omino/Colors.js";
 import {SingleEvent} from "omino/Listeners.js";
 import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
 import type {Submittable} from "omino/scene/utils/Submittable.js";
+import type Vector from "omino/Vector.js";
 
 export default class TickboxScene extends SingleEvent(DimsScene<any>, null! as [boolean]) implements Submittable<boolean>{
     private value: boolean;
     private newValue: boolean;
     private requiresApply: boolean;
-    constructor({value = false, requiresApply = false} = {}) {
+    constructor({value = false, extra:{requiresApply = false}}) {
         super();
         this.value = value;
         this.newValue = value;
@@ -36,7 +37,7 @@ export default class TickboxScene extends SingleEvent(DimsScene<any>, null! as [
     render(env:AnyEnhancedEnv) {
         fill(this.value == this.newValue ? "scenes.util.tickbox.bg" : "scenes.util.tickbox.bgUnsaved", env);
         env.fillRect(0, 0, this.dims.x, this.dims.y);
-        if (this.value) {
+        if (this.newValue) {
             stroke("scenes.util.tickbox.color", env);
             env.scale((this.dims.x + this.dims.y) * 0.05, (this.dims.x + this.dims.y) * 0.05);
             env.lineWidth=2;
@@ -47,7 +48,17 @@ export default class TickboxScene extends SingleEvent(DimsScene<any>, null! as [
         super.render(env);
     }
 
-    submit(val: boolean): void {
+    resized(oldDims:Vector, newDims=oldDims){
+        const size = Math.min(this.dims.x,this.dims.y);
+        if(size === this.dims.x)
+            this.pos.y+=this.dims.y/2-size/2;
+        if(size === this.dims.y)
+            this.pos.x+=this.dims.x/2-size/2;
+        this.dims.replace(size,size);
+        super.resized(oldDims, newDims)
+    }
 
+    submit() {
+        this.value=this.newValue;
     }
 }
