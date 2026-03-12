@@ -13,10 +13,10 @@ import {
 import settingsParser from "omino/scene/SettingsParser.js";
 
 class PaletteSpace extends ButtonScene<any> {
-    private elementGenerator: (nodes: NodeGroup, env: BoardEnv, historicalNodes: NodeGroup) => SelectableElement;
+    private elementGenerator: (nodes: NodeGroup, env: BoardRenderEnv, historicalNodes: NodeGroup) => SelectableElement;
     private drawFunc: (nodes: NodeGroup, env: BoardRenderEnv, historicalNodes: NodeGroup) => void;
     private board: Board;
-    constructor(el:((nodes:NodeGroup, env:BoardEnv, historicalNodes:NodeGroup)=>SelectableElement),
+    constructor(el:((nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup)=>SelectableElement),
                 draw:(nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup)=>void,
                 board:Board) {
         super();

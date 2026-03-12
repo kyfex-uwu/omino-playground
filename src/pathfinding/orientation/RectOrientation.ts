@@ -1,11 +1,18 @@
 import Orientation from "omino/pathfinding/orientation/Orientation.js";
+import Vector from "omino/Vector.js";
 
 const dir = (dir:RectOrienVal)=>{return {up:0,right:1,down:2,left:3}[dir]}
 const str = (dir:number)=>(["up","right","down","left"])[dir]! as RectOrienVal;
 
-type RectOrienVal="up"|"right"|"down"|"left";
+export type RectOrienVal="up"|"right"|"down"|"left";
+export const rectOrienDirs:{[key in RectOrienVal]:Vector} = {
+    up:new Vector(0,-1),
+    down:new Vector(0,1),
+    left:new Vector(-1,0),
+    right:new Vector(1,0),
+}
 export default class RectOrientation extends Orientation<RectOrienVal> {
-    private readonly orientation:RectOrienVal;
+    public readonly orientation:RectOrienVal;
     constructor(orientation:RectOrienVal) {
         super();
         this.orientation = orientation;

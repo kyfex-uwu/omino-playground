@@ -58,7 +58,7 @@ abstract class Element {
     }
     abstract settings(nodes:NodeGroup, env:BoardEnv, historicalNodes:NodeGroup):SettingData<any>[];
     abstract palette(nodes:NodeGroup, env:BoardEnv, historicalNodes:NodeGroup): {
-        el:((nodes:NodeGroup, env:BoardEnv, historicalNodes:NodeGroup)=>SelectableElement),
+        el:((nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup)=>SelectableElement),
         draw:(nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup)=>void
     }[];
     infoTextPass(env:BoardEnv){ return ""; }
@@ -128,7 +128,7 @@ abstract class Element {
 }
 
 abstract class SelectableElement extends Element {
-    protected onMouse:false|Vector=false;
+    onMouse:false|Vector=false;
     public forceSelected=false;
 
     isSelected(nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup) {

@@ -1,5 +1,7 @@
 //todo: caching
 
+import type {ConnTree} from "omino/pathfinding/elements/OminoEl.js";
+
 export type OType=string
 
 //instances of this class should not change!!! instead they should return new instances

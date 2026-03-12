@@ -13,6 +13,7 @@ import {background, fill} from "omino/Colors.js";
 import type {SettingData} from "omino/scene/SettingsParser.js";
 import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
 import OminoEl, {type ConnTree} from "omino/pathfinding/elements/OminoEl.js";
+import data from "omino/Global.js"
 
 //  0
 // 3 1
@@ -216,18 +217,27 @@ export default class RectBoardEl extends Element {
     }
     palette(){
         const zipped = ([
-            {"left":{},"right":{},"down":{"down":{}}},
+            {"left":{},"right":{"up":{}},"down":{}},
             {"left":{},"right":{},"down":{"left":{}}},
             {"left":{},"down":{"down":{}}},
             {"left":{},"right":{"right":{}}},
+            {"left":{}},
+            {"right":{}},
+            {"up":{}},
+            {"down":{}}
         ] satisfies ConnTree<RectOrientation>[]);
-        return zipped.map(data=>{return{
-            el:(nodes: NodeGroup, env: BoardEnv, historicalNodes: NodeGroup)=>
-                new OminoEl(data, 21, new RectOrientation("up")),
+        return zipped.map(d=>{return{
+            el:(nodes: NodeGroup, env: BoardRenderEnv, historicalNodes: NodeGroup)=> {
+                const el = new OminoEl(d, 0, new RectOrientation("up"));
+                el.onMouse = new Vector(0,0);
+                env.cursor.heldElement = el;
+                // env.board.add(el);
+                return el;
+            },
             draw:(nodes: NodeGroup, env: BoardRenderEnv, historicalNodes: NodeGroup)=>{
                 env.drawData.context.save();
                 env.drawData.context.scale(20, 20)
-                OminoEl.drawFromConnTree(data, env);
+                OminoEl.drawFromConnTree(d, env, "center");
                 env.drawData.context.restore();
             }
         }});
