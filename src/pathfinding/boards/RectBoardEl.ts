@@ -65,7 +65,7 @@ export default class RectBoardEl extends Element {
 
         renderPasses.push(
             {order:-1000, func:(nodes, env) => {//initializes the board area
-                this.renderScale = Math.min(env.container.dims.x / this.width, env.container.dims.y / this.height);
+                this.renderScale = Math.min(env.board.dims.x / this.width, env.board.dims.y / this.height);
 
                 Object.assign(env.drawData, {
                     nodeToTexPos: (n:Node<any, any>) => this.getNodePos(n, this.renderScale),
@@ -73,7 +73,7 @@ export default class RectBoardEl extends Element {
                 });
 
                 this.center.replace(this.renderScale*this.width/2, this.renderScale*this.height/2);
-                env.container.center = this.center;
+                env.board.center = this.center;
             }},
 
             {order:-10, func:(nodes, env) => {//draws grid
@@ -152,13 +152,13 @@ export default class RectBoardEl extends Element {
                     }
                     if(pickingUp !== undefined){
                         env.cursor.heldElement = pickingUp;
-                        env.board.remove(pickingUp);
+                        env.board.removeElement(pickingUp);
                     }
                 } else {
                     if (env.cursor.heldElement instanceof SelectableElement &&
                             env.cursor.heldElement.tryPlace(nodes, env, historicalNodes)) {
                         env.board.add(env.cursor.heldElement);
-                        env.container.unHold();
+                        env.board.unHold();
                     }
                 }
             }},

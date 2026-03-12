@@ -207,7 +207,7 @@ class OminoEl extends EditableElement {
 
     getNodePos(node:Node<any, {pos:Vector}>, env:RenderEnv, historicalNodes:NodeGroup) {
         if (this.onMouse && env.cursor.heldElement === this) {
-            return env.mouse.pos.sub(env.container.getAbsolutePos())
+            return env.mouse.pos.sub(env.board.getAbsolutePos())
                 .sub(env.drawData.nodeToTexPos(this.getRoot(historicalNodes)))
                 .sub(env.drawData.nodeSize / 2, env.drawData.nodeSize / 2)
                 .sub(this.onMouse || new Vector(0, 0))
@@ -248,7 +248,7 @@ class OminoEl extends EditableElement {
             return SelectableElement.CLICK.CONSUME;
 
         if (env.mouse.clickedLeft) {
-            let cellPos = env.mouse.pos.sub(env.container.getAbsolutePos())
+            let cellPos = env.mouse.pos.sub(env.board.getAbsolutePos())
                 .scale(1 / env.drawData.nodeSize)
 
             let node = Object.values(historicalNodes).find(n => n.custom.pos.equals(cellPos.floor()));
@@ -256,7 +256,7 @@ class OminoEl extends EditableElement {
                 this.onMouse = env.mouse.pos.sub(this.getNodePos(
                     this.getRoot(historicalNodes), env, historicalNodes))
                     .sub(env.drawData.nodeSize / 2, env.drawData.nodeSize / 2)
-                    .sub(env.container.getAbsolutePos());
+                    .sub(env.board.getAbsolutePos());
                 return SelectableElement.CLICK.PICKUP;
             }
         }
@@ -265,7 +265,7 @@ class OminoEl extends EditableElement {
 
     isEditing(nodes:NodeGroup, env:RenderEnv, historicalNodes:NodeGroup) {
         if (env.mouse.clickedRight) {
-            let cellPos = env.mouse.pos.sub(env.container.getAbsolutePos())
+            let cellPos = env.mouse.pos.sub(env.board.getAbsolutePos())
                 .scale(1 / env.drawData.nodeSize);
 
             let node = Object.values(historicalNodes).find(n => n.custom.pos.equals(cellPos.floor()));
@@ -276,7 +276,7 @@ class OminoEl extends EditableElement {
 
     tryPlace(nodes:NodeGroup, env:RenderEnv) {
         if (env.mouse.clickedLeft) {
-            let cellPos = env.mouse.pos.sub(env.container.getAbsolutePos())
+            let cellPos = env.mouse.pos.sub(env.board.getAbsolutePos())
                 .sub(this.onMouse || new Vector(0, 0)).scale(1 / env.drawData.nodeSize).floor();
 
             let newRoot = Object.values(nodes).find(n => n.custom.pos.equals(cellPos));

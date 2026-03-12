@@ -5,7 +5,6 @@ import {fill} from "omino/Colors.js";
 import events from "omino/Events.js";
 import type Node from "omino/pathfinding/Node.js";
 import type Scene from "omino/scene/Scene.js";
-import type {BoardContainer} from "omino/scene/MainScene.js";
 import type Board from "omino/Board.js";
 import type {OType} from "omino/pathfinding/orientation/Orientation.js";
 import type {AnyEnhancedEnv, EnhancedEnv} from "omino/EnvHelper.js";
@@ -24,7 +23,6 @@ export type RenderEnv = Env & {
         nodeSize: number,
         notifyTexture: () => void,
     },
-    container: BoardContainer,
     board: Board,
     mouse: {
         dragging: false|{
@@ -253,7 +251,7 @@ abstract class EditableElement extends SelectableElement {
                     let offs = new Vector(Math.max(0,origCenterX),pos.y);
                     self.editDialog.pos.replace(offs);
                     env.drawData.context.translate(offs.x,offs.y);//todo: snap to right edge as well
-                    self.editDialog.getAbsolutePos = ()=> offs.add(env.container.pos);
+                    self.editDialog.getAbsolutePos = ()=> offs.add(env.board.center).sub(env.board.dims.scale(0.5));
                     self.editDialog.pointerOffs=Math.min(0,origCenterX);
                     self.editDialog.render(env.drawData.context);
                     env.drawData.context.restore();

@@ -10,7 +10,6 @@ import SettingsContainerScene from "omino/scene/settings/SettingsContainerScene.
 import Vector from "omino/Vector.js";
 import data from "omino/Global.js"
 import {background, fill, stroke} from "omino/Colors.js";
-import {BoardContainer} from "omino/scene/MainScene.js";
 import Element, {type Env, type NodeGroup} from "omino/pathfinding/elements/Element.js";
 import settingsParser, {LabeledScene} from "omino/scene/SettingsParser.js";
 import MainScene from "omino/scene/MainScene.js";
@@ -22,12 +21,12 @@ import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
 
 class ShareImageScene extends Scene<never> {
     private mainScene: Scene<never>;
-    private board: BoardContainer;
+    private board: Board;
     constructor(mainScene:MainScene) {
         super();
         this.mainScene = mainScene;
 
-        this.board = new BoardContainer(mainScene);
+        this.board = mainScene.board.clone();
     }
 
     render(env:AnyEnhancedEnv) {
@@ -60,7 +59,7 @@ class ShareImageScene extends Scene<never> {
         env.translate(
             env.width() * 0.2 + env.width() * 0.6 / 2 - smallestDim/4,
             env.height() * 0.2 + env.height() * 0.6 / 2 - smallestDim/4);
-        this.board.render();
+        this.board.render(env);
         env.restore();
     }
 

@@ -1,5 +1,11 @@
-import Element from "omino/pathfinding/elements/Element.js";
+import Element, {type NodeGroup, type RenderEnv, SelectableElement} from "omino/pathfinding/elements/Element.js";
 import * as FakeWebWorker from "omino/pathfinding/Pathfinder.js";
+import {DimsScene} from "omino/scene/Scene.js";
+import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
+import {Keybinds} from "omino/Keybinds.js";
+import Vector from "omino/Vector.js";
+import data from "omino/Global.js";
+import {stroke} from "omino/Colors.js";
 
 type Options={
     elements: Element[],
@@ -16,7 +22,25 @@ const defaultOptions:Options = {
     endPoint:undefined
 };
 
-export default class Board {
+export default class Board extends DimsScene<any>{
+    private dragging:false|{
+        orig: Vector
+        curr: Vector
+        delta: Vector
+    }=false;
+    private shouldUnhold=false;
+    private env: RenderEnv;
+    private applyData: {
+        historicalNodes:NodeGroup,
+        nodes:NodeGroup
+    }={
+        historicalNodes:undefined!,
+        nodes:undefined!,
+    };
+    center=new Vector(0,0);
+    cursor: { heldElement: SelectableElement|undefined }={heldElement:undefined};
+    private clicked: boolean[]=[];
+
     elements: Element[];
     private startPoint: number|undefined;
     private endPoint: number|undefined;
@@ -30,6 +54,8 @@ export default class Board {
     }|undefined;
 
     constructor(options:Partial<Options> = {}) {
+        super();
+
         let filledInOptions:Options = {...defaultOptions}
         Object.assign(filledInOptions, options);
 
@@ -42,7 +68,43 @@ export default class Board {
         this.shouldRecalcPath = filledInOptions.calcPath;
         this.recalcPath();
 
-        this.elementsListeners = [];
+        this.elementsListeners = []
+
+        this.env=({} as unknown as undefined)!;//todo:fix
+
+        this.elementsListeners.push(() => this.onElementsChange());
+
+    }
+
+    setEnv(env:AnyEnhancedEnv=data.env) {
+        const size = Math.min(env.width()/2, env.height());
+        let newEnv = {
+            drawData: {
+                ...this.env.drawData,
+                context:env,
+            },
+            board: this,
+            mouse: {
+                dragging: this.dragging,
+                clickedLeft: !!this.clicked[0],
+                clickedRight: !!this.clicked[2],
+                pos: new Vector(data.mouseX, data.mouseY),
+            },
+            cursor: this.cursor,
+
+            elements:[]
+        } satisfies RenderEnv;
+        Object.assign(this.env, newEnv);
+    }
+
+    unHold() {
+        this.shouldUnhold = true;
+    }
+
+    apply() {
+        this.applyData.historicalNodes = {};
+        this.applyData.nodes = Element.apply(this.elements,
+            this.env, this.applyData.historicalNodes);
     }
 
     add(element:Element) {
@@ -51,7 +113,7 @@ export default class Board {
         this.recalcPath();
     }
 
-    remove(element:Element) {
+    removeElement(element:Element) {
         if (this.elements.includes(element)) {
             for (const l of this.elementsListeners) l(this);
             this.elements.splice(this.elements.indexOf(element), 1);
@@ -119,5 +181,67 @@ export default class Board {
             path: this.path,
             elements: this.elements,
         });
+    }
+
+    onElementsChange() {
+        setTimeout(()=>this.apply(), 0);//alright
+    }
+
+    mouseUp(x:number, y:number, button:number) {
+        this.clicked[button]=this.dragging ? this.dragging.orig.distTo(this.dragging.curr) < 10 : true;
+        this.dragging = false;
+        return true;
+    }
+    mouseDown(x:number, y:number, button:number) {
+        if(super.mouseDown(x,y,button)) return true;
+
+        if(!this.isIn()) return false;
+
+        this.dragging = {
+            orig: new Vector(x, y),
+            curr: new Vector(x, y),
+            delta: new Vector(0, 0),
+        };
+        return true;
+    }
+
+    render(env:AnyEnhancedEnv) {
+        if(Keybinds.DEL.isReleased() && this.cursor.heldElement){
+            this.cursor.heldElement=undefined;
+        }
+
+        if (this.dragging) {
+            let pos = new Vector(data.mouseX, data.mouseY).sub(this.pos);
+            this.dragging.delta = pos.sub(this.dragging.curr);
+            this.dragging.curr = pos;
+        }
+
+        let shouldUpdate=false;
+        for(const element of this.elements){
+            if(element.needsUpdate){
+                element.needsUpdate=false;
+                shouldUpdate=true;
+            }
+        }
+        if(shouldUpdate) {
+            this.apply();
+            for (const l of this.elementsListeners) l(this);
+            this.recalcPath();
+        }
+
+        this.setEnv(env);
+        Element.render(this.elements, this.applyData.nodes, this.applyData.historicalNodes, this.env);
+        this.pos.replace(new Vector(data.env.width()/4,0).add(new Vector(data.canvElt.width/2, data.canvElt.height)
+            .sub(this.center.scale(2)).scale(0.5)));
+
+        if (this.cursor.heldElement) {
+            this.cursor.heldElement.drawAtMouse(this.applyData.nodes, this.env, this.applyData.historicalNodes);
+        }
+        if (this.shouldUnhold) {
+            this.cursor.heldElement = undefined;
+            this.shouldUnhold = false;
+        }
+
+        this.clicked=[];
     }
 }
