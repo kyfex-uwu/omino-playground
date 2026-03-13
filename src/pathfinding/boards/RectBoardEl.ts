@@ -9,7 +9,7 @@ import {
 import Node from "omino/pathfinding/Node.js";
 import RectOrientation, {type RectOrienVal} from "omino/pathfinding/orientation/RectOrientation.js";
 import Vector from "omino/Vector.js";
-import {fill} from "omino/Colors.js";
+import {fill, stroke} from "omino/Colors.js";
 import type {SettingData} from "omino/scene/SettingsParser.js";
 import OminoEl, {type ConnTree} from "omino/pathfinding/elements/OminoEl.js";
 import PortalEl from "omino/pathfinding/elements/PortalEl.js";
@@ -230,7 +230,48 @@ export default class RectBoardEl extends Element {
 
         ] satisfies ConnTree<RectOrientation>[]);
 
-        return (zipped.map(d=>{return{
+        return ([{
+            el:(nodes: NodeGroup, env: BoardRenderEnv, historicalNodes: NodeGroup)=> {
+                //hehe
+            },
+            draw:(nodes: NodeGroup, env: BoardRenderEnv, historicalNodes: NodeGroup)=>{
+                fill("scenes.buttons.dark.icon", env.drawData.context);
+                env.drawData.context.translate(0,-3);
+                env.drawData.context.scale(2,2);
+
+                env.drawData.context.save();
+                env.drawData.context.translate(30,0);
+                env.drawData.context.fillRect(-45,-10,30,5);
+                env.drawData.context.beginPath();
+                env.drawData.context.moveTo(-37,-7);
+                env.drawData.context.lineTo(-33,-13);
+                env.drawData.context.lineTo(-27,-13);
+                env.drawData.context.lineTo(-23,-7);
+                env.drawData.context.fill();
+                env.drawData.context.restore();
+
+                env.drawData.context.beginPath();
+                env.drawData.context.moveTo(-13,-2);
+                env.drawData.context.lineTo(-8,-2);
+                env.drawData.context.lineTo(-5,13);
+                env.drawData.context.lineTo(5,13);
+                env.drawData.context.lineTo(8,-2);
+                env.drawData.context.lineTo(13,-2);
+                env.drawData.context.lineTo(9,18);
+                env.drawData.context.lineTo(-9,18);
+                env.drawData.context.fill();
+
+                env.drawData.context.save();
+                stroke("scenes.buttons.dark.icon", env.drawData.context);
+                env.drawData.context.lineWidth=3;
+                env.drawData.context.singleLine(-3,0, -2,10);
+                env.drawData.context.singleLine(3,0, 2,10);
+                env.drawData.context.restore();
+            }
+        }] as {
+            el:((nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup)=>SelectableElement|void),
+            draw:(nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup)=>void
+        }[]).concat((zipped.map(d=>{return{
             el:(nodes: NodeGroup, env: BoardRenderEnv, historicalNodes: NodeGroup)=> {
                 const el = new OminoEl(d, 0, new RectOrientation("up"));
                 el.onMouse = new Vector(0,0);
@@ -243,10 +284,7 @@ export default class RectBoardEl extends Element {
                 OminoEl.drawFromConnTree(d, env, "center");
                 env.drawData.context.restore();
             }
-        }}) as {
-            el:((nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup)=>SelectableElement|void),
-            draw:(nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup)=>void
-        }[]).concat([{
+        }}))).concat([{
             el:(nodes: NodeGroup, env: BoardRenderEnv, historicalNodes: NodeGroup)=> {
                 if(data.scene instanceof MainScene)
                     data.scene = new CreatingOminoScene(data.scene, env.cursor);
