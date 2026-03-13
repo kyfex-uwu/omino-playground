@@ -7,6 +7,7 @@ import data from "omino/Global.js";
 import OminoEl, {type ConnTree} from "omino/pathfinding/elements/OminoEl.js";
 import RectOrientation, {rectOrienDirs, type RectOrienVal} from "omino/pathfinding/orientation/RectOrientation.js";
 import type MainScene from "omino/scene/MainScene.js";
+import RectOminoEl from "omino/pathfinding/elements/RectOminoEl.js";
 
 class Inner extends DimsScene<any>{
     private tree:ConnTree<any, RectOrienVal>={};
@@ -110,7 +111,7 @@ class Inner extends DimsScene<any>{
     }
 
     getOmino(){
-        return new OminoEl(this.tree, 0, new RectOrientation("up"));
+        return new RectOminoEl(this.tree, 0, RectOrientation.up);
     }
 }
 

@@ -6,11 +6,23 @@ export type OType=string
 
 //instances of this class should not change!!! instead they should return new instances
 export default abstract class Orientation<ThisOType extends OType> {
+    public readonly direc: ThisOType;
+    constructor(direc:ThisOType) {
+        this.direc = direc;
+    }
+
     public __only_for_ts:ThisOType=undefined!;
 
     // direc: the direction from this orientation's perspective
     // returns: the direction translated to the default/absolute perspective
     abstract apply(direc:ThisOType):ThisOType;
+    applyToTree(tree: ConnTree<any, ThisOType>):ConnTree<any, ThisOType>{
+        const toReturn:ConnTree<any, ThisOType> = {};
+        for(const child in tree)
+            toReturn[this.apply(child)] = this.applyToTree(tree[child]!);
+
+        return toReturn;
+    }
 
     //thisDirec: the absolute direction out of this node
     //otherDirec: the absolute direction of the other node that this node is connecting to

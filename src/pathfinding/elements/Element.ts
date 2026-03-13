@@ -253,7 +253,8 @@ abstract class EditableElement extends SelectableElement {
                     let offs = new Vector(Math.max(0,origCenterX),pos.y);
                     self.editDialog.pos.replace(offs);
                     env.drawData.context.translate(offs.x,offs.y);//todo: snap to right edge as well
-                    self.editDialog.getAbsolutePos = ()=> offs.add(env.board.center).sub(env.board.dims.scale(0.5));
+                    self.editDialog.getAbsolutePos = ()=>
+                        offs.add(env.board.center).sub(env.board.dims.scale(0.5)).add(env.board.getAbsolutePos());
                     self.editDialog.pointerOffs=Math.min(0,origCenterX);
                     self.editDialog.render(env.drawData.context);
                     env.drawData.context.restore();

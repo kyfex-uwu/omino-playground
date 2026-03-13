@@ -16,6 +16,7 @@ import PortalEl from "omino/pathfinding/elements/PortalEl.js";
 import data from "omino/Global.js";
 import CreatingOminoScene from "omino/scene/CreatingOminoScene.js";
 import MainScene from "omino/scene/MainScene.js";
+import RectOminoEl from "omino/pathfinding/elements/RectOminoEl.js";
 
 export default class RectBoardEl extends Element {
     private width: number;
@@ -216,7 +217,7 @@ export default class RectBoardEl extends Element {
     palette(){
         const zipped = ([
             {down:{down:{down:{down:{}}}}},
-            {down:{down:{down:{right:{}}}}},
+            {down:{down:{down:{left:{}}}}},
             {down:{down:{down:{},right:{}}}},
             {down:{down:{right:{down:{}}}}},
             {down:{right:{down:{right:{}}}}},
@@ -273,7 +274,7 @@ export default class RectBoardEl extends Element {
             draw:(nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup)=>void
         }[]).concat((zipped.map(d=>{return{
             el:(nodes: NodeGroup, env: BoardRenderEnv, historicalNodes: NodeGroup)=> {
-                const el = new OminoEl(d, 0, new RectOrientation("up"));
+                const el = new RectOminoEl(d, 0, RectOrientation.up);
                 el.onMouse = new Vector(0,0);
                 env.cursor.heldElement = el;
                 return el;
@@ -281,7 +282,7 @@ export default class RectBoardEl extends Element {
             draw:(nodes: NodeGroup, env: BoardRenderEnv, historicalNodes: NodeGroup)=>{
                 env.drawData.context.save();
                 env.drawData.context.scale(20, 20)
-                OminoEl.drawFromConnTree(d, env, "center");
+                RectOminoEl.drawFromConnTree(d, env, "center");
                 env.drawData.context.restore();
             }
         }}))).concat([{

@@ -12,24 +12,26 @@ export const rectOrienDirs:{[key in RectOrienVal]:Vector} = {
     right:new Vector(1,0),
 }
 export default class RectOrientation extends Orientation<RectOrienVal> {
-    public readonly orientation:RectOrienVal;
-    constructor(orientation:RectOrienVal) {
-        super();
-        this.orientation = orientation;
+    private constructor(orientation:RectOrienVal) {
+        super(orientation);
     }
 
     apply(direc:RectOrienVal) {
-        return str((dir(direc) + dir(this.orientation)) % 4);
+        return str((dir(direc) + dir(this.direc)) % 4);
     }
 
     toString() {
-        return `RectOrientation{${this.orientation}}`;
+        return `RectOrientation{${this.direc}}`;
     }
 
     getOtherOrientation(thisDirec:RectOrienVal, otherDirec:any, otherClass:Orientation<any>) {
         if(otherClass instanceof RectOrientation)
-            return new RectOrientation(str((dir(otherDirec) - dir(thisDirec) + 2 + dir(this.orientation) + 8) % 4));
+            return new RectOrientation(str((dir(otherDirec) - dir(thisDirec) + 2 + dir(this.direc) + 8) % 4));
     }
 
-    static readonly default = new RectOrientation("up")
+    static readonly default = new RectOrientation("up");
+    static readonly up = RectOrientation.default;
+    static readonly down = new RectOrientation("down");
+    static readonly left = new RectOrientation("left");
+    static readonly right = new RectOrientation("right");
 }
