@@ -12,4 +12,4 @@ Installation
 
 ---
 Notes:
-- You need an internet connection (at least the first time) to run this app, since it depends on a graphics library
+- ~~You need an internet connection (at least the first time) to run this app~~ nope removed the library
