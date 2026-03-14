@@ -1,13 +1,10 @@
-import Scene, {DimsScene, OneTimeButtonScene} from "omino/scene/Scene.js";
+import Scene, {DimsScene} from "omino/scene/Scene.js";
 import type Element from "omino/pathfinding/elements/Element.js";
 import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
-import {background, fill, stroke} from "omino/Colors.js";
+import {background} from "omino/Colors.js";
 import Vector from "omino/Vector.js";
 import data from "omino/Global.js";
-import OminoEl, {type ConnTree} from "omino/pathfinding/elements/OminoEl.js";
-import RectOrientation, {rectOrienDirs, type RectOrienVal} from "omino/pathfinding/orientation/RectOrientation.js";
 import type MainScene from "omino/scene/MainScene.js";
-import RectOminoEl from "omino/pathfinding/elements/RectOminoEl.js";
 
 export default class CreatingOminoScene extends Scene<never>{
     private cursorHolder: { heldElement: Element | undefined };

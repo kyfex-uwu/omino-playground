@@ -1,5 +1,4 @@
 import events from "omino/Events.js";
-import data from "omino/Global.js"
 import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
 
 type ColorValArr =[number,number,number]|[number,number,number,number];

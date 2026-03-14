@@ -1,23 +1,18 @@
 import {
     ApplyData,
-    EditableElement,
     type BoardEnv,
+    type BoardRenderEnv,
+    EditableElement,
     type NodeGroup,
     type Pass,
-    type BoardRenderEnv,
     type RenderPass,
     SelectableElement
 } from "omino/pathfinding/elements/Element.js";
-import {background, fill, stroke} from "omino/Colors.js";
 import Vector from "omino/Vector.js";
 import PortalEl from "omino/pathfinding/elements/PortalEl.js";
-import Scene, {DimsScene, OneTimeButtonScene} from "omino/scene/Scene.js";
 import Node, {type NodeView} from "omino/pathfinding/Node.js";
 import type {OType} from "omino/pathfinding/orientation/Orientation.js";
 import Orientation from "omino/pathfinding/orientation/Orientation.js";
-import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
-import RectOrientation, {rectOrienDirs, type RectOrienVal} from "omino/pathfinding/orientation/RectOrientation.js";
-import data from "omino/Global.js";
 
 /**
  *  ##

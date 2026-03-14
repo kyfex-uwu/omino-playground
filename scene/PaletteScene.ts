@@ -3,14 +3,7 @@ import {ButtonScene, DimsScene, ScrollableScene} from "omino/scene/Scene.js";
 import {fill} from "omino/Colors.js";
 import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
 import type Board from "omino/Board.js";
-import {
-    type BoardEnv,
-    type BoardRenderEnv,
-    Element,
-    type NodeGroup,
-    SelectableElement
-} from "omino/pathfinding/elements/Element.js";
-import settingsParser from "omino/scene/SettingsParser.js";
+import {type BoardRenderEnv, type NodeGroup, SelectableElement} from "omino/pathfinding/elements/Element.js";
 
 class PaletteSpace extends ButtonScene<any> {
     private elementGenerator: (nodes: NodeGroup, env: BoardRenderEnv, historicalNodes: NodeGroup) => SelectableElement|void;

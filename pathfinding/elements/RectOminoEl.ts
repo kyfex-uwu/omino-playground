@@ -8,7 +8,8 @@ import Orientation from "omino/pathfinding/orientation/Orientation.js";
 import {
     type BoardRenderEnv,
     EditableElement,
-    type NodeGroup, type Pass,
+    type NodeGroup,
+    type Pass,
     type RenderPass
 } from "omino/pathfinding/elements/Element.js";
 import {swap} from "omino/pathfinding/elements/HexOminoEl.js";

@@ -1,4 +1,4 @@
-import Element, {type NodeGroup, type BoardRenderEnv, SelectableElement} from "omino/pathfinding/elements/Element.js";
+import Element, {type BoardRenderEnv, type NodeGroup, SelectableElement} from "omino/pathfinding/elements/Element.js";
 import * as FakeWebWorker from "omino/pathfinding/Pathfinder.js";
 import {DimsScene} from "omino/scene/Scene.js";
 import type {AnyEnhancedEnv} from "omino/EnvHelper.js";

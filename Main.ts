@@ -7,14 +7,10 @@ import {hover, isKindaMobile} from "omino/scene/Scene.js";
 import events from "omino/Events.js";
 
 import RectBoardEl from "omino/pathfinding/boards/RectBoardEl.js";
-import OminoEl from "omino/pathfinding/elements/OminoEl.js";
-import PortalEl from "omino/pathfinding/elements/PortalEl.js";
-import RectOrientation from "omino/pathfinding/orientation/RectOrientation.js";
 import EnvHelper from "omino/EnvHelper.js";
 import {pageData} from "omino/Options.js";
 import data from "omino/Global.js";
 import {getCanvas} from "../omino-playground.js";
-import HexBoardEl from "omino/pathfinding/boards/HexBoardEl.js";
 
 //--
 

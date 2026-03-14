@@ -1,12 +1,8 @@
 import MainScene from "omino/scene/MainScene.js";
-import Scene, {ButtonScene, DimsScene, hover, OneTimeButtonScene} from "omino/scene/Scene.js";
-import type {ConnTree} from "omino/pathfinding/elements/OminoEl.js";
-import RectOrientation, {rectOrienDirs, type RectOrienVal} from "omino/pathfinding/orientation/RectOrientation.js";
+import Scene, {ButtonScene, DimsScene, hover} from "omino/scene/Scene.js";
 import {background, fill, stroke} from "omino/Colors.js";
 import Vector from "omino/Vector.js";
 import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
-import RectOminoEl from "omino/pathfinding/elements/RectOminoEl.js";
-import type Element from "omino/pathfinding/elements/Element.js";
 import data from "omino/Global.js";
 import type BoardElement from "omino/pathfinding/boards/BoardElement.js";
 import RectBoardEl from "omino/pathfinding/boards/RectBoardEl.js";

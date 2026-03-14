@@ -1,8 +1,8 @@
 import {
-    EditableElement,
     type BoardEnv,
-    type NodeGroup,
     type BoardRenderEnv,
+    EditableElement,
+    type NodeGroup,
     type RenderPass,
     SelectableElement
 } from "omino/pathfinding/elements/Element.js";

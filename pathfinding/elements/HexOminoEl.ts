@@ -8,7 +8,8 @@ import Orientation, {type OType} from "omino/pathfinding/orientation/Orientation
 import {
     type BoardRenderEnv,
     EditableElement,
-    type NodeGroup, type Pass,
+    type NodeGroup,
+    type Pass,
     type RenderPass
 } from "omino/pathfinding/elements/Element.js";
 

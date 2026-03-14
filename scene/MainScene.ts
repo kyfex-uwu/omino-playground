@@ -1,7 +1,7 @@
 import Vector from "omino/Vector.js";
-import {hover, Scene} from "omino/scene/Scene.js";
+import {Scene} from "omino/scene/Scene.js";
 import OptionsScene from "omino/scene/OptionsScene.js";
-import {background, fill} from "omino/Colors.js";
+import {background} from "omino/Colors.js";
 import type Board from "omino/Board.js";
 import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
 import PaletteScene from "omino/scene/PaletteScene.js";

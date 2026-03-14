@@ -1,16 +1,17 @@
 import {
     ApplyData,
+    type BoardRenderEnv,
     EditableElement,
-    Element, type BoardEnv, type NodeGroup,
+    type NodeGroup,
     type Pass,
     type RenderPass,
-    SelectableElement, type BoardRenderEnv
+    SelectableElement
 } from "omino/pathfinding/elements/Element.js";
 import Node from "omino/pathfinding/Node.js";
 import Vector from "omino/Vector.js";
-import {background, type ColorPath, fill, stroke} from "omino/Colors.js";
+import {fill, stroke} from "omino/Colors.js";
 import type {SettingData} from "omino/scene/SettingsParser.js";
-import OminoEl, {type ConnTree} from "omino/pathfinding/elements/OminoEl.js";
+import {type ConnTree} from "omino/pathfinding/elements/OminoEl.js";
 import PortalEl from "omino/pathfinding/elements/PortalEl.js";
 import data from "omino/Global.js";
 import CreatingOminoScene from "omino/scene/CreatingOminoScene.js";
