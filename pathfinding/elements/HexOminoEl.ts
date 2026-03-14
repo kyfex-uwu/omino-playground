@@ -109,7 +109,7 @@ export default class HexOminoEl extends OminoEl<HexOrienVal>{
         }
 
     },(env)=>{
-        env.rotate(Math.PI/3*2);
+        env.rotate(Math.PI/-6);
         flipShape(env);
     });
     private readonly flipHDown = button(_=>{
@@ -128,7 +128,7 @@ export default class HexOminoEl extends OminoEl<HexOrienVal>{
         }
 
     },(env)=>{
-        env.rotate(Math.PI/3);
+        env.rotate(Math.PI/6);
         flipShape(env);
     });
     private readonly flipV = button(_=>{
@@ -146,6 +146,7 @@ export default class HexOminoEl extends OminoEl<HexOrienVal>{
             childrenToParse.shift();
         }
     },(env)=>{
+        env.rotate(Math.PI/2);
         flipShape(env);
     });
 
@@ -159,7 +160,7 @@ export default class HexOminoEl extends OminoEl<HexOrienVal>{
 
         renderPasses.push({order:0, func:(...args) => this.draw(...args)},
             EditableElement.createDialogPass(this, (nodes, env, historicalNodes) =>
-                env.drawData.nodeToTexPos(historicalNodes[this.root]!).add(env.drawData.nodeSize / 2, env.drawData.nodeSize / 2)));//todo: change pos
+                env.drawData.nodeToTexPos(historicalNodes[this.root]!)));//todo: change pos
     }
 
 

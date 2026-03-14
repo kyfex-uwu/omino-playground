@@ -50,7 +50,6 @@ export function connTreeHash(tree:ConnTree<any, any>, limit=12){
 
 function getNodes(currNodeView:NodeView<any, any>|undefined, connTree:ConnTree<any, any>, toReturn:Set<Node<any, any>> = new Set()) {
     if(currNodeView === undefined) return false;
-    console.log(currNodeView.orientation.direc);
 
     toReturn.add(currNodeView.node);
 
@@ -155,11 +154,10 @@ abstract class OminoEl<ThisOType extends OType> extends EditableElement {
 
     isEditing(nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup) {
         if (env.mouse.clickedRight) {
-            let cellPos = env.mouse.pos.sub(env.board.getAbsolutePos())
+            const mousePos = env.mouse.pos.sub(env.board.getAbsolutePos())
                 .scale(1 / env.drawData.nodeSize);
 
-            let node = Object.values(historicalNodes).find(n => n.custom.pos.equals(cellPos.floor()));
-            return !!node && this.nodes.some(n => n.id === node.id);
+            return this.nodes.some(node => node.custom.pos.distTo(mousePos) < 0.5);
         }
         return false;
     }

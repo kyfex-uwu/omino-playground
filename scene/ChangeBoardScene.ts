@@ -164,7 +164,6 @@ export default class ChangeBoardScene extends Scene<never>{
         if(!this.modal.isIn()) {
             data.scene = this.parentScene;
             this.parentScene.hasMouseAccess = true;
-            console.log("mrp")
         }
         return true;
     }

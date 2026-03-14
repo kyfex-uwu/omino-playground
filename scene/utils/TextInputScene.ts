@@ -51,7 +51,6 @@ class TextInputScene extends SingleEvent<[string]>()(DimsScene<any>) {
     }
 
     keyPressed(key:string) {
-        console.log(this.focused)
         if (!this.focused) return super.keyPressed(key);
 
         switch (key) {

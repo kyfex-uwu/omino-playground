@@ -126,7 +126,7 @@ export default class RectOminoEl extends OminoEl<RectOrienVal>{
 
         renderPasses.push({order:0, func:(...args) => this.draw(...args)},
             EditableElement.createDialogPass(this, (nodes, env, historicalNodes) =>
-                env.drawData.nodeToTexPos(historicalNodes[this.root]!).add(env.drawData.nodeSize / 2, env.drawData.nodeSize / 2)));//todo: change pos
+                env.drawData.nodeToTexPos(historicalNodes[this.root]!)));
     }
 
 

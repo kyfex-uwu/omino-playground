@@ -18,7 +18,6 @@ export default class TickboxScene extends SingleEvent<[boolean]>()(DimsScene<any
 
     apply() {
         this.oldValue = this.value;
-        console.log("A")
 
         this.emitEvent(this.value);
         return true;
