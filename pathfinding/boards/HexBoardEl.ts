@@ -420,14 +420,29 @@ export default class HexBoardEl extends BoardElement{
     }
     palette(){
         const zipped = ([
-            {down:{down:{downright:{}}}},
-            {up:{},downright:{},downleft:{}},
-            {down:{down:{down:{}}}},
-            {down:{},downright:{down:{}}},
-            {down:{downright:{down:{}}}},
-            {downright:{},downleft:{up:{}}},
-            {down:{downright:{}},upright:{}}
-
+            {"up":{"up":{}},"down":{"down":{}}} ,
+            {"up":{"upright":{}},"down":{"down":{}}} ,
+            {"up":{"up":{},"upright":{}},"down":{}} ,
+            {"up":{"up":{}},"down":{},"upright":{}} ,
+            {"down":{"down":{"down":{}}},"upright":{"upright":{}}} ,
+            {"down":{"down":{}},"upright":{"up":{}}} ,
+            {"down":{},"up":{"upright":{}},"upright":{}} ,
+            {"down":{},"downright":{},"up":{"upright":{}}} ,
+            {"up":{"upright":{}},"down":{"downright":{}}} ,
+            {"down":{},"up":{},"upright":{},"downright":{}} ,
+            {"down":{},"up":{"upleft":{},"upright":{}}} ,
+            {"downright":{"down":{"downleft":{"upleft":{}}}}} ,
+            {"down":{},"up":{},"upright":{"upright":{}}} ,
+            {"down":{},"up":{},"upright":{"downright":{}}} ,
+            {"down":{},"up":{"upright":{}},"downleft":{}} ,
+            {"up":{"upright":{}},"down":{"downleft":{}}} ,
+            {"down":{},"up":{},"upleft":{},"upright":{}} ,
+            {"down":{},"downleft":{},"up":{},"upright":{}} ,
+            {"down":{},"up":{"upright":{"downright":{}}}} ,
+            {"upright":{"downright":{}},"down":{"down":{}}} ,
+            {"down":{"downleft":{}},"upright":{"downright":{}}} ,
+            {"up":{},"downleft":{},"downright":{"upright":{}}} ,
+            {"down":{"downleft":{}},"upright":{"up":{}}}
         ] satisfies ConnTree<HexOrientation>[]);
 
         return ([{
