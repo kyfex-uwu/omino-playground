@@ -289,18 +289,18 @@ export default class HexBoardEl extends BoardElement{
                         size * 0.4, size * 0.4, 0, 0, Math.PI*2);
                     env.drawData.context.fill();
 
-                    for(const conn in node.connections){
-                        stroke(({
-                            upright:[255,0,0],
-                            downright:[255,255,0],
-                            up:[255,255,255],
-                            down:[0,0,0],
-                            upleft:[255,0,255],
-                            downleft:[0,255,255],
-                        } satisfies {[key:string]:ColorPath})[conn] ?? [0,0,255],env.drawData.context);
-                        const pos2 = env.drawData.nodeToTexPos(node.connections[conn]!.node);
-                        env.drawData.context.singleLine(pos.x, pos.y, (pos2.x+pos.x)/2, (pos2.y+pos.y)/2);
-                    }
+                    // for(const conn in node.connections){
+                    //     stroke(({
+                    //         upright:[255,0,0],
+                    //         downright:[255,255,0],
+                    //         up:[255,255,255],
+                    //         down:[0,0,0],
+                    //         upleft:[255,0,255],
+                    //         downleft:[0,255,255],
+                    //     } satisfies {[key:string]:ColorPath})[conn] ?? [0,0,255],env.drawData.context);
+                    //     const pos2 = env.drawData.nodeToTexPos(node.connections[conn]!.node);
+                    //     env.drawData.context.singleLine(pos.x, pos.y, (pos2.x+pos.x)/2, (pos2.y+pos.y)/2);
+                    // }
                 }
             }},
             {order:1000, func:(nodes, env, historicalNodes) => {//draws path
