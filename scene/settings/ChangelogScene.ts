@@ -5,6 +5,8 @@ import type Vector from "omino/Vector.js";
 import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
 
 const changelog = [
+    `v1.0.2 3/13/26
+- Added a "view source" button, for anyone who wants to tinker with the code :3`,
     `v1.0.1b 3/13/26
 - fixed the hexagon board!`,
     `v1.0.1 3/13/26

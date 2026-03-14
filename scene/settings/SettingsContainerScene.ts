@@ -1,4 +1,4 @@
-import {DimsScene, hover, OneTimeButtonScene, Scene} from "omino/scene/Scene.js";
+import {ClippedScene, DimsScene, hover, OneTimeButtonScene, Scene} from "omino/scene/Scene.js";
 import Vector from "omino/Vector.js";
 import data from "omino/Global.js";
 import {background, fill, stroke} from "omino/Colors.js";
@@ -9,21 +9,12 @@ import type MainScene from "omino/scene/MainScene.js";
 import MiscSettingsScene from "omino/scene/settings/MiscSettingsScene.js";
 import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
 
-class ClippedContainer extends DimsScene<any> {
+class CustomClippedContainer extends ClippedScene(DimsScene<any>) {
     private inner: Scene<any>;
     constructor(scene:Scene<any>) {
         super();
         this.addScene(scene);
         this.inner = scene;
-    }
-
-    render(env:AnyEnhancedEnv) {
-        env.save();
-        env.beginPath();
-        env.rect(0, 0, this.dims.x, this.dims.y);
-        env.clip();
-        super.render(env);
-        env.restore();
     }
 
     resized(oldDims:Vector, newDims = oldDims) {
@@ -45,6 +36,7 @@ class SettingsContainerScene extends DimsScene<any> {
     private tabButtons: OneTimeButtonScene<Scene<any>>[];
     private bgOffs: number=0;
     private activeTab: { name: string; scene: Scene<any> };
+    private viewsource: OneTimeButtonScene<Scene<any>>;
     constructor(mainScene:MainScene) {
         super();
 
@@ -133,6 +125,32 @@ class SettingsContainerScene extends DimsScene<any> {
         }, () => {
             window.open("https://discord.gg/e5spvrgN9B", '_blank')?.focus();
         }));
+        this.viewsource = this.addScene(new OneTimeButtonScene((s, env) => {
+            buttonFrame(s, env);
+
+            env.save();
+            env.translate(s.dims.x * 0.5, s.dims.y * 0.5);
+            env.scale(s.dims.x / 100, s.dims.x / 100);
+
+            env.lineWidth=7;
+            stroke("scenes.settings.buttons.dark.text", env);
+            env.lineCap="round"
+            env.singleLine(-40,0,-30,17);
+            env.singleLine(-40,0,-30,-17);
+            env.singleLine(40,0,30,17);
+            env.singleLine(40,0,30,-17);
+            env.lineCap="butt"
+            env.singleLine(-30,17,-20,35);
+            env.singleLine(-30,-17,-20,-35);
+            env.singleLine(30,17,20,35);
+            env.singleLine(30,-17,20,-35);
+            env.singleLine(6,-40,-8,40);
+
+            env.restore();
+            if (s.isIn()) hover.set("View Source", s);
+        }, () => {
+            window.open("https://github.com/kyfex-uwu/omino-playground/tree/typescript", '_blank')?.focus();
+        }));
 
         this.colorfile = this.addScene(new OneTimeButtonScene((s, env) => {
             buttonFrame(s, env);
@@ -187,7 +205,7 @@ class SettingsContainerScene extends DimsScene<any> {
             }, () => {
                 this.activeTab.scene.remove();
                 this.activeTab = {...bData};
-                this.activeTab.scene = new ClippedContainer(bData.scene);
+                this.activeTab.scene = new CustomClippedContainer(bData.scene);
                 this.addScene(this.activeTab.scene);
                 if (this.dims) this.activeTab.scene.resized(this.dims, this.dims);
             }));
@@ -206,6 +224,8 @@ class SettingsContainerScene extends DimsScene<any> {
         this.backButton.dims.replace(unit * 1.2, unit * 1.2);
         this.bugreport.pos.replace(unit * 1.5, unit * 0.2);
         this.bugreport.dims.replace(unit * 1.2, unit * 1.2);
+        this.viewsource.pos.replace(unit * 2.8, unit * 0.2);
+        this.viewsource.dims.replace(unit * 1.2, unit * 1.2);
         this.colorfile.pos.replace(this.dims.x - unit * 1.4, unit * 0.2);
         this.colorfile.dims.replace(unit * 1.2, unit * 1.2);
 

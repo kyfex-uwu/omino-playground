@@ -242,6 +242,22 @@ export class ScrollableScene<T extends Scene<any>> extends DimsScene<T> {
     }
 }
 
+export function ClippedScene<T extends new(...args:any[])=>{
+    render(env:AnyEnhancedEnv):void,
+    dims:Vector
+}>(base: T){
+    return class extends base{
+        render(env:AnyEnhancedEnv) {
+            env.save();
+            env.beginPath();
+            env.rect(0, 0, this.dims.x, this.dims.y);
+            env.clip();
+            super.render(env);
+            env.restore();
+        }
+    }
+}
+
 let focusedElement:Scene<any>|undefined;
 function focus(element:Scene<any>) {
     if (focusedElement!==undefined) focusedElement.unfocus();
