@@ -9,7 +9,7 @@ import {
 } from "omino/pathfinding/elements/Element.js";
 import Node from "omino/pathfinding/Node.js";
 import Vector from "omino/Vector.js";
-import {fill, stroke} from "omino/Colors.js";
+import {type ColorPath, fill, stroke} from "omino/Colors.js";
 import type {SettingData} from "omino/scene/SettingsParser.js";
 import {type ConnTree} from "omino/pathfinding/elements/OminoEl.js";
 import PortalEl from "omino/pathfinding/elements/PortalEl.js";
@@ -147,143 +147,128 @@ export default class HexBoardEl extends BoardElement{
 
         applyPasses.push(
             {order:-1000, func:() => {//generate nodes
-                    const toReturn = new ApplyData();
+                const toReturn = new ApplyData();
 
+                const center = new Node(HexOrientation.default, {pos:new Vector(0,0)}, "0");
+                toReturn.add(center);
 
-                    const center = new Node(HexOrientation.default, {pos:new Vector(0,0)}, "0");
-                    toReturn.add(center);
+                const realExtrusions = this.extrusions.map((v,i)=>
+                    Math.min(v, this.extrusions[(i+5)%6]!+this.extrusions[(i+1)%6]!));
 
-                    const triangles:Node<HexOrienVal, {pos:Vector}>[][][] = [];
+                const triangles:Node<HexOrienVal, {pos:Vector}>[][][] = [];
 
-                    for(let which=0;which<6;which++){
-                        let spoke: Node<HexOrienVal, {
-                            pos: Vector
-                        }>[]=[];
-                        let prev=center;
+                for(let which=0;which<6;which++){
+                    let spoke: Node<HexOrienVal, {
+                        pos: Vector
+                    }>[]=[];
+                    let prev=center;
 
-                        //create spoke
-                        for(let i=1;i<Math.min(
-                            this.extrusions[which]!,
-                            this.extrusions[(which+1)%6]!,
-                        );i++){
-                            let next = new Node(HexOrientation.default,
-                                {pos:prev.custom.pos.add(hexOrienDirs[HexOrientation.clockwise[which]!.direc])},
-                                `${which},${i}`)
+                    //create spoke
+                    for(let i=0;i<realExtrusions[which]!;i++){
+                        let next = new Node(HexOrientation.default,
+                            {pos:prev.custom.pos.add(hexOrienDirs[HexOrientation.clockwise[which]!.direc])},
+                            `${which},${i}`)
+                        next.getView(HexOrientation.default).connectNode(
+                            HexOrientation.clockwise[(which+3)%6]!.direc,
+                            HexOrientation.clockwise[which]!.direc,
+                            prev
+                        )
+                        toReturn.add(next);
+
+                        spoke.push(next);
+                        prev=next;
+                    }
+
+                    //populate spoke
+                    const extrusions:Node<HexOrienVal, {pos:Vector}>[][] = [];
+                    triangles.push(extrusions);
+                    for(let i=0;i<spoke.length;i++){
+                        const extrusion = [spoke[i]!];
+                        extrusions.push(extrusion);
+                        let prev=spoke[i]!;
+                        for(let j=0;j<i;j++){
+                            const next = new Node(HexOrientation.default,
+                                {pos:prev.custom.pos.add(hexOrienDirs[HexOrientation.clockwise[(which+2)%6]!.direc])},
+                                `${which},,${i},${j}`);
+
                             next.getView(HexOrientation.default).connectNode(
-                                HexOrientation.clockwise[(which+3)%6]!.direc,
-                                HexOrientation.clockwise[which]!.direc,
+                                HexOrientation.clockwise[(which+5)%6]!.direc,
+                                HexOrientation.clockwise[(which+2)%6]!.direc,
                                 prev
                             )
+
                             toReturn.add(next);
 
-                            spoke.push(next);
+                            extrusion.push(next);
                             prev=next;
                         }
-
-                        //populate spoke
-                        const extrusions:Node<HexOrienVal, {pos:Vector}>[][] = [];
-                        triangles.push(extrusions);
-                        for(let i=0;i<spoke.length;i++){
-                            const extrusion = [spoke[i]!];
-                            extrusions.push(extrusion);
-                            let prev=spoke[i]!;
-                            for(let j=0;j<i;j++){
-                                const next = new Node(HexOrientation.default,
-                                    {pos:prev.custom.pos.add(hexOrienDirs[HexOrientation.clockwise[(which+2)%6]!.direc])},
-                                    `${which},,${i},${j}`);
-
-                                next.getView(HexOrientation.default).connectNode(
-                                    HexOrientation.clockwise[(which+5)%6]!.direc,
-                                    HexOrientation.clockwise[(which+2)%6]!.direc,
-                                    prev
-                                )
-
-                                toReturn.add(next);
-
-                                extrusion.push(next);
-                                prev=next;
-                            }
-                        }
-
-                        //connect extrusions
-                        for(let i=1;i<extrusions.length;i++){
-                            for(let j=0;j<extrusions[i]!.length;j++){
-                                const view = extrusions[i]![j]!.getView(HexOrientation.default);
-                                if(j !== extrusions[i]!.length-1)
-                                    view.connectNode(
-                                        HexOrientation.clockwise[(which+3)%6]!.direc,
-                                        HexOrientation.clockwise[which]!.direc,
-                                        extrusions[i-1]![j]!
-                                    );
-                                if(j !== 0)
-                                    view.connectNode(
-                                        HexOrientation.clockwise[(which+4)%6]!.direc,
-                                        HexOrientation.clockwise[(which+1)%6]!.direc,
-                                        extrusions[i-1]![j-1]!
-                                    )
-                            }
-                        }
                     }
 
-                    for(let i=0;i<6;i++){
-                        //shave spokes
-                        for(let j=triangles[i]!.length;j<triangles[(i+1)%6]!.length;j++){
-                            for(let k=j;k<triangles[(i+1)%6]!.length;k++)
-                                toReturn.nuke(triangles[(i+1)%6]![k]![j-triangles[i]!.length]!);
-                        }
-                        for(let j=triangles[i]!.length+1;j<triangles[(i+5)%6]!.length;j++){
-                            for(let k=triangles[(i+5)%6]![j]!.length-(j-triangles[i]!.length);k<triangles[(i+5)%6]![j]!.length;k++)
-                                toReturn.nuke(triangles[(i+5)%6]![j]![k]!);
-                        }
-
-                        //connect triangles
-                        for(let k=0;k<triangles[i]!.length;k++){
-                            const view = triangles[i]![k]![0]!.getView(HexOrientation.default);
-                            if(triangles[(i+5)%6]!.length>k)
+                    //connect extrusions
+                    for(let i=1;i<extrusions.length;i++){
+                        for(let j=0;j<extrusions[i]!.length;j++){
+                            const view = extrusions[i]![j]!.getView(HexOrientation.default);
+                            if(j !== extrusions[i]!.length-1)
                                 view.connectNode(
-                                    HexOrientation.clockwise[(i+4)%6]!.direc,
-                                    HexOrientation.clockwise[(i+1)%6]!.direc,
-                                    triangles[(i+5)%6]![k]![triangles[(i+5)%6]![k]!.length-1]!
-                                )
-                            if(triangles[(i+5)%6]!.length>k+1)
+                                    HexOrientation.clockwise[(which+3)%6]!.direc,
+                                    HexOrientation.clockwise[which]!.direc,
+                                    extrusions[i-1]![j]!
+                                );
+                            if(j !== 0)
                                 view.connectNode(
-                                    HexOrientation.clockwise[(i+5)%6]!.direc,
-                                    HexOrientation.clockwise[(i+2)%6]!.direc,
-                                    triangles[(i+5)%6]![k+1]![triangles[(i+5)%6]![k+1]!.length-1]!
+                                    HexOrientation.clockwise[(which+4)%6]!.direc,
+                                    HexOrientation.clockwise[(which+1)%6]!.direc,
+                                    extrusions[i-1]![j-1]!
                                 )
                         }
                     }
+                }
 
-                    //
-                    // let currRowNode;
-                    // for (let y = 0; y < this.height; y++) {
-                    //     let leftView;
-                    //     for (let x = 0; x < this.width; x++) {
-                    //         let node = new Node(RectOrientation.default, {pos:new Vector(x,y)}, this.board[y]![x]!);
-                    //         toReturn.add(node);
-                    //
-                    //         let nodeView = node.getView(RectOrientation.default);
-                    //         if (x !== 0) {
-                    //             nodeView.connectNode("left", "right", leftView!.node);
-                    //
-                    //             if (y !== 0) {
-                    //                 nodeView.connectNode("up", "down", leftView!.get("up")!.getNode("right")!);
-                    //             }
-                    //         } else if (y !== 0) {
-                    //             nodeView.connectNode("up", "down", currRowNode!);
-                    //         }
-                    //         if (x === 0) currRowNode = node;
-                    //         leftView = nodeView;
-                    //     }
-                    // }
+                for(let i=0;i<6;i++){
+                    //shave spokes
+                    for(let j=triangles[i]!.length;j<triangles[(i+1)%6]!.length;j++){
+                        for(let k=j;k<triangles[(i+1)%6]!.length;k++)
+                            toReturn.nuke(triangles[(i+1)%6]![k]![j-triangles[i]!.length]!);
+                    }
+                    for(let j=triangles[i]!.length+1;j<triangles[(i+5)%6]!.length;j++){
+                        for(let k=triangles[(i+5)%6]![j]!.length-(j-triangles[i]!.length);k<triangles[(i+5)%6]![j]!.length;k++)
+                            toReturn.nuke(triangles[(i+5)%6]![j]![k]!);
+                    }
 
-                    return toReturn;
-                }},
+                    //connect triangles
+                    for(let k=0;k<triangles[i]!.length;k++){
+                        const view = triangles[i]![k]![0]!.getView(HexOrientation.default);
+                        if(triangles[(i+5)%6]!.length>k)
+                            view.connectNode(
+                                HexOrientation.clockwise[(i+4)%6]!.direc,
+                                HexOrientation.clockwise[(i+1)%6]!.direc,
+                                triangles[(i+5)%6]![k]![triangles[(i+5)%6]![k]!.length-1]!
+                            )
+                        if(triangles[(i+5)%6]!.length>k+1)
+                            view.connectNode(
+                                HexOrientation.clockwise[(i+5)%6]!.direc,
+                                HexOrientation.clockwise[(i+2)%6]!.direc,
+                                triangles[(i+5)%6]![k+1]![triangles[(i+5)%6]![k+1]!.length-1]!
+                            )
+                    }
+                }
+
+                return toReturn;
+            }},
         );
 
         renderPasses.push(
             {order:-1000, func:(nodes, env) => {//initializes the board area
-                this.renderScale = env.board.dims.x/2 / Math.max(...this.extrusions);
+                this.renderScale = env.board.dims.x/2 / Math.max(
+                    this.extrusions[1]!+this.extrusions[4]!,
+                    (this.extrusions[0]!+this.extrusions[5]!+this.extrusions[2]!+this.extrusions[3]!)/2
+                )*2;
+
+                env.board.center.replace(HexOrientation.clockwise.map((o,i)=>
+                        hexOrienDirs[o.direc].scale(this.extrusions[i]!))
+                    .reduce((acc,n)=>
+                        acc.add(n), new Vector(0,0))
+                    .scale(this.renderScale/2))
 
                 Object.assign(env.drawData, {
                     nodeToTexPos: (n:Node<any, any>) => this.getNodePos(n, this.renderScale),
@@ -292,32 +277,32 @@ export default class HexBoardEl extends BoardElement{
             }},
 
             {order:-10, func:(nodes, env) => {//draws grid
-                    fill("board.grid", env.drawData.context);
-                    stroke("board.grid", env.drawData.context);
-                    env.drawData.context.lineWidth=env.drawData.nodeSize*0.1;
-                    let size = env.drawData.nodeSize;
+                fill("board.grid", env.drawData.context);
+                stroke("board.grid", env.drawData.context);
+                env.drawData.context.lineWidth=env.drawData.nodeSize*0.1;
+                let size = env.drawData.nodeSize;
 
-                    for (const node of Object.values(nodes)) {
-                        let pos = env.drawData.nodeToTexPos(node);
-                        env.drawData.context.beginPath();
-                        env.drawData.context.ellipse(pos.x, pos.y,
-                            size * 0.4, size * 0.4, 0, 0, Math.PI*2);
-                        env.drawData.context.fill();
+                for (const node of Object.values(nodes)) {
+                    let pos = env.drawData.nodeToTexPos(node);
+                    env.drawData.context.beginPath();
+                    env.drawData.context.ellipse(pos.x, pos.y,
+                        size * 0.4, size * 0.4, 0, 0, Math.PI*2);
+                    env.drawData.context.fill();
 
-                        // for(const conn in node.connections){
-                        //     stroke(({
-                        //         upright:[255,0,0],
-                        //         downright:[255,255,0],
-                        //         up:[255,255,255],
-                        //         down:[0,0,0],
-                        //         upleft:[255,0,255],
-                        //         downleft:[0,255,255],
-                        //     } satisfies {[key:string]:ColorPath})[conn] ?? [0,0,255],env.drawData.context);
-                        //     const pos2 = env.drawData.nodeToTexPos(node.connections[conn]!.node);
-                        //     env.drawData.context.singleLine(pos.x, pos.y, (pos2.x+pos.x)/2, (pos2.y+pos.y)/2);
-                        // }
+                    for(const conn in node.connections){
+                        stroke(({
+                            upright:[255,0,0],
+                            downright:[255,255,0],
+                            up:[255,255,255],
+                            down:[0,0,0],
+                            upleft:[255,0,255],
+                            downleft:[0,255,255],
+                        } satisfies {[key:string]:ColorPath})[conn] ?? [0,0,255],env.drawData.context);
+                        const pos2 = env.drawData.nodeToTexPos(node.connections[conn]!.node);
+                        env.drawData.context.singleLine(pos.x, pos.y, (pos2.x+pos.x)/2, (pos2.y+pos.y)/2);
                     }
-                }},
+                }
+            }},
             {order:1000, func:(nodes, env, historicalNodes) => {//draws path
                 fill("board.grid", env.drawData.context);
                 let positions = env.board.path.map(id => historicalNodes[id]!).map(n =>//todo: revert this back to just nodes

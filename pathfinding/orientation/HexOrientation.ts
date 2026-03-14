@@ -30,7 +30,7 @@ export default class HexOrientation extends Orientation<HexOrienVal> {
 
     getOtherOrientation(thisDirec:HexOrienVal, otherDirec:any, otherClass:Orientation<any>) {
         if(otherClass instanceof HexOrientation)
-            return new HexOrientation(str((dir(otherDirec) - dir(thisDirec) + 2 + dir(this.direc) + 8) % 4));
+            return new HexOrientation(str((dir(otherDirec) - dir(thisDirec) + 3 + dir(this.direc) + 12) % 6));
     }
 
     static readonly default = new HexOrientation("up");

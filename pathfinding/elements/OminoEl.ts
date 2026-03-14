@@ -50,6 +50,7 @@ export function connTreeHash(tree:ConnTree<any, any>, limit=12){
 
 function getNodes(currNodeView:NodeView<any, any>|undefined, connTree:ConnTree<any, any>, toReturn:Set<Node<any, any>> = new Set()) {
     if(currNodeView === undefined) return false;
+    console.log(currNodeView.orientation.direc);
 
     toReturn.add(currNodeView.node);
 
