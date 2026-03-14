@@ -1,0 +1,113 @@
+import {ButtonScene, DimsScene} from "omino/scene/Scene.js";
+import Vector from "omino/Vector.js";
+import {fill} from "omino/Colors.js";
+import {SingleEvent} from "omino/Listeners.js";
+import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
+
+class KeyScene extends SingleEvent<[]>()(ButtonScene<MobileKeyboard>) {
+    private key;
+    private orderPos;
+    private orderDims;
+    constructor(pos:Vector, dims:Vector, key:string) {
+        super();
+
+        this.key = key;
+        this.orderPos = pos;
+        this.orderDims = dims;
+    }
+
+    click() {
+        switch (this.key) {
+            case "Backspace":
+                this.parent!.value = this.parent!.value.slice(0, -1);
+                break;
+            default:
+                this.parent!.value += this.key;
+                break;
+        }
+
+        this.emitEvent();
+    }
+
+    render(env:AnyEnhancedEnv) {
+        fill(this.isIn() ? "scenes.util.keypad.button.bgHover" : "scenes.util.keypad.button.bg", env);
+        env.sRect(0, 0, this.dims.x, this.dims.y, Math.max(0, Math.min(this.dims.x, this.dims.y)));
+        env.fill();
+        fill("scenes.util.keypad.button.color", env);
+        env.setFontSize(this.dims.y * 0.7);
+        switch (this.key) {
+            case "Backspace":
+                env.spFillText("⌫", this.dims.x / 2, this.dims.y / 2, {align:"center", baseline:"middle"});
+                break;
+            default:
+                env.spFillText(this.key, this.dims.x / 2, this.dims.y / 2, {align:"center", baseline:"middle"});
+                break;
+        }
+    }
+
+    resize(dims:Vector) {
+        let screenHeight = dims.x * 0.3;
+        let padding = Math.max(dims.x / (this.orderDims.x + 1), dims.y / (this.orderDims.y + 1)) * 0.2;
+
+        let newDims = dims.sub(new Vector(0, screenHeight));
+        this.dims.replace( newDims.div(this.orderDims).sub(new Vector(padding, padding)));
+        this.pos.replace(this.orderPos.mult(newDims.div(this.orderDims)).add(new Vector(padding / 2, screenHeight)));
+    }
+}
+
+class MobileKeyboard extends SingleEvent<[string]>()(DimsScene<any>) {
+    value: string;
+    private keysArr: (undefined | KeyScene)[][];
+    constructor(keysArr:string[][]) {
+        super();
+        this.clipParent = false;
+        this.value = "";
+
+        let width = keysArr[0]?.length ?? 0;
+        let height = keysArr.length;
+        this.keysArr = keysArr.map((row, y) => row.map((data, x) => {
+            if (data === undefined) return;
+            const toAdd = new KeyScene(new Vector(x, y), new Vector(width, height), data);
+            toAdd.addListener(()=>this.emitEvent(data));
+            return this.addScene(toAdd);
+        }));
+    }
+
+    recalculate() {
+        for (const row of this.keysArr) {
+            for (const button of row) {
+                if (button) button.resize(this.dims);
+            }
+        }
+    }
+
+    changePosAndDims(pos:Vector, dims:Vector) {
+        this.pos.replace(pos);
+        this.dims.replace(dims);
+        this.recalculate();
+    }
+
+    render(env:AnyEnhancedEnv) {
+        let unit = Math.max(0, Math.min(this.dims.x, this.dims.y));
+        fill("scenes.util.keypad.shadow", env);
+        env.sRect(-unit * 0.02, -unit * 0.02, this.dims.x + unit * 0.04, this.dims.y + unit * 0.04, unit * 0.04);
+        env.fill();
+        fill("scenes.util.keypad.bg", env);
+        env.sRect(0, 0, this.dims.x, this.dims.y, unit * 0.03);
+        env.fill();
+        fill("scenes.util.keypad.display", env);
+        env.sRect(this.dims.y * 0.05, this.dims.y * 0.05, this.dims.x - this.dims.y * 0.1, this.dims.x * 0.3 - this.dims.y * 0.1, unit * 0.01);
+        env.fill();
+        fill("scenes.util.keypad.text", env);
+        env.spFillText(this.value || "0", this.dims.x / 2, this.dims.x * 0.15, {align:"center",baseline:"middle"});
+        super.render(env);
+    }
+
+    mouseUp(x:number, y:number, button:number) {
+        if (super.mouseUp(x, y, button)) return true;
+        return this.isIn();
+
+    }
+}
+
+export default MobileKeyboard;
