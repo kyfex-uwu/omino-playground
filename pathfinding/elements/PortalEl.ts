@@ -42,7 +42,7 @@ class PortalEl extends EditableElement {
         }}], renderPasses);
         renderPasses.push({order:0, func:(...args) => this.draw(...args)},
             EditableElement.createDialogPass(this, (nodes, env) =>
-                env.drawData.nodeToTexPos(nodes[this.root]!).add(env.drawData.nodeSize / 2, env.drawData.nodeSize / 2)));
+                env.drawData.nodeToTexPos(nodes[this.root]!)));
 
         this.root = root;
         this.id=group;
@@ -112,11 +112,8 @@ class PortalEl extends EditableElement {
     }
     isEditing(_nodes:NodeGroup, env:BoardRenderEnv, historicalNodes:NodeGroup<any,{pos:Vector}>) {
         if (env.mouse.clickedRight) {
-            let cellPos = env.mouse.pos.sub(env.board.getAbsolutePos())
-                .scale(1 / env.drawData.nodeSize);
-
-            let node = Object.values(historicalNodes).find(n => n.custom.pos.equals(cellPos.floor()));
-            return !!node && this.root === node.id;
+            return env.mouse.pos.sub(env.board.getAbsolutePos())
+                .scale(1 / env.drawData.nodeSize).distTo(historicalNodes[this.root]!.custom.pos) < 0.5
         }
         return false;
     }
