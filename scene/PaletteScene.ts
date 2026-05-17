@@ -1,9 +1,10 @@
 import Vector from "omino/Vector.js";
-import {ButtonScene, DimsScene, ScrollableScene} from "omino/scene/Scene.js";
+import Scene, {ButtonScene, DimsScene, ScrollableScene} from "omino/scene/Scene.js";
 import {fill} from "omino/Colors.js";
 import type {AnyEnhancedEnv} from "omino/EnvHelper.js";
 import type Board from "omino/Board.js";
 import {type BoardRenderEnv, type NodeGroup, SelectableElement} from "omino/pathfinding/elements/Element.js";
+import data from "omino/Global.js";
 
 class PaletteSpace extends ButtonScene<any> {
     private elementGenerator: (nodes: NodeGroup, env: BoardRenderEnv, historicalNodes: NodeGroup) => SelectableElement|void;
@@ -37,14 +38,6 @@ class PaletteSpace extends ButtonScene<any> {
         if(result instanceof SelectableElement)
             this.board.cursor.heldElement = result;
         return true;
-    }
-
-    recalc() {
-        const scale = this.parent!.dims.x / 3;
-        const index = this.parent!.spaces().indexOf(this);
-
-        this.pos.replace(index % 3 * scale, Math.floor(index / 3) * scale);
-        this.dims.replace(scale, scale);
     }
 }
 
@@ -83,13 +76,19 @@ class PieceHolder extends ScrollableScene<any> {
             child.dims.replace(unit, unit);
         }
 
-        this.scrollLimits.max = Math.ceil((this.subScenes.length - 1) / 3) * unit - this.dims.y;
+        this.scrollLimits.max = Math.ceil((this.subScenes.length) / 3) * unit - this.dims.y;
 
         return super.resized(oldDims, newDims);
     }
 
     spaces(){
         return this.subScenes;
+    }
+
+    addScene<T extends Scene<any>>(scene: T): T {
+        const toReturn = super.addScene(scene);
+        this.offs=0;
+        return toReturn;
     }
 }
 

@@ -439,7 +439,6 @@ export default class HexBoardEl extends BoardElement{
             {"down":{},"up":{},"upleft":{},"upright":{}} ,
             {"down":{},"downleft":{},"up":{},"upright":{}} ,
             {"down":{},"up":{"upright":{"downright":{}}}} ,
-            {"upright":{"downright":{}},"down":{"down":{}}} ,
             {"down":{"downleft":{}},"upright":{"downright":{}}} ,
             {"up":{},"downleft":{},"downright":{"upright":{}}} ,
             {"down":{"downleft":{}},"upright":{"up":{}}}
